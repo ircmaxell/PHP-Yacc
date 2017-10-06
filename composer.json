@@ -1,0 +1,22 @@
+{
+    "name": "ircmaxell/php-yacc",
+    "description": "A PHP YACC Parser-Generator library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anthony Ferrara",
+            "email": "ircmaxell@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "PhpYacc\\": "lib/"
+        }
+    },
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=6.3"
+    }
+}
