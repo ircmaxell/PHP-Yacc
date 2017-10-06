@@ -10,6 +10,7 @@ class ParseResult {
     public $startSymbol = null;
     public $expected = null;
     public $unioned = false;
+    public $eofToken = null;
     public $startPrime = null;
     public $grams = [];
 

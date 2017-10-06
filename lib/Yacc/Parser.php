@@ -15,11 +15,17 @@ use PhpYacc\{
 use PhpYacc\Core\ArrayObject;
 
 class Parser  {
+    /** @var Context */
     protected $context;
     protected $lexer;
+    /** @var ParseResult */
     protected $result;
     protected $macros;
 
+    /** @var Symbol */
+    protected $eofToken;
+    /** @var Symbol */
+    protected $errorToken;
     protected $startPrime;
 
     public function __construct(Lexer $lexer, MacroSet $macros)
@@ -35,6 +41,7 @@ class Parser  {
         $this->context = $this->result->ctx;
         $this->doDeclaration();
         $this->doGrammar();
+        $this->result->eofToken = $this->eofToken;
         $this->result->startPrime = $this->startPrime;
         return $this->result;
     }
@@ -204,7 +211,8 @@ class Parser  {
 
     protected function doDeclaration()
     {
-        $this->context->internSymbol("EOF", true)->value = 0;
+        $this->eofToken = $this->context->internSymbol("EOF", true);
+        $this->eofToken->value = 0;
         $this->errorToken = $this->context->internSymbol("error", true);
         $this->startPrime = $this->context->internSymbol("start", false);
 

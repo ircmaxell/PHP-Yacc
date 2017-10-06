@@ -48,12 +48,12 @@ class Lr1 {
 
     public function isTailItem(): bool
     {
-        return $this->_item[0]->code === 0;
+        return $this->_item[0] === null;
     }
 
     public function isHeadItem(): bool
     {
-        return $this->_item[-2]->code === 0;
+        return $this->_item[-2] === null;
     }
 
 }
