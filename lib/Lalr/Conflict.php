@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Lalr;
 
-use PhpParser\Grammar\Symbol;
+use PhpYacc\Grammar\Symbol;
 
 abstract class Conflict {
 
@@ -26,12 +26,13 @@ abstract class Conflict {
         return false;
     }
 
-    public function symbol(): symbol
+    public function symbol(): Symbol
     {
         return $this->symbol;
     }
 
     public function next()
+    {
         return $this->next;
     }
 
