@@ -23,7 +23,6 @@ class StateList {
 
     public function __set($name, $value)
     {
-        $cb = 'set' . $name;
         $this->{'set' . $name}($value);
     }
 
