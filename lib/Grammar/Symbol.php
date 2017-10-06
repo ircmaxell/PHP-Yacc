@@ -3,6 +3,15 @@ declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
+/**
+ * @property int $code
+ * @property Symbol|null $type
+ * @property mixed $value
+ * @property int $precedence
+ * @property int $associativity
+ * @property string $name
+ * @property int $terminal
+ */
 class Symbol {
 
     const UNDEF = 0;
@@ -14,24 +23,24 @@ class Symbol {
     const TERMINAL = 0x100;
     const NONTERMINAL = 0x200;
 
-    protected $code;
-    protected $type;
+    protected $_code;
+    protected $_type;
 
-    protected $value;
-    protected $precedence;
-    protected $associativity;
-    protected $name;
+    protected $_value;
+    protected $_precedence;
+    protected $_associativity;
+    protected $_name;
 
-    protected $terminal = self::UNDEF;
+    protected $_terminal = self::UNDEF;
 
     public function __construct(int $code, string $name, $value, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
     {
-        $this->code = $code;
-        $this->name = $name;
-        $this->value = $value;
-        $this->precedence = $precedence;
-        $this->associativity = $associativity;
-        $this->type = $type;
+        $this->_code = $code;
+        $this->_name = $name;
+        $this->_value = $value;
+        $this->_precedence = $precedence;
+        $this->_associativity = $associativity;
+        $this->_type = $type;
     }
 
     public function isTerminal(): bool
@@ -51,7 +60,7 @@ class Symbol {
 
     public function __get($name)
     {
-        return $this->$name;
+        return $this->{'_'.$name};
     }
 
     public function __set($name, $value)
@@ -61,27 +70,27 @@ class Symbol {
 
     public function setTerminal(int $terminal)
     {
-        $this->terminal = $terminal;
+        $this->_terminal = $terminal;
     }
 
     public function setAssociativity(int $associativity)
     {
-        $this->associativity = $associativity;
+        $this->_associativity = $associativity;
     }
 
     public function setPrecedence(int $precedence)
     {
-        $this->precedence = $precedence;
+        $this->_precedence = $precedence;
     }
 
     public function setValue($value)
     {
-        $this->value = $value;
+        $this->_value = $value;
     }
 
     public function setType(Symbol $type = null)
     {
-        $this->type = $type;
+        $this->_type = $type;
     }
 
 

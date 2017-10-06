@@ -2,6 +2,7 @@
 
 namespace PhpYacc\Lalr;
 
+use PhpYacc\Grammar\Context;
 use PhpYacc\Yacc\ParseResult;
 use PhpYacc\Grammar\Symbol;
 use PhpYacc\Yacc\Production;
@@ -9,8 +10,10 @@ use PhpYacc\Yacc\Production;
 require_once __DIR__ . '/functions.php';
 
 class Generator {
-    
+
+    /** @var ParseResult */
     protected $parseResult;
+    /** @var Context */
     protected $context;
     protected $nullable;
     protected $blank;

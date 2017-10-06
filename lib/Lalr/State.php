@@ -6,25 +6,33 @@ namespace PhpYacc\Lalr;
 use ArrayObject;
 use PhpYacc\Grammar\Symbol;
 
+/**
+ * @property State|null $next
+ * @property ArrayObject $shifts
+ * @property Reduce $reduce
+ * @property Conflict $conflict
+ * @property Symbol $through
+ * @property Lr1 $items
+ */
 class State {
 
-    protected $next;
-    protected $shifts;
-    protected $reduce;
-    protected $conflict;
-    protected $through;
-    protected $items;
+    protected $_next;
+    protected $_shifts;
+    protected $_reduce;
+    protected $_conflict;
+    protected $_through;
+    protected $_items;
 
 
     public function __construct()
     {
-        $this->shifts = new ArrayObject([]);
+        $this->_shifts = new ArrayObject([]);
 
     }
 
     public function __get($name)
     {
-        return $this->$name;
+        return $this->{'_'.$name};
     }
 
     public function __set($name, $value)
@@ -34,27 +42,27 @@ class State {
 
     public function setConflict(Conflict $conflict)
     {
-        $this->conflict = $conflict;
+        $this->_conflict = $conflict;
     }
 
     public function setReduce(Reduce $reduce)
     {
-        $this->reduce = $reduce;
+        $this->_reduce = $reduce;
     }
 
     public function setThrough(Symbol $through)
     {
-        $this->through = $through;
+        $this->_through = $through;
     }
 
     public function setNext(State $next = null)
     {
-        $this->next = $next;
+        $this->_next = $next;
     }
 
     public function setItems(Lr1 $items)
     {
-        $this->items = $items;
+        $this->_items = $items;
     }
 
 
