@@ -42,6 +42,7 @@ class Lexer implements CoreLexer {
     protected $token = null;
     protected $prevIsDollar = false;
 
+    protected $filename;
     protected $lineNumber = 0;
 
     public function getLineNumber(): int
