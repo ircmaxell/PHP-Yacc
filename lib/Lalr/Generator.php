@@ -20,6 +20,7 @@ class Generator {
     protected $statesThrough = [];
     protected $visited = [];
     protected $tail;
+    protected $first;
 
     public function compute(ParseResult $parseResult)
     {
@@ -80,7 +81,7 @@ class Generator {
             foreach ($this->parseResult->grams() as $gram) {
                 $left = $gram->body[1];
                 $right = $gram->body[2];
-                if (($right === null || $right->associativity & Production::EMPTY) && !($left->associativity & Production::EMPTY)) {
+                if (($right === null || ($right->associativity & Production::EMPTY)) && !($left->associativity & Production::EMPTY)) {
                     $left->setAssociativityFlag(Production::EMPTY);
                     $changed = true;
                 }
@@ -103,26 +104,29 @@ class Generator {
             $changed = false;
             foreach ($this->parseResult->grams() as $gram) {
                 $h = $gram->body[1];
-                for ($s = 2; $s < count($gram->body); $s++) {
+                for ($s = 2; $s < count($gram->body) + 1; $s++) {
                     $g = $gram->body[$s];
                     if ($g->isTerminal()) {
                         if (!testBit($this->first[$h->code], $g->code)) {
                             $changed = true;
                             setBit($this->first[$h->code], $g->code);
                         }
+                        continue 2;
                     }
+
                     $changed |= orbits(
                         $this->context, 
                         $this->first[$h->code],
                         $this->first[$g->code]
                     );
                     if (!$this->nullable[$g->code]) {
-                        break;
+                        continue 2;
                     }
-                    if ($g->code === 0 && !$this->nullable[$h->code]) {
-                        $this->nullable[$h->code] = true;
-                        $changed = true;
-                    }
+                }
+
+                if (!$this->nullable[$h->code]) {
+                    $this->nullable[$h->code] = true;
+                    $changed = true;
                 }
             }
         } while ($changed);

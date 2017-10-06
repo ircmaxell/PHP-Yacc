@@ -31,6 +31,7 @@ class ParseResult {
         return $this->grams[$i];
     }
 
+    /** @return Production[] */
     public function grams(): array
     {
         return $this->grams;

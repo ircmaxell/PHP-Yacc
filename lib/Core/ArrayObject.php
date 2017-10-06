@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace PhpYacc\Core;
 
+use Countable;
 use IteratorAggregate;
 use ArrayAccess;
 
-class ArrayObject implements ArrayAccess, IteratorAggregate {
+class ArrayObject implements ArrayAccess, IteratorAggregate, Countable  {
 
     protected $offset = 0;
     protected $array = [];
@@ -69,5 +70,9 @@ class ArrayObject implements ArrayAccess, IteratorAggregate {
     public function offsetUnset($index)
     {
         unset($this->array[$index + $this->offset]);
+    }
+
+    public function count() {
+        return \count($this->array);
     }
 }

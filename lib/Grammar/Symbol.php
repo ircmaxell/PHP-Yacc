@@ -93,5 +93,10 @@ class Symbol {
         $this->_type = $type;
     }
 
+    public function setAssociativityFlag(int $flag)
+    {
+        $this->_associativity |= $flag;
+    }
+
 
 }
