@@ -60,7 +60,7 @@ class Context {
 
         $p->terminal = ($isTerm || $p->name[0] === "'") ? Symbol::TERMINAL : Symbol::NONTERMINAL;
         $p->associativity   = Symbol::UNDEF;
-        $p->precidence      = Symbol::UNDEF;
+        $p->precedence      = Symbol::UNDEF;
         $p->value           = null;
         return $p;
     }

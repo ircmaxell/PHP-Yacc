@@ -18,18 +18,18 @@ class Symbol {
     protected $type;
 
     protected $value;
-    protected $precidence;
+    protected $precedence;
     protected $associativity;
     protected $name;
 
     protected $terminal = self::UNDEF;
 
-    public function __construct(int $code, string $name, $value, int $precidence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
+    public function __construct(int $code, string $name, $value, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
     {
         $this->code = $code;
         $this->name = $name;
         $this->value = $value;
-        $this->precidence = $precidence;
+        $this->precedence = $precedence;
         $this->associativity = $associativity;
         $this->type = $type;
     }
@@ -70,9 +70,9 @@ class Symbol {
         $this->associativity = $associativity;
     }
 
-    public function setPrecidence(int $precidence)
+    public function setPrecedence(int $precedence)
     {
-        $this->precidence = $precidence;
+        $this->precedence = $precedence;
     }
 
     public function setValue($value)

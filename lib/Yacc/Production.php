@@ -10,7 +10,7 @@ class Production {
 
     protected $link;
     protected $associativity;
-    protected $precidence;
+    protected $precedence;
     protected $position;
     protected $action;
     protected $body;
@@ -53,9 +53,9 @@ class Production {
         $this->associativity = $associativity;
     }
 
-    public function setPrecidence(int $precidence)
+    public function setPrecedence(int $precedence)
     {
-        $this->precidence = $precidence;
+        $this->precedence = $precedence;
     }
 
     public function setAction(string $action)

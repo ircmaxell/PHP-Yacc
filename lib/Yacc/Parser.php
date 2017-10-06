@@ -173,7 +173,7 @@ class Parser  {
             }
             $r = new Production($action, $pos);
             $r->body->sliceInto(array_slice($gbuffer, 0, $i), 1);
-            $r->precidence = $lastTerm->precidence;
+            $r->precedence = $lastTerm->precedence;
             $r->associativity = $lastTerm->associativity & Symbol::MASK;
             $r->link = $r->body[1]->value;
             $r->body[1]->value = $this->result->addGram($r);
@@ -251,7 +251,7 @@ class Parser  {
 
     }
 
-    protected $currentPrecidence = 0;
+    protected $currentPrecedence = 0;
 
     protected function doToken(Token $tag)
     {
@@ -280,7 +280,7 @@ class Parser  {
                     break;
             }
             if ($p->associativity !== Symbol::UNDEF) {
-                $p->precidence = $this->currentPrecidence;
+                $p->precedence = $this->currentPrecedence;
                 $preIncr = 1;
             }
             $t = $this->lexer->get();
@@ -297,7 +297,7 @@ class Parser  {
             }
         }
         $this->lexer->unget();
-        $this->currentPrecidence += $preIncr;
+        $this->currentPrecedence += $preIncr;
     }
 
     protected function getType()
