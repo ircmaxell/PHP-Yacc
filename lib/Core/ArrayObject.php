@@ -90,18 +90,18 @@ class ArrayObject implements ArrayAccess, IteratorAggregate, Countable  {
         $result = '';
         for ($i = 1; $i < count($this->array) + 1; $i++) {
             if ($i === 2) {
-                $result .= "-> ";
+                $result .= ": ";
             }
             if ($i === $this->offset) {
-                $result .= "* ";
+                $result .= ". ";
             }
             $result .= $this->array[$i]->name . " ";
         }
         if ($i === 2) {
-            $result .= "-> ";
+            $result .= ": ";
         }
         if ($i === $this->offset) {
-            $result .= "* ";
+            $result .= ". ";
         }
         return $result;
     }

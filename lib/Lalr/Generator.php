@@ -22,6 +22,9 @@ class Generator {
     protected $statesThrough = [];
     protected $visited = [];
     protected $first;
+    protected $follow;
+    /** @var State $states */
+    protected $states;
     protected $nlooks;
     protected $nstates;
     protected $nacts;
@@ -46,6 +49,7 @@ class Generator {
         $this->computeEmpty();
         $this->firstNullablePrecomp();
         $this->computeKernels();
+        $this->computeLookaheads();
     }
 
     protected function computeKernels()
@@ -55,15 +59,15 @@ class Generator {
             $this->blank, 
             $this->parseResult->gram(0)->body->slice(2)
         );
-        $states = new State();
-        $states->through = $this->context->nilSymbol();
-        $states->items = $this->makeState($tmpList);
+        $this->states = new State();
+        $this->states->through = $this->context->nilSymbol();
+        $this->states->items = $this->makeState($tmpList);
 
-        $this->linkState($states, $states->through);
-        $tail = $states;
+        $this->linkState($this->states, $this->states->through);
+        $tail = $this->states;
         $this->nstates = 1;
 
-        for ($p = $states; $p !== null; $p = $p->next) {
+        for ($p = $this->states; $p !== null; $p = $p->next) {
             // Collect direct GOTO's (come from kernel items)
 
             /** @var Lr1|null $tmpList */
@@ -153,13 +157,116 @@ class Generator {
             $p->shifts = $nextst;
             $this->nacts += count($nextst);
         }
+    }
+
+    protected function computeLookaheads() {
+        setBit($this->states->items->look, 0);
+        do {
+            $changed = false;
+            for ($p = $this->states; $p !== null; $p = $p->next) {
+                $this->computeFollow($p);
+                for ($x = $p->items; $x !== null; $x = $x->next) {
+                    $g = $x->item[0];
+                    if (null !== $g) {
+                        $s = $x->item->slice(1);
+                        $t = null;
+                        foreach ($p->shifts as $t) {
+                            if ($t->through === $g) {
+                                break;
+                            }
+                        }
+                        assert($t->through === $g);
+                        for ($y = $t->items; $y !== null; $y = $y->next) {
+                            if ($y->item == $s) {
+                                break;
+                            }
+                        }
+                        assert($y->item == $s);
+                        $changed |= orbits($this->context, $y->look, $x->look);
+                    }
+                }
+                foreach ($p->shifts as $t) {
+                    for ($x = $t->items; $x !== null; $x = $x->next) {
+                        if ($x->left !== $this->parseResult->startPrime) {
+                            $changed |= orbits($this->context, $x->look, $this->follow[$x->left->code]);
+                        }
+                    }
+                }
+                for ($x = $p->items; $x !== null; $x = $x->next) {
+                    if ($x->isTailItem() && $x->isHeadItem()) {
+                        orbits($this->context, $x->look, $this->follow[$x->item[-1]->code]);
+                    }
+                }
+            }
+        } while ($changed);
 
         if (DEBUG) {
-            echo "States:\n";
-            for ($s = $states; $s !== null; $s = $s->next) {
-                dumpLr1($s->items);
+            for ($p = $this->states; $p != null; $p = $p->next) {
+                echo "state unknown:\n";
+                for ($x = $p->items; $x != null; $x = $x->next) {
+                    echo "\t", $x->item, "\n"; // TODO match output
+                    echo "\t\t[ ";
+                    dumpSet($this->context, $x->look);
+                    echo "]\n";
+                }
             }
         }
+    }
+
+    protected function computeFollow(State $st) {
+        foreach ($st->shifts as $t) {
+            if (!$t->through->isTerminal()) {
+                for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
+                    $this->computeFirst($this->follow[$t->through->code], $x->item);
+                }
+            }
+        }
+        for ($x = $st->items; $x !== null; $x = $x->next) {
+            /** @var Symbol $g */
+            $g = $x->item[0];
+            if ($g !== null && !$g->isTerminal() && $this->isSeqNullable($x->item->slice(1))) {
+                orbits($this->context, $this->follow[$g->code], $x->look);
+            }
+        }
+        do {
+            $changed = false;
+            foreach ($st->shifts as $t) {
+                if (!$t->through->isTerminal()) {
+                    $p =& $this->follow[$t->through->code];
+                    for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
+                        if ($this->isSeqNullable($x->item) && $x->left != $this->parseResult->startPrime) {
+                            $changed |= orbits($this->context, $p, $this->follow[$x->left->code]);
+                        }
+                    }
+                }
+            }
+        } while ($changed);
+    }
+
+    protected function computeFirst(string &$p, ArrayObject $item) {
+        $i = 0;
+        /** @var Symbol $g */
+        while (null !== $g = $item[$i++]) {
+            if ($g->isTerminal()) {
+                setBit($p, $g->code);
+                return;
+            }
+            orbits($this->context, $p, $this->first[$g->code]);
+            if (!$this->nullable[$g->code]) {
+                return;
+            }
+        }
+    }
+
+    protected function isSeqNullable(ArrayObject $item) {
+        $i = 0;
+        /** @var Symbol $g */
+        while (null !== $g = $item[$i++]) {
+            if ($g->isTerminal() || !$this->nullable[$g->code]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected function linkState(State $state, Symbol $g)
