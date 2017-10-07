@@ -5,13 +5,13 @@ namespace PhpYacc\Lalr;
 
 use PhpYacc\Grammar\Symbol;
 
-use PhpYacc\Core\ArrayObject;
+use PhpYacc\Lalr\Item;
 
 
 /**
  * @property Lr1|null $next
  * @property Symbol $left
- * @property ArrayObject $item
+ * @property Item $item
  */
 class Lr1 {
   
@@ -20,11 +20,11 @@ class Lr1 {
     protected $_item;
     public $look;
 
-    public function __construct(Symbol $left, string $look, ArrayObject $item = null)
+    public function __construct(Symbol $left, string $look, Item $item)
     {
         $this->_left = $left;
         $this->look = $look;
-        $this->_item = $item ?: new ArrayObject;
+        $this->_item = $item;
     }
 
     public function __get($name)
@@ -42,19 +42,19 @@ class Lr1 {
         $this->_next = $next;
     }
 
-    public function setItem(ArrayObject $item)
+    public function setItem(Item $item)
     {
         $this->_item = $item;
     }
 
     public function isTailItem(): bool
     {
-        return $this->_item[0] === null;
+        return $this->_item->isTailItem();
     }
 
     public function isHeadItem(): bool
     {
-        return $this->_item[-2] === null;
+        return $this->_item->isHeadItem();
     }
 
 }

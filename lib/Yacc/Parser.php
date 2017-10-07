@@ -12,7 +12,7 @@ use PhpYacc\{
     MacroSet,
     Token
 };
-use PhpYacc\Core\ArrayObject;
+use PhpYacc\Lalr\Item;
 
 class Parser  {
     /** @var Context */
@@ -93,7 +93,7 @@ class Parser  {
         $attribute = [];
         $gbuffer = [null];
         $r = new Production('', 0);
-        $r->body[1] = $this->startPrime;
+        $r->body = [$this->startPrime];
         $this->result->addGram($r);
 
         $t = $this->lexer->get();
@@ -157,11 +157,13 @@ class Parser  {
                     $this->lexer->get();
                 } elseif (isGsym($t)) {
                     if ($action) {
+                        $g = $this->context->genNonTerminal();
                         $r = new Production($action, $pos);
-                        $gbuffer[$i++] = $r->body[1] = $this->context->genNonTerminal();
+                        $r->body = [$g];
+                        $gbuffer[$i++] = $g;
                         $attribute[$i] = null;
-                        $r->link = $r->body[1]->value;
-                        $r->body[1]->value = $this->result->addGram($r);
+                        $r->link = $r->body[0]->value;
+                        $g->value = $this->result->addGram($r);
                     }
                     $gbuffer[$i++] = $w = $this->context->internSymbol($t->v, false);
                     $attribute[$i] = null;
@@ -179,17 +181,17 @@ class Parser  {
                 }
             }
             $r = new Production($action, $pos);
-            $r->body->sliceInto(array_slice($gbuffer, 0, $i), 1);
+            $r->body = array_slice($gbuffer, 0, $i);
             $r->precedence = $lastTerm->precedence;
             $r->associativity = $lastTerm->associativity & Symbol::MASK;
-            $r->link = $r->body[1]->value;
-            $r->body[1]->value = $this->result->addGram($r);
+            $r->link = $r->body[0]->value;
+            $gbuffer[0]->value = $this->result->addGram($r);
 
             if ($t->t === ';') {
                 $t = $this->lexer->get();
             }
         }
-        $this->result->gram(0)->body[2] = $this->result->startSymbol;
+        $this->result->gram(0)->appendToBody($this->result->startSymbol);
         $this->startPrime->value = null;
         foreach ($this->context->nonTerminals() as $key => $symbol) {
             if ($symbol === $this->startPrime) {

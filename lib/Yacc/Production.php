@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
-use PhpYacc\Core\ArrayObject;
+use PhpYacc\Lalr\Item;
+use PhpYacc\Grammar\Symbol;
 
 /**
  * @property Production|null $link
@@ -11,7 +12,7 @@ use PhpYacc\Core\ArrayObject;
  * @property int $precedence
  * @property int $position
  * @property string $action
- * @property ArrayObject $body
+ * @property Symbol[] $body
  */
 class Production {
     const EMPTY = 0x10;
@@ -27,7 +28,7 @@ class Production {
     {
         $this->_action = $action;
         $this->_position = $position;
-        $this->_body = new ArrayObject([]);
+        $this->_body = [];
     }
 
     public function __get($name)
@@ -40,8 +41,11 @@ class Production {
         $this->{'set' . $name}($value);
     }
 
-    public function setBody(ArrayObject $new)
+    public function setBody(array $new)
     {
+        foreach ($new as $symbol) {
+            assert($symbol instanceof Symbol);
+        }
         $this->_body = $new;
     }
 
@@ -68,5 +72,13 @@ class Production {
     public function setAction(string $action)
     {
         $this->_action = $action;
+    }
+
+    public function appendToBody(Symbol $symbol) {
+        $this->_body[] = $symbol;
+    }
+
+    public function isEmpty(): bool {
+        return count($this->_body) === 1;
     }
 }

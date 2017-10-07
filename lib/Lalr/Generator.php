@@ -2,7 +2,7 @@
 
 namespace PhpYacc\Lalr;
 
-use PhpYacc\Core\ArrayObject;
+use PhpYacc\Lalr\Item;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Yacc\ParseResult;
 use PhpYacc\Grammar\Symbol;
@@ -58,7 +58,7 @@ class Generator {
         $tmpList = new Lr1(
             $this->parseResult->startPrime, 
             $this->blank, 
-            $this->parseResult->gram(0)->body->slice(2)
+            new Item($this->parseResult->gram(0), 1)
         );
         $this->states = new State();
         $this->states->through = $this->context->nilSymbol();
@@ -97,8 +97,8 @@ class Generator {
                     $this->visited[$g->code] = true;
                     /** @var Production $gram */
                     for ($gram = $g->value; $gram != null; $gram = $gram->link) {
-                        if ($gram->body[2] !== null) {
-                            $wp = new Lr1($g, $this->blank, $gram->body->slice(3));
+                        if (isset($gram->body[1])) {
+                            $wp = new Lr1($g, $this->blank, new Item($gram, 2));
                             $tmpTail->next = $wp;
                             $tmpTail = $wp;
                         }
@@ -111,13 +111,13 @@ class Generator {
             $tmpList = $this->sortList($tmpList, function(Lr1 $x, Lr1 $y) {
                 $i = -1;
                 do {
-                    $gx = $x->item[$i] !== null ? $x->item[$i]->code : 0;
-                    $gy = $y->item[$i] !== null ? $y->item[$i]->code : 0;
+                    $gx = isset($x->item[$i]) ? $x->item[$i]->code : 0;
+                    $gy = isset($y->item[$i]) ? $y->item[$i]->code : 0;
                     if ($gx !== $gy) {
                         return $gx - $gy;
                     }
                     $i++;
-                } while ($x->item[$i] !== null || $y->item[$i] !== null);
+                } while (isset($x->item[$i]) || isset($y->item[$i]));
                 return 0;
             });
 
@@ -167,7 +167,7 @@ class Generator {
             for ($p = $this->states; $p !== null; $p = $p->next) {
                 $this->computeFollow($p);
                 for ($x = $p->items; $x !== null; $x = $x->next) {
-                    $g = $x->item[0];
+                    $g = $x->item[0] ?? null;
                     if (null !== $g) {
                         $s = $x->item->slice(1);
                         $t = null;
@@ -262,7 +262,7 @@ class Generator {
         }
         for ($x = $st->items; $x !== null; $x = $x->next) {
             /** @var Symbol $g */
-            $g = $x->item[0];
+            $g = $x->item[0] ?? null;
             if ($g !== null && !$g->isTerminal() && $this->isSeqNullable($x->item->slice(1))) {
                 orbits($this->context, $this->follow[$g->code], $x->look);
             }
@@ -282,10 +282,9 @@ class Generator {
         } while ($changed);
     }
 
-    protected function computeFirst(string &$p, ArrayObject $item) {
-        $i = 0;
+    protected function computeFirst(string &$p, Item $item) {
         /** @var Symbol $g */
-        while (null !== $g = $item[$i++]) {
+        foreach ($item as $g) {
             if ($g->isTerminal()) {
                 setBit($p, $g->code);
                 return;
@@ -297,10 +296,9 @@ class Generator {
         }
     }
 
-    protected function isSeqNullable(ArrayObject $item) {
-        $i = 0;
+    protected function isSeqNullable(Item $item) {
         /** @var Symbol $g */
-        while (null !== $g = $item[$i++]) {
+        foreach ($item as $g) {
             if ($g->isTerminal() || !$this->nullable[$g->code]) {
                 return false;
             }
@@ -321,8 +319,8 @@ class Generator {
         do {
             $changed = false;
             foreach ($this->parseResult->grams() as $gram) {
-                $left = $gram->body[1];
-                $right = $gram->body[2];
+                $left = $gram->body[0];
+                $right = $gram->body[1] ?? null;
                 if (($right === null || ($right->associativity & Production::EMPTY)) && !($left->associativity & Production::EMPTY)) {
                     $left->setAssociativityFlag(Production::EMPTY);
                     $changed = true;
@@ -345,8 +343,8 @@ class Generator {
         do {
             $changed = false;
             foreach ($this->parseResult->grams() as $gram) {
-                $h = $gram->body[1];
-                for ($s = 2; $s < count($gram->body) + 1; $s++) {
+                $h = $gram->body[0];
+                for ($s = 1; $s < count($gram->body); $s++) {
                     $g = $gram->body[$s];
                     if ($g->isTerminal()) {
                         if (!testBit($this->first[$h->code], $g->code)) {
@@ -408,7 +406,7 @@ class Generator {
         $this->clearVisited();
         for ($p = $items; $p !== null; $p = $p->next) {
             /** @var Symbol $g */
-            $g = $p->item[0];
+            $g = $p->item[0] ?? null;
             if ($g !== null && !$g->isTerminal()) {
                 $tail = $this->findEmpty($tail, $g);
             }
@@ -430,13 +428,13 @@ class Generator {
 
             /** @var Production $gram */
             for ($gram = $x->value; $gram !== null; $gram = $gram->link) {
-                if ($gram->body[2] === null) {
-                    $p = new Lr1($this->parseResult->startPrime, $this->blank, $gram->body->slice(2));
+                if ($gram->isEmpty()) {
+                    $p = new Lr1($this->parseResult->startPrime, $this->blank, new Item($gram, 1));
                     $tail->next = $p;
                     $tail = $p;
                     $this->nlooks++;
-                } else if (!$gram->body[2]->isTerminal()) {
-                    $tail = $this->findEmpty($tail, $gram->body[2]);
+                } else if (!$gram->body[1]->isTerminal()) {
+                    $tail = $this->findEmpty($tail, $gram->body[1]);
                 }
             }
         }
