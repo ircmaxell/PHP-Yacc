@@ -56,7 +56,9 @@ $parser = new PhpYacc\Yacc\Parser($lexer, $macroset);
 
 $parseResult = $parser->parse($source, "test.php");
 
-//var_dump($parseResult);
+/*foreach ($parseResult->grams() as $g) {
+    echo $g->body, "\n";
+}*/
 
 $generator = new PhpYacc\Lalr\Generator;
 

@@ -172,9 +172,8 @@ class Parser  {
                     break;
                 }
             }
-            $i++;
             if (!$action) {
-                if ($i > 2 && $gbuffer[0]->type !== null && $$gbuffer[0]->type !== $gbuffer[1]->type) {
+                if ($i > 1 && $gbuffer[0]->type !== null && $gbuffer[0]->type !== $gbuffer[1]->type) {
                     throw new RuntimeException("Stack types are different");
                 }
             }
