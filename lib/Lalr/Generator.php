@@ -25,7 +25,7 @@ class Generator {
     protected $visited = [];
     protected $first;
     protected $follow;
-    /** @var State $states */
+    /** @var State[] $states */
     protected $states;
 
     protected $nlooks;
@@ -65,16 +65,18 @@ class Generator {
             $this->blank, 
             new Item($this->parseResult->gram(0), 1)
         );
-        $this->states = new State(
+        $state = new State(
             $this->context->nilSymbol(),
             $this->makeState($tmpList)
         );
+        $this->states = [$state];
 
-        $this->linkState($this->states, $this->states->through);
+        $this->linkState($state, $state->through);
         $tail = $this->states;
         $this->nstates = 1;
 
-        for ($p = $this->states; $p !== null; $p = $p->next) {
+        // foreach by ref so that new additions to $this->states are also picked up
+        foreach ($this->states as &$p) {
             // Collect direct GOTO's (come from kernel items)
 
             /** @var Lr1|null $tmpList */
@@ -149,8 +151,7 @@ class Generator {
                     $q = $lp->state;
                 } else {
                     $q = new State($g, $this->makeState($sublist));
-                    $tail->next = $q;
-                    $tail = $q;
+                    $this->states[] = $q;
                     $this->linkState($q, $g);
                     $this->nstates++;
                 }
@@ -164,10 +165,10 @@ class Generator {
     }
 
     protected function computeLookaheads() {
-        setBit($this->states->items->look, 0);
+        setBit($this->states[0]->items->look, 0);
         do {
             $changed = false;
-            for ($p = $this->states; $p !== null; $p = $p->next) {
+            foreach ($this->states as $p) {
                 $this->computeFollow($p);
                 for ($x = $p->items; $x !== null; $x = $x->next) {
                     $g = $x->item[0] ?? null;
@@ -205,7 +206,7 @@ class Generator {
         } while ($changed);
 
         if (DEBUG) {
-            for ($p = $this->states; $p != null; $p = $p->next) {
+            foreach ($this->states as $p) {
                 echo "state unknown:\n";
                 for ($x = $p->items; $x != null; $x = $x->next) {
                     echo "\t", $x->item, "\n";
@@ -222,7 +223,7 @@ class Generator {
         $tmpr = [];
 
         $this->clearVisited();
-        for ($p = $this->states; $p != null; $p = $p->next) {
+        foreach ($this->states as $p) {
             $tdefact = 0;
             foreach ($p->shifts as $t) {
                 if ($t->through === $this->parseResult->errorToken) {

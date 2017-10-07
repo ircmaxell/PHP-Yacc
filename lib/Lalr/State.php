@@ -7,7 +7,6 @@ use ArrayObject;
 use PhpYacc\Grammar\Symbol;
 
 /**
- * @property State|null $next
  * @property Reduce[] $reduce
  * @property Conflict $conflict
  * @property Symbol $through
@@ -17,7 +16,6 @@ class State {
 
     /** @var State[] */
     public $shifts = []; // public for indirect array modification
-    protected $_next;
     protected $_reduce;
     protected $_conflict;
     protected $_through;
@@ -54,11 +52,6 @@ class State {
     public function setThrough(Symbol $through)
     {
         $this->_through = $through;
-    }
-
-    public function setNext(State $next = null)
-    {
-        $this->_next = $next;
     }
 
     public function setItems(Lr1 $items)
