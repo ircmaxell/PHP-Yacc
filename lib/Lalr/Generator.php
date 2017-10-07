@@ -65,9 +65,10 @@ class Generator {
             $this->blank, 
             new Item($this->parseResult->gram(0), 1)
         );
-        $this->states = new State();
-        $this->states->through = $this->context->nilSymbol();
-        $this->states->items = $this->makeState($tmpList);
+        $this->states = new State(
+            $this->context->nilSymbol(),
+            $this->makeState($tmpList)
+        );
 
         $this->linkState($this->states, $this->states->through);
         $tail = $this->states;
@@ -147,11 +148,9 @@ class Generator {
                 if ($lp !== null) {
                     $q = $lp->state;
                 } else {
-                    $q = new State();
+                    $q = new State($g, $this->makeState($sublist));
                     $tail->next = $q;
                     $tail = $q;
-                    $q->items = $this->makeState($sublist);
-                    $q->through = $g;
                     $this->linkState($q, $g);
                     $this->nstates++;
                 }

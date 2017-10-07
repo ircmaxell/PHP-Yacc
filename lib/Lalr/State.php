@@ -23,6 +23,10 @@ class State {
     protected $_through;
     protected $_items;
 
+    public function __construct(Symbol $through, Lr1 $items) {
+        $this->_through = $through;
+        $this->_items = $items;
+    }
 
     public function __get($name)
     {
