@@ -2,6 +2,8 @@
 
 namespace PhpYacc\Lalr;
 
+use PhpYacc\Lalr\Conflict\ReduceReduce;
+use PhpYacc\Lalr\Conflict\ShiftReduce;
 use PhpYacc\Lalr\Item;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Yacc\ParseResult;
@@ -32,6 +34,7 @@ class Generator {
     protected $nstates;
     protected $nacts;
     protected $nacts2;
+    protected $nnonleafstates;
     protected $nsrerr;
     protected $nrrerr;
 
@@ -46,6 +49,7 @@ class Generator {
         $this->first = array_fill(0, $nSymbols, $this->blank);
         $this->follow = array_fill(0, $nSymbols, $this->blank);
         $this->nlooks = $this->nstates = $this->nacts = $this->nacts2 = 0;
+        $this->nnonleafstates = 0;
         $this->nsrerr = $this->nrrerr = 0;
         foreach ($this->context->symbols() as $s) {
             $this->statesThrough[$s->code] = null;
@@ -353,8 +357,47 @@ class Generator {
             echo $k, " rule(s) never reduced\n";
         }
 
-        // TODO
-        // Sort states
+        // Sort states in decreasing order of entries
+        // do not move initial state
+        $initState = array_shift($this->states);
+        usort($this->states, function(State $p, State $q) {
+            $pt = $pn = 0;
+            foreach ($p->shifts as $x) {
+                if ($x->through->isTerminal()) {
+                    $pt++;
+                }
+            }
+            $numReduces = count($p->reduce) - 1; // -1 for default action
+            $pt += $numReduces;
+            $pn += $numReduces;
+
+            $qt = $qn = 0;
+            foreach ($q->shifts as $x) {
+                if ($x->through->isTerminal()) {
+                    $qt++;
+                }
+            }
+            $numReduces = count($q->reduce) - 1; // -1 for default action
+            $qt += $numReduces;
+            $qn += $numReduces;
+
+            if ($pt !== $qt) {
+                return $qt - $pt;
+            }
+            return $qn - $pn;
+        });
+        array_unshift($this->states, $initState);
+
+        foreach ($this->states as $i => $p) {
+            $p->number = $i;
+            if (!empty($p->shifts) || $p->reduce[0]->symbol !== $this->context->nilSymbol()) {
+                $this->nnonleafstates = $i;
+            }
+        }
+
+        foreach ($this->states as $state) {
+            $this->printState($state);
+        }
     }
 
     protected function comparePrecedence(Production $gram, Symbol $x) {
@@ -569,7 +612,7 @@ class Generator {
         return $tail;
     }
 
-    function sortList(Lr1 $list = null, callable $cmp) {
+    protected function sortList(Lr1 $list = null, callable $cmp) {
         $array = [];
         for ($x = $list; $x !== null; $x = $x->next) {
             $array[] = $x;
@@ -589,6 +632,31 @@ class Generator {
             $tail = $x;
         }
         return $list;
+    }
+
+    protected function printState(State $state) {
+        echo "state " . $state->number . "\n";
+        for ($conf = $state->conflict; $conf !== null; $conf = $conf->next()) {
+            if ($conf instanceof ShiftReduce) {
+                echo sprintf(
+                    "%d: shift/reduce conflict (shift %d, reduce %d) on %s\n",
+                    $state->number, $conf->state()->number, $conf->reduce(),
+                    $conf->symbol()->name);
+            } else if ($conf instanceof ReduceReduce) {
+                echo sprintf(
+                    "%d: reduce/reduce conflict (reduce %d, reduce %d) on %s\n",
+                    $state->number, $conf->reduce1(), $conf->reduce2(),
+                    $conf->symbol()->name
+                );
+            }
+        }
+
+        for ($x = $state->items; $x !== null; $x = $x->next) {
+            echo "\t" . $x->item . "\n";
+        }
+        echo "\n";
+
+        // TODO
     }
 
 }

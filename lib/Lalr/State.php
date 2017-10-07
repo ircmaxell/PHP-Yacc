@@ -11,6 +11,7 @@ use PhpYacc\Grammar\Symbol;
  * @property Conflict $conflict
  * @property Symbol $through
  * @property Lr1 $items
+ * @property int $number
  */
 class State {
 
@@ -20,6 +21,7 @@ class State {
     protected $_conflict;
     protected $_through;
     protected $_items;
+    protected $_number;
 
     public function __construct(Symbol $through, Lr1 $items) {
         $this->_through = $through;
@@ -59,4 +61,7 @@ class State {
         $this->_items = $items;
     }
 
+    public function setNumber(int $number) {
+        $this->_number = $number;
+    }
 }
