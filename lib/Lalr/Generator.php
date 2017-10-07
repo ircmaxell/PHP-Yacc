@@ -106,19 +106,18 @@ class Generator {
                 }
             }
 
-            // This is NOT the same comparison function as in the original code
-            // It uses comparisons between unrelated pointers as far as I can see :/
             $tmpList = $this->sortList($tmpList, function(Lr1 $x, Lr1 $y) {
-                $i = -1;
-                do {
-                    $gx = isset($x->item[$i]) ? $x->item[$i]->code : 0;
-                    $gy = isset($y->item[$i]) ? $y->item[$i]->code : 0;
-                    if ($gx !== $gy) {
-                        return $gx - $gy;
-                    }
-                    $i++;
-                } while (isset($x->item[$i]) || isset($y->item[$i]));
-                return 0;
+                $gx = isset($x->item[-1]) ? $x->item[-1]->code : 0;
+                $gy = isset($y->item[-1]) ? $y->item[-1]->code : 0;
+                if ($gx !== $gy) {
+                    return $gx - $gy;
+                }
+                $px = $x->item->getProduction();
+                $py = $y->item->getProduction();
+                if ($px !== $py) {
+                    return $px->num - $py->num;
+                }
+                return $x->item->getPos() - $y->item->getPos();
             });
 
             // Compute next states
@@ -205,7 +204,7 @@ class Generator {
             for ($p = $this->states; $p != null; $p = $p->next) {
                 echo "state unknown:\n";
                 for ($x = $p->items; $x != null; $x = $x->next) {
-                    echo "\t", $x->item, "\n"; // TODO match output
+                    echo "\t", $x->item, "\n";
                     echo "\t\t[ ";
                     dumpSet($this->context, $x->look);
                     echo "]\n";

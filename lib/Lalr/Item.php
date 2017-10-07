@@ -63,6 +63,14 @@ class Item implements ArrayAccess, IteratorAggregate {
         return $this->pos === count($this->production->body);
     }
 
+    public function getProduction(): Production {
+        return $this->production;
+    }
+
+    public function getPos(): int {
+        return $this->pos;
+    }
+
     public function __toString() {
         $result = "(" . $this->production->num . ") ";
         for ($i = 0; $i < count($this->production->body); $i++) {
