@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
-use PhpYacc\Lalr\Item;
 use PhpYacc\Grammar\Symbol;
 
 /**
@@ -13,6 +12,7 @@ use PhpYacc\Grammar\Symbol;
  * @property int $position
  * @property string $action
  * @property Symbol[] $body
+ * @property int $num
  */
 class Production {
     const EMPTY = 0x10;
@@ -23,6 +23,7 @@ class Production {
     protected $_position;
     protected $_action;
     protected $_body;
+    protected $_num = -1;
 
     public function __construct(string $action = null, int $position)
     {
@@ -72,6 +73,10 @@ class Production {
     public function setAction(string $action)
     {
         $this->_action = $action;
+    }
+
+    public function setNum(int $num) {
+        $this->_num = $num;
     }
 
     public function appendToBody(Symbol $symbol) {

@@ -24,6 +24,7 @@ class ParseResult {
 
     public function addGram(Production $p)
     {
+        $p->num = count($this->grams);
         $this->grams[] = $p;
         return $p;
     }
