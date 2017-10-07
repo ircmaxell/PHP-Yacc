@@ -656,7 +656,43 @@ class Generator {
         }
         echo "\n";
 
-        // TODO
+        $i = $j = 0;
+        while (true) {
+            $s = $state->shifts[$i] ?? null;
+            $r = $state->reduce[$j] ?? null;
+            if ($s === null && $r === null) {
+                break;
+            }
+
+            if ($s !== null && ($r === null || $s->through->code < $r->symbol->code)) {
+                $str = $s->through->name;
+                echo strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
+                echo $s->through->isTerminal() ? "shift" : "goto";
+                echo " " . $s->number;
+                if ($this->isReduceOnly($s)) {
+                    echo " and reduce (" . $s->reduce[0]->number . ")";
+                }
+                echo "\n";
+                $i++;
+            } else {
+                $str = $r->symbol->isNilSymbol() ? "." : $r->symbol->name;
+                echo strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
+                if ($r->number === 0) {
+                    echo "accept\n";
+                } else if ($r->number < 0) {
+                    echo "error\n";
+                } else {
+                    echo "reduce ($r->number)\n";
+                }
+                $j++;
+            }
+        }
+        echo "\n";
+    }
+
+    protected function isReduceOnly(State $st): bool {
+        return empty($st->shifts)
+            && $st->reduce[0]->symbol->isNilSymbol();
     }
 
 }
