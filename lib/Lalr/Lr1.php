@@ -23,6 +23,7 @@ class Lr1 {
     public function __construct(Symbol $left, string $look, ArrayObject $item = null)
     {
         $this->_left = $left;
+        $this->look = $look;
         $this->_item = $item ?: new ArrayObject;
     }
 

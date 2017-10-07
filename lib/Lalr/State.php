@@ -8,7 +8,7 @@ use PhpYacc\Grammar\Symbol;
 
 /**
  * @property State|null $next
- * @property ArrayObject $shifts
+ * @property State[] $shifts
  * @property Reduce $reduce
  * @property Conflict $conflict
  * @property Symbol $through
@@ -26,7 +26,7 @@ class State {
 
     public function __construct()
     {
-        $this->_shifts = new ArrayObject([]);
+        $this->_shifts = [];
 
     }
 
@@ -65,5 +65,8 @@ class State {
         $this->_items = $items;
     }
 
+    public function setShifts(array $shifts) {
+        $this->_shifts = $shifts;
+    }
 
 }

@@ -18,11 +18,13 @@ class Generator {
     protected $context;
     protected $nullable;
     protected $blank;
+    /** @var StateList[] */
     protected $statesThrough = [];
     protected $visited = [];
-    protected $tail;
     protected $first;
     protected $nlooks;
+    protected $nstates;
+    protected $nacts;
 
     public function compute(ParseResult $parseResult)
     {
@@ -35,8 +37,10 @@ class Generator {
         $this->first = array_fill(0, $nSymbols, $this->blank);
         $this->follow = array_fill(0, $nSymbols, $this->blank);
         $this->nlooks = 0;
+        $this->nstates = 0;
+        $this->nacts = 0;
         foreach ($this->context->symbols() as $s) {
-            $this->statesThrough[$s->code] = new StateList(null, null);
+            $this->statesThrough[$s->code] = null;
         }
 
         $this->computeEmpty();
@@ -55,18 +59,99 @@ class Generator {
         $states->through = $this->context->nilSymbol();
         $states->items = $this->makeState($tmpList);
 
-
         $this->linkState($states, $states->through);
-        $this->tail = $states;
+        $tail = new StateList($states);
+        $this->nstates = 1;
 
         for ($p = $states; $p !== null; $p = $p->next) {
+            // Collect direct GOTO's (come from kernel items)
+
+            /** @var Lr1|null $tmpList */
+            /** @var Lr1|null $tmpTail */
             $tmpList = $tmpTail = null;
+
             /** @var Lr1 $x */
             for ($x = $p->items; $x !== null; $x = $x->next) {
                 if (!$x->isTailItem()) {
                     $wp = new Lr1($this->parseResult->startPrime, $this->blank, $x->item->slice(1));
+                    if ($tmpTail !== null) {
+                        $tmpTail->next = $wp;
+                    } else {
+                        $tmpList = $wp;
+                    }
+                    $tmpTail = $wp;
                 }
             }
+
+            // Collect indirect GOTO's (come from nonkernel items)
+            $this->clearVisited();
+            for ($tp = $tmpList; $tp != null; $tp = $tp->next) {
+                /** @var Symbol $g */
+                $g = $tp->item[-1];
+                if ($g !== null && !$g->isTerminal() && !$this->visited[$g->code]) {
+                    $this->visited[$g->code] = true;
+                    /** @var Production $gram */
+                    for ($gram = $g->value; $gram != null; $gram = $gram->link) {
+                        if ($gram->body[2] !== null) {
+                            $wp = new Lr1($g, $this->blank, $gram->body->slice(3));
+                            $tmpTail->next = $wp;
+                            $tmpTail = $wp;
+                        }
+                    }
+                }
+            }
+
+            // This is NOT the same comparison function as in the original code
+            // It uses comparisons between unrelated pointers as far as I can see :/
+            $tmpList = $this->sortList($tmpList, function(Lr1 $x, Lr1 $y) {
+                $i = -1;
+                do {
+                    $gx = $x->item[$i] !== null ? $x->item[$i]->code : 0;
+                    $gy = $y->item[$i] !== null ? $y->item[$i]->code : 0;
+                    if ($gx !== $gy) {
+                        return $gx - $gy;
+                    }
+                    $i++;
+                } while ($x->item[$i] !== null || $y->item[$i] !== null);
+                return 0;
+            });
+
+            // Compute next states
+            $nextst = [];
+            for ($tp = $tmpList; $tp !== null; ) {
+                $sp = null;
+
+                $g = $tp->item[-1];
+                $sublist = $tp;
+                while ($tp != null && $tp->item[-1] === $g) {
+                    $sp = $tp;
+                    $tp = $tp->next;
+                }
+                $sp->next = null;
+
+                for ($lp = $this->statesThrough[$g->code]; $lp != null; $lp = $lp->next) {
+                    if (isSameSet($lp->state->items, $sublist)) {
+                        break;
+                    }
+                }
+
+                if ($lp !== null) {
+                    $q = $lp->state;
+                } else {
+                    $q = new State();
+                    $q->items = $this->makeState($sublist);
+                    $q->through = $g;
+                    $this->linkState($states, $states->through);
+                    $tail->next = new StateList($q);
+                    $tail = $tail->next;
+                    $this->nstates++;
+                }
+
+                $nextst[] = $q;
+            }
+
+            $p->shifts = $nextst;
+            $this->nacts += count($nextst);
         }
     }
 
@@ -163,6 +248,7 @@ class Generator {
             }
             if ($p->look === null) {
                 $p->look = $this->blank;
+                $this->nlooks++;
             }
             $tail = $p;
         }
@@ -191,7 +277,7 @@ class Generator {
 
             /** @var Production $gram */
             for ($gram = $x->value; $gram !== null; $gram = $gram->link) {
-                if (count($gram->body) == 1) {
+                if ($gram->body[2] === null) {
                     $p = new Lr1($this->parseResult->startPrime, $this->blank, $gram->body->slice(2));
                     $tail->next = $p;
                     $tail = $p;
@@ -202,6 +288,28 @@ class Generator {
             }
         }
         return $tail;
+    }
+
+    function sortList(Lr1 $list, callable $cmp) {
+        $array = [];
+        for ($x = $list; $x !== null; $x = $x->next) {
+            $array[] = $x;
+        }
+
+        usort($array, $cmp);
+
+        $list = null;
+        /** @var Lr1 $tail */
+        $tail = null;
+        foreach ($array as $x) {
+            if ($list == null) {
+                $list = $x;
+            } else {
+                $tail->next = $x;
+            }
+            $tail = $x;
+        }
+        return $list;
     }
 
 }

@@ -6,6 +6,7 @@ namespace PhpYacc\Core;
 use Countable;
 use IteratorAggregate;
 use ArrayAccess;
+use PhpYacc\Grammar\Symbol;
 
 class ArrayObject implements ArrayAccess, IteratorAggregate, Countable  {
 
@@ -64,6 +65,7 @@ class ArrayObject implements ArrayAccess, IteratorAggregate, Countable  {
 
     public function offsetSet($index, $value)
     {
+        assert($value instanceof Symbol);
         $this->array[$index + $this->offset] = $value;
     }
 

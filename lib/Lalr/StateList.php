@@ -6,19 +6,23 @@ namespace PhpYacc\Lalr;
 use ArrayObject;
 use PhpYacc\Grammar\Symbol;
 
+/**
+ * @property StateList|null $next
+ * @property State $state
+ */
 class StateList {
-    protected $next;
-    protected $state;
+    protected $_next;
+    protected $_state;
 
-    public function __construct(State $state = null, StateList $next = null)
+    public function __construct(State $state, StateList $next = null)
     {
-        $this->state = $state;
-        $this->next = $next;
+        $this->_state = $state;
+        $this->_next = $next;
     }
 
     public function __get($name)
     {
-        return $this->$name;
+        return $this->{'_'.$name};
     }
 
     public function __set($name, $value)
@@ -28,12 +32,12 @@ class StateList {
 
     public function setState(State $state)
     {
-        $this->state = $state;
+        $this->_state = $state;
     }
 
     public function setNext(StateList $next = null)
     {
-        $this->next = $next;
+        $this->_next = $next;
     }
 
 }

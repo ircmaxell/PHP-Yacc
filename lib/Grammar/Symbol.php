@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
+use PhpYacc\Yacc\Production;
 
 /**
  * @property int $code
@@ -85,6 +86,9 @@ class Symbol {
 
     public function setValue($value)
     {
+        if (!$this->isTerminal()) {
+            assert($value instanceof Production || $value === null);
+        }
         $this->_value = $value;
     }
 
