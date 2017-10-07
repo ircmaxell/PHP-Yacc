@@ -42,6 +42,7 @@ class Parser  {
         $this->doDeclaration();
         $this->doGrammar();
         $this->result->eofToken = $this->eofToken;
+        $this->result->errorToken = $this->errorToken;
         $this->result->startPrime = $this->startPrime;
         return $this->result;
     }

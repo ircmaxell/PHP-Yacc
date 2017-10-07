@@ -47,7 +47,7 @@ class Context {
     public function genNonTerminal(): Symbol
     {
         $buffer = sprintf("@%d", $this->nonTerminalCounter++);
-        return $this->interSymbol($buffer, false);
+        return $this->internSymbol($buffer, false);
     }
 
     public function internSymbol(string $s, bool $isTerm): Symbol

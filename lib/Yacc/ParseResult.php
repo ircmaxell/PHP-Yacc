@@ -11,6 +11,7 @@ class ParseResult {
     public $expected = null;
     public $unioned = false;
     public $eofToken = null;
+    public $errorToken = null;
     public $startPrime = null;
     public $grams = [];
 

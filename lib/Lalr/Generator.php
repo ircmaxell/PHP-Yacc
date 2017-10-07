@@ -50,6 +50,7 @@ class Generator {
         $this->firstNullablePrecomp();
         $this->computeKernels();
         $this->computeLookaheads();
+        $this->fillReduce();
     }
 
     protected function computeKernels()
@@ -211,6 +212,44 @@ class Generator {
                 }
             }
         }
+    }
+
+    protected function fillReduce() {
+        $this->clearVisited();
+        for ($p = $this->states; $p != null; $p = $p->next) {
+            $tdefact = 0;
+            foreach ($p->shifts as $t) {
+                if ($t->through === $this->parseResult->errorToken) {
+                    // shifting error
+                    $tdefact = -1;
+                }
+            }
+
+            // Pick up reduce entries
+            $nr = 0;
+            for ($x = $p->items; $x !== null; $x = $x->next) {
+                if (!$x->isTailItem()) {
+                    continue;
+                }
+
+                $alook = $x->look; // clone! bitset
+                // TODO $pnum;
+                foreach ($p->shifts as $t) {
+                    // TODO if (t == RUBOUT) continue;
+                    $e = $t->through;
+                    if (!$e->isTerminal()) {
+                        break;
+                    }
+                    if (testBit($alook, $e->code)) {
+                        //
+                    }
+                }
+            }
+
+            // TODO
+        }
+        // TODO
+        $k = 0;
     }
 
     protected function computeFollow(State $st) {
