@@ -77,13 +77,14 @@ function isSameSet(Lr1 $left = null, Lr1 $right = null): bool
     $p = $left;
     $t = $right;
     while ($t !== null) {
-        if ($p === null || $p->item !== $t->item) {
+        // Not using !== here intentionally
+        if ($p === null || $p->item != $t->item) {
             return false;
         }
         $p = $p->next;
         $t = $t->next;
     }
-    return $p === null || $p->headitem();
+    return $p === null || $p->isHeadItem();
 }
 
 function dumpSet(Context $ctx, string $string)
@@ -93,4 +94,12 @@ function dumpSet(Context $ctx, string $string)
             echo "{$symbol->name} ";
         }
     }
+}
+
+function dumpLr1(Lr1 $lr1 = null) {
+    while ($lr1 !== null) {
+        echo $lr1->item, "\n";
+        $lr1 = $lr1->next;
+    }
+    echo "\n";
 }

@@ -16,8 +16,15 @@ class ArrayObject implements ArrayAccess, IteratorAggregate, Countable  {
     public function __construct($input = [], int $offset = 0)
     {
         if ($input instanceof ArrayObject) {
-            $this->array = $input;
+            if ($input->array instanceof ArrayObject) {
+                $this->array = $input->array;
+                $offset += $input->offset;
+                assert($input->array->offset === 0);
+            } else {
+                $this->array = $input;
+            }
         } elseif (is_array($input)) {
+            assert($offset === 0);
             $this->array = $input;
         } else {
             throw new \InvalidArgumentException("Unknown type passed");
@@ -46,6 +53,7 @@ class ArrayObject implements ArrayAccess, IteratorAggregate, Countable  {
     {
         $i = 0;
         foreach ($new as $value) {
+            assert($value instanceof Symbol);
             $this->array[$i++ + $offset] = $value;
         }
     }
@@ -76,5 +84,25 @@ class ArrayObject implements ArrayAccess, IteratorAggregate, Countable  {
 
     public function count() {
         return \count($this->array);
+    }
+
+    public function __toString() {
+        $result = '';
+        for ($i = 1; $i < count($this->array) + 1; $i++) {
+            if ($i === 2) {
+                $result .= "-> ";
+            }
+            if ($i === $this->offset) {
+                $result .= "* ";
+            }
+            $result .= $this->array[$i]->name . " ";
+        }
+        if ($i === 2) {
+            $result .= "-> ";
+        }
+        if ($i === $this->offset) {
+            $result .= "* ";
+        }
+        return $result;
     }
 }

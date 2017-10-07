@@ -60,7 +60,7 @@ class Generator {
         $states->items = $this->makeState($tmpList);
 
         $this->linkState($states, $states->through);
-        $tail = new StateList($states);
+        $tail = $states;
         $this->nstates = 1;
 
         for ($p = $states; $p !== null; $p = $p->next) {
@@ -139,11 +139,11 @@ class Generator {
                     $q = $lp->state;
                 } else {
                     $q = new State();
+                    $tail->next = $q;
+                    $tail = $q;
                     $q->items = $this->makeState($sublist);
                     $q->through = $g;
-                    $this->linkState($states, $states->through);
-                    $tail->next = new StateList($q);
-                    $tail = $tail->next;
+                    $this->linkState($q, $g);
                     $this->nstates++;
                 }
 
@@ -152,6 +152,13 @@ class Generator {
 
             $p->shifts = $nextst;
             $this->nacts += count($nextst);
+        }
+
+        if (DEBUG) {
+            echo "States:\n";
+            for ($s = $states; $s !== null; $s = $s->next) {
+                dumpLr1($s->items);
+            }
         }
     }
 
@@ -290,7 +297,7 @@ class Generator {
         return $tail;
     }
 
-    function sortList(Lr1 $list, callable $cmp) {
+    function sortList(Lr1 $list = null, callable $cmp) {
         $array = [];
         for ($x = $list; $x !== null; $x = $x->next) {
             $array[] = $x;

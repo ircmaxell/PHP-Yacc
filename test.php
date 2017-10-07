@@ -2,6 +2,9 @@
 
 error_reporting(E_ALL);
 ini_set('assert.exception', 1);
+set_error_handler(function($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
 
 const DEBUG = true;
 
