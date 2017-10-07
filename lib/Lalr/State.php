@@ -8,27 +8,21 @@ use PhpYacc\Grammar\Symbol;
 
 /**
  * @property State|null $next
- * @property State[] $shifts
- * @property Reduce $reduce
+ * @property Reduce[] $reduce
  * @property Conflict $conflict
  * @property Symbol $through
  * @property Lr1 $items
  */
 class State {
 
+    /** @var State[] */
+    public $shifts = []; // public for indirect array modification
     protected $_next;
-    protected $_shifts;
     protected $_reduce;
     protected $_conflict;
     protected $_through;
     protected $_items;
 
-
-    public function __construct()
-    {
-        $this->_shifts = [];
-
-    }
 
     public function __get($name)
     {
@@ -45,8 +39,11 @@ class State {
         $this->_conflict = $conflict;
     }
 
-    public function setReduce(Reduce $reduce)
+    public function setReduce(array $reduce)
     {
+        foreach ($reduce as $r) {
+            assert($r instanceof Reduce);
+        }
         $this->_reduce = $reduce;
     }
 
@@ -63,10 +60,6 @@ class State {
     public function setItems(Lr1 $items)
     {
         $this->_items = $items;
-    }
-
-    public function setShifts(array $shifts) {
-        $this->_shifts = $shifts;
     }
 
 }

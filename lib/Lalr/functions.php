@@ -63,7 +63,7 @@ function nextElement(Context $ctx, int $e, string $p): int
     return $e;
 }
 
-function forEachMember(Context $ctx, int $v, string $set)
+function forEachMember(Context $ctx, string $set)
 {
     $nSymbols = $ctx->nSymbols();
     for ($v = 0; ($v = nextElement($ctx, $v, $set)) < $nSymbols; $v++) {

@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace PhpYacc\Lalr\Conflict;
 
+use PhpYacc\Grammar\Symbol;
 use PhpYacc\Lalr\{
-    Conflict,
-    State
+    Conflict
 };
 
 class ReduceReduce extends Conflict {
@@ -13,7 +13,7 @@ class ReduceReduce extends Conflict {
     protected $reduce1;
     protected $reduce2;
 
-    public function __construct(int $reduce1, int $reduce2, int $symbol, Conflict $next = null)
+    public function __construct(int $reduce1, int $reduce2, Symbol $symbol, Conflict $next = null)
     {
         $this->reduce1 = $reduce1;
         $this->reduce2 = $reduce2;

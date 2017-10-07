@@ -102,5 +102,4 @@ class Symbol {
         $this->_associativity |= $flag;
     }
 
-
 }

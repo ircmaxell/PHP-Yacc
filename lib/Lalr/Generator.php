@@ -12,6 +12,8 @@ require_once __DIR__ . '/functions.php';
 
 class Generator {
 
+    const NON_ASSOC = -32768;
+
     /** @var ParseResult */
     protected $parseResult;
     /** @var Context */
@@ -25,9 +27,13 @@ class Generator {
     protected $follow;
     /** @var State $states */
     protected $states;
+
     protected $nlooks;
     protected $nstates;
     protected $nacts;
+    protected $nacts2;
+    protected $nsrerr;
+    protected $nrrerr;
 
     public function compute(ParseResult $parseResult)
     {
@@ -39,9 +45,8 @@ class Generator {
         $this->blank = str_repeat("\0", ceil(($nSymbols + NBITS - 1) / NBITS));
         $this->first = array_fill(0, $nSymbols, $this->blank);
         $this->follow = array_fill(0, $nSymbols, $this->blank);
-        $this->nlooks = 0;
-        $this->nstates = 0;
-        $this->nacts = 0;
+        $this->nlooks = $this->nstates = $this->nacts = $this->nacts2 = 0;
+        $this->nsrerr = $this->nrrerr = 0;
         foreach ($this->context->symbols() as $s) {
             $this->statesThrough[$s->code] = null;
         }
@@ -214,6 +219,10 @@ class Generator {
     }
 
     protected function fillReduce() {
+        $rubout = new State();
+        /** @var Reduce[] $tmpr */
+        $tmpr = [];
+
         $this->clearVisited();
         for ($p = $this->states; $p != null; $p = $p->next) {
             $tdefact = 0;
@@ -225,30 +234,154 @@ class Generator {
             }
 
             // Pick up reduce entries
-            $nr = 0;
             for ($x = $p->items; $x !== null; $x = $x->next) {
                 if (!$x->isTailItem()) {
                     continue;
                 }
 
                 $alook = $x->look; // clone! bitset
-                // TODO $pnum;
-                foreach ($p->shifts as $t) {
-                    // TODO if (t == RUBOUT) continue;
+                $gram = $x->item->getProduction();
+
+                // find shift/reduce conflict
+                foreach ($p->shifts as $m => $t) {
+                    if ($t === $rubout) continue;
                     $e = $t->through;
                     if (!$e->isTerminal()) {
                         break;
                     }
                     if (testBit($alook, $e->code)) {
-                        //
+                        $rel = $this->comparePrecedence($gram, $e);
+                        if ($rel === self::NON_ASSOC) {
+                            clearBit($alook, $e->code);
+                            $p->shifts[$m] = $rubout;
+                            $tmpr[] = new Reduce($e, -1);
+                        } elseif ($rel < 0) {
+                            // reduce
+                            $p->shifts[$m] = $rubout;
+                        } elseif ($rel > 0) {
+                            // shift
+                            clearBit($alook, $e->code);
+                        } elseif ($rel == 0) {
+                            // conflict
+                            clearBit($alook, $e->code);
+                            $this->nsrerr++;
+                            $p->conflict = new Conflict\ShiftReduce($t, $gram->num, $e, $p->conflict);
+                        }
+                    }
+                }
+
+                foreach ($tmpr as $reduce) {
+                    if (testBit($alook, $reduce->symbol->code)) {
+                        // reduce/reduce conflict
+                        $this->nrrerr++;
+                        $p->conflict = new Conflict\ReduceReduce(
+                            $reduce->number, $gram->num, $reduce->symbol, $p->conflict);
+
+                        if ($gram->num < $reduce->number) {
+                            $reduce->number = $gram->num;
+                        }
+                        clearBit($alook, $reduce->symbol->code);
+                    }
+                }
+
+                foreach (forEachMember($this->context, $alook) as $e) {
+                    $sym = $this->context->symbols()[$e];
+                    $tmpr[] = new Reduce($sym, $gram->num);
+                }
+            }
+
+            // Decide default action
+            if (!$tdefact) {
+                $tdefact = -1;
+
+                usort($tmpr, function (Reduce $x, Reduce $y) {
+                    if ($x->number != $y->number) {
+                        return $y->number - $x->number;
+                    }
+                    return $x->symbol->code - $y->symbol->code;
+                });
+
+                $maxn = 0;
+                $nr = count($tmpr);
+                for ($j = 0; $j < $nr; ) {
+                    for ($k = $j; $j < $nr; $j++) {
+                        if ($tmpr[$j]->number != $tmpr[$k]->number) {
+                            break;
+                        }
+                    }
+                    if ($j - $k > $maxn && $tmpr[$k]->number > 0) {
+                        $maxn = $j - $k;
+                        $tdefact = $tmpr[$k]->number;
                     }
                 }
             }
 
-            // TODO
+            // Squeeze tmpr
+            $tmpr = array_filter($tmpr, function(Reduce $reduce) use($tdefact) {
+                return $reduce->number !== $tdefact;
+            });
+
+            usort($tmpr, function(Reduce $x, Reduce $y) {
+                if ($x->symbol !== $y->symbol) {
+                    return $x->symbol->code - $y->symbol->code;
+                }
+                return $x->number - $y->number;
+            });
+            $tmpr[] = new Reduce($this->context->nilSymbol(), $tdefact);
+
+            // Squeeze shift actions
+            $p->shifts = array_filter($p->shifts, function(State $q) use($rubout) {
+                return $q !== $rubout;
+            });
+
+            foreach ($tmpr as $reduce) {
+                if ($reduce->number >= 0) {
+                    $this->visited[$reduce->number] = true;
+                }
+            }
+
+            // Register tmpr
+            $p->reduce = $tmpr;
+            $this->nacts2 += count($tmpr);
         }
-        // TODO
+
         $k = 0;
+        foreach ($this->parseResult->grams() as $gram) {
+            if (!$this->visited[$gram->num]) {
+                $k++;
+                echo "Never reduced: \n"; // TODO
+            }
+        }
+
+        if ($k) {
+            echo $k, " rule(s) never reduced\n";
+        }
+
+        // TODO
+        // Sort states
+    }
+
+    protected function comparePrecedence(Production $gram, Symbol $x) {
+        if ($gram->associativity === Symbol::UNDEF
+            || ($x->associativity & Symbol::MASK) === Symbol::UNDEF
+        ) {
+            return 0;
+        }
+
+        $v = $x->precedence - $gram->precedence;
+        if ($v !== 0) {
+            return $v;
+        }
+
+        switch ($gram->associativity) {
+            case Symbol::LEFT:
+                return -1;
+            case Symbol::RIGHT:
+                return 1;
+            case Symbol::NON:
+                return self::NON_ASSOC;
+        }
+        throw new \Exception('Cannot happen');
     }
 
     protected function computeFollow(State $st) {
