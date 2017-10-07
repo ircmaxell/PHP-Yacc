@@ -219,7 +219,6 @@ class Generator {
     }
 
     protected function fillReduce() {
-        $rubout = new State();
         /** @var Reduce[] $tmpr */
         $tmpr = [];
 
@@ -244,7 +243,6 @@ class Generator {
 
                 // find shift/reduce conflict
                 foreach ($p->shifts as $m => $t) {
-                    if ($t === $rubout) continue;
                     $e = $t->through;
                     if (!$e->isTerminal()) {
                         break;
@@ -253,11 +251,11 @@ class Generator {
                         $rel = $this->comparePrecedence($gram, $e);
                         if ($rel === self::NON_ASSOC) {
                             clearBit($alook, $e->code);
-                            $p->shifts[$m] = $rubout;
+                            unset($p->shifts[$m]);
                             $tmpr[] = new Reduce($e, -1);
                         } elseif ($rel < 0) {
                             // reduce
-                            $p->shifts[$m] = $rubout;
+                            unset($p->shifts[$m]);
                         } elseif ($rel > 0) {
                             // shift
                             clearBit($alook, $e->code);
@@ -329,10 +327,8 @@ class Generator {
             });
             $tmpr[] = new Reduce($this->context->nilSymbol(), $tdefact);
 
-            // Squeeze shift actions
-            $p->shifts = array_filter($p->shifts, function(State $q) use($rubout) {
-                return $q !== $rubout;
-            });
+            // Squeeze shift actions (we deleted some keys)
+            $p->shifts = array_values($p->shifts);
 
             foreach ($tmpr as $reduce) {
                 if ($reduce->number >= 0) {
