@@ -223,11 +223,11 @@ class Generator {
     }
 
     protected function fillReduce() {
-        /** @var Reduce[] $tmpr */
-        $tmpr = [];
-
         $this->clearVisited();
         foreach ($this->states as $p) {
+            /** @var Reduce[] $tmpr */
+            $tmpr = [];
+
             $tdefact = 0;
             foreach ($p->shifts as $t) {
                 if ($t->through === $this->parseResult->errorToken) {
