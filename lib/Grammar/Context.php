@@ -10,15 +10,14 @@ class Context {
     protected $counter = 0;
     protected $symbolHash = [];
     protected $symbols = [];
+    protected $nilSymbol = null;
 
     public function nilSymbol(): Symbol
     {
-        foreach ($this->symbols as $symbol) {
-            if ($symbol->isNilSymbol()) {
-                return $symbol;
-            }
+        if ($this->nilSymbol === null) {
+            $this->nilSymbol = $this->intern("@nil");
         }
-        return $this->intern("@nil");
+        return $this->nilSymbol;
     }
 
     public function nSymbols(): int

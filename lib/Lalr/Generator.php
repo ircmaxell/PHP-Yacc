@@ -42,6 +42,8 @@ class Generator {
     {
         $this->parseResult = $parseResult;
         $this->context = $parseResult->ctx;
+        // Ensure nil symbol is part of nSymbols
+        $this->context->nilSymbol();
         $nSymbols = $this->context->nSymbols();
         $this->nullable = array_fill(0, $nSymbols, false);
 
