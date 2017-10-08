@@ -390,7 +390,7 @@ class Generator {
 
         foreach ($this->states as $i => $p) {
             $p->number = $i;
-            if (!empty($p->shifts) || $p->reduce[0]->symbol !== $this->context->nilSymbol()) {
+            if (!empty($p->shifts) || $p->reduce[0]->symbol->isNilSymbol()) {
                 $this->nnonleafstates = $i;
             }
         }
@@ -669,7 +669,7 @@ class Generator {
                 echo strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
                 echo $s->through->isTerminal() ? "shift" : "goto";
                 echo " " . $s->number;
-                if ($this->isReduceOnly($s)) {
+                if ($s->isReduceOnly()) {
                     echo " and reduce (" . $s->reduce[0]->number . ")";
                 }
                 echo "\n";
@@ -688,11 +688,6 @@ class Generator {
             }
         }
         echo "\n";
-    }
-
-    protected function isReduceOnly(State $st): bool {
-        return empty($st->shifts)
-            && $st->reduce[0]->symbol->isNilSymbol();
     }
 
 }

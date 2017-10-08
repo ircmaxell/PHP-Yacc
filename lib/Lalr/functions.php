@@ -52,22 +52,13 @@ function clearBit(string &$s, int $i)
     $s[$offset] = $char;
 }
 
-function nextElement(Context $ctx, int $e, string $p): int
-{
-    $nSymbols = $ctx->nSymbols();
-    for (; $e < $nSymbols; $e++) {
-        if (testBit($p, $e)) {
-            break;
-        }
-    }
-    return $e;
-}
-
 function forEachMember(Context $ctx, string $set)
 {
     $nSymbols = $ctx->nSymbols();
-    for ($v = 0; ($v = nextElement($ctx, $v, $set)) < $nSymbols; $v++) {
-        yield $v;
+    for ($v = 0; $v < $nSymbols; $v++) {
+        if (testBit($set, $v)) {
+            yield $v;
+        }
     }
 }
 

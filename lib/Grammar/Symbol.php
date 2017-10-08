@@ -46,17 +46,17 @@ class Symbol {
 
     public function isTerminal(): bool
     {
-        return $this->terminal === self::TERMINAL;
+        return $this->_terminal === self::TERMINAL;
     }
 
     public function isNonTerminal(): bool
     {
-        return $this->terminal === self::NONTERMINAL;
+        return $this->_terminal === self::NONTERMINAL;
     }
 
     public function isNilSymbol(): bool
     {
-        return $this->terminal === self::UNDEF;
+        return $this->_terminal === self::UNDEF;
     }
 
     public function __get($name)

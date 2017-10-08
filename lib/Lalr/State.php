@@ -64,4 +64,9 @@ class State {
     public function setNumber(int $number) {
         $this->_number = $number;
     }
+
+    public function isReduceOnly(): bool {
+        return empty($this->shifts)
+            && $this->_reduce[0]->symbol->isNilSymbol();
+    }
 }
