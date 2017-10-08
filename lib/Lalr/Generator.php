@@ -624,6 +624,7 @@ class Generator {
                 $tail->next = $x;
             }
             $tail = $x;
+            $x->next = null;
         }
         return $list;
     }
