@@ -27,7 +27,7 @@ foreach ($it as $file) {
     $skeleton = "$dir/parser.template.php";
     copy($grammar, $tmpGrammar);
 
-    $output = trim(shell_exec("cd $dir && kmyacc -t -v -l -m $skeleton -p Parser $tmpGrammar 2>&1"));
+    $output = trim(shell_exec("cd $dir && kmyacc -x -t -v -l -m $skeleton -p Parser $tmpGrammar 2>&1"));
 
     rename("$dir/y.output", "$dir/y.kmyacc.output");
 
