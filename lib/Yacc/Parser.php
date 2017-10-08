@@ -12,7 +12,6 @@ use PhpYacc\{
     MacroSet,
     Token
 };
-use PhpYacc\Lalr\Item;
 
 class Parser  {
     /** @var Context */

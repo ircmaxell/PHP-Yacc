@@ -22,7 +22,7 @@ class Generator {
     protected $context;
     protected $nullable;
     protected $blank;
-    /** @var StateList[] */
+    /** @var State[][] */
     protected $statesThrough = [];
     protected $visited = [];
     protected $first;
@@ -50,11 +50,12 @@ class Generator {
         $this->blank = str_repeat("\0", ceil(($nSymbols + NBITS - 1) / NBITS));
         $this->first = array_fill(0, $nSymbols, $this->blank);
         $this->follow = array_fill(0, $nSymbols, $this->blank);
+        $this->states = [];
         $this->nlooks = $this->nstates = $this->nacts = $this->nacts2 = 0;
         $this->nnonleafstates = 0;
         $this->nsrerr = $this->nrrerr = 0;
         foreach ($this->context->symbols() as $s) {
-            $this->statesThrough[$s->code] = null;
+            $this->statesThrough[$s->code] = [];
         }
 
         $this->computeEmpty();
@@ -73,15 +74,7 @@ class Generator {
             $this->blank, 
             new Item($this->parseResult->gram(0), 1)
         );
-        $state = new State(
-            $this->context->nilSymbol(),
-            $this->makeState($tmpList)
-        );
-        $this->states = [$state];
-
-        $this->linkState($state, $state->through);
-        $tail = $this->states;
-        $this->nstates = 1;
+        $this->findOrCreateState($this->context->nilSymbol(), $tmpList);
 
         // foreach by ref so that new additions to $this->states are also picked up
         foreach ($this->states as &$p) {
@@ -149,22 +142,7 @@ class Generator {
                 }
                 $sp->next = null;
 
-                for ($lp = $this->statesThrough[$g->code]; $lp != null; $lp = $lp->next) {
-                    if (isSameSet($lp->state->items, $sublist)) {
-                        break;
-                    }
-                }
-
-                if ($lp !== null) {
-                    $q = $lp->state;
-                } else {
-                    $q = new State($g, $this->makeState($sublist));
-                    $this->states[] = $q;
-                    $this->linkState($q, $g);
-                    $this->nstates++;
-                }
-
-                $nextst[] = $q;
+                $nextst[] = $this->findOrCreateState($g, $sublist);
             }
 
             $p->shifts = $nextst;
@@ -481,12 +459,19 @@ class Generator {
         return true;
     }
 
-    protected function linkState(State $state, Symbol $g)
+    protected function findOrCreateState(Symbol $through, Lr1 $sublist)
     {
-        $this->statesThrough[$g->code] = new StateList(
-            $state, 
-            $this->statesThrough[$g->code]
-        );
+        foreach ($this->statesThrough[$through->code] as $state) {
+            if (isSameSet($state->items, $sublist)) {
+                return $state;
+            }
+        }
+
+        $state = new State($through, $this->makeState($sublist));
+        $this->states[] = $state;
+        $this->statesThrough[$through->code][] = $state;
+        $this->nstates++;
+        return $state;
     }
 
     protected function computeEmpty()
