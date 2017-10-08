@@ -6,14 +6,15 @@ state unknown:
 	(0) start : . expr 
 		[ EOF ]
 state unknown:
-	(0) start : expr . 
+	(1) expr : '1' . 
 		[ EOF ]
 state unknown:
-	(1) expr : '1' . 
+	(0) start : expr . 
 		[ EOF ]
 state 0
 	(0) start : . expr 
 
+	'1'		shift 2 and reduce (1)
 	expr		goto 1
 	'1'		shift 2 and reduce (1)
 	.		error
@@ -37,4 +38,4 @@ Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/basic-usage/grammar.y:
 	3 states
 	0 shift/reduce, 0 reduce/reduce conflicts
 	3 lookahead sets used
-	2+4=6 action entries
+	3+4=7 action entries
