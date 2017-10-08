@@ -37,10 +37,14 @@ class Generator {
     protected $nnonleafstates;
     protected $nsrerr;
     protected $nrrerr;
+    protected $filename = '';
 
-    public function compute(ParseResult $parseResult)
+    protected $debug = '';
+
+    public function compute(ParseResult $parseResult, string $filename = '')
     {
         $this->parseResult = $parseResult;
+        $this->filename = $filename;
         $this->context = $parseResult->ctx;
         // Ensure nil symbol is part of nSymbols
         $this->context->nilSymbol();
@@ -65,6 +69,7 @@ class Generator {
         $this->fillReduce();
         $this->printDiagnostics();
         $this->printStatistics();
+        return new LalrResult($this->parseResult->grams(), $this->states, $this->debug);
     }
 
     protected function computeKernels()
@@ -193,12 +198,12 @@ class Generator {
 
         if (DEBUG) {
             foreach ($this->states as $p) {
-                echo "state unknown:\n";
+                $this->debug .= "state unknown:\n";
                 for ($x = $p->items; $x != null; $x = $x->next) {
-                    echo "\t", $x->item, "\n";
-                    echo "\t\t[ ";
-                    dumpSet($this->context, $x->look);
-                    echo "]\n";
+                    $this->debug .= "\t" . $x->item . "\n";
+                    $this->debug .= "\t\t[ ";
+                    $this->debug .= dumpSet($this->context, $x->look);
+                    $this->debug .= "]\n";
                 }
             }
         }
@@ -331,12 +336,12 @@ class Generator {
         foreach ($this->parseResult->grams() as $gram) {
             if (!$this->visited[$gram->num]) {
                 $k++;
-                echo "Never reduced: \n"; // TODO
+                $this->debug .= "Never reduced: \n"; // TODO
             }
         }
 
         if ($k) {
-            echo $k, " rule(s) never reduced\n";
+            $this->debug .= $k . " rule(s) never reduced\n";
         }
 
         // Sort states in decreasing order of entries
@@ -489,10 +494,10 @@ class Generator {
         } while ($changed);
 
         if (DEBUG) {
-            echo "EMPTY nonterminals: \n";
+            $this->debug .= "EMPTY nonterminals: \n";
             foreach ($this->context->nonTerminals() as $symbol) {
                 if ($symbol->associativity & Production::EMPTY) {
-                    echo "  " . $symbol->name . "\n";
+                    $this->debug .= "  " . $symbol->name . "\n";
                 }
             }
         }
@@ -532,14 +537,14 @@ class Generator {
         } while ($changed);
 
         if (DEBUG) {
-            echo "First:\n";
+            $this->debug .= "First:\n";
             foreach ($this->context->nonTerminals() as $symbol) {
-                echo "  {$symbol->name}\t[ ";
-                dumpSet($this->context, $this->first[$symbol->code]);
+                $this->debug .= "  {$symbol->name}\t[ ";
+                $this->debug .= dumpSet($this->context, $this->first[$symbol->code]);
                 if ($this->nullable[$symbol->code]) {
-                    echo "@ ";
+                    $this->debug .= "@ ";
                 }
-                echo "]\n";
+                $this->debug .= "]\n";
             }
         }
     }
@@ -624,15 +629,15 @@ class Generator {
     }
 
     protected function printState(State $state) {
-        echo "state " . $state->number . "\n";
+        $this->debug .= "state " . $state->number . "\n";
         for ($conf = $state->conflict; $conf !== null; $conf = $conf->next()) {
             if ($conf instanceof ShiftReduce) {
-                echo sprintf(
+                $this->debug .= sprintf(
                     "%d: shift/reduce conflict (shift %d, reduce %d) on %s\n",
                     $state->number, $conf->state()->number, $conf->reduce(),
                     $conf->symbol()->name);
             } else if ($conf instanceof ReduceReduce) {
-                echo sprintf(
+                $this->debug .= sprintf(
                     "%d: reduce/reduce conflict (reduce %d, reduce %d) on %s\n",
                     $state->number, $conf->reduce1(), $conf->reduce2(),
                     $conf->symbol()->name
@@ -641,9 +646,9 @@ class Generator {
         }
 
         for ($x = $state->items; $x !== null; $x = $x->next) {
-            echo "\t" . $x->item . "\n";
+            $this->debug .= "\t" . $x->item . "\n";
         }
-        echo "\n";
+        $this->debug .= "\n";
 
         $i = $j = 0;
         while (true) {
@@ -655,46 +660,45 @@ class Generator {
 
             if ($s !== null && ($r === null || $s->through->code < $r->symbol->code)) {
                 $str = $s->through->name;
-                echo strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
-                echo $s->through->isTerminal() ? "shift" : "goto";
-                echo " " . $s->number;
+                $this->debug .= strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
+                $this->debug .= $s->through->isTerminal() ? "shift" : "goto";
+                $this->debug .= " " . $s->number;
                 if ($s->isReduceOnly()) {
-                    echo " and reduce (" . $s->reduce[0]->number . ")";
+                    $this->debug .= " and reduce (" . $s->reduce[0]->number . ")";
                 }
-                echo "\n";
+                $this->debug .= "\n";
                 $i++;
             } else {
                 $str = $r->symbol->isNilSymbol() ? "." : $r->symbol->name;
-                echo strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
+                $this->debug .= strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
                 if ($r->number === 0) {
-                    echo "accept\n";
+                    $this->debug .= "accept\n";
                 } else if ($r->number < 0) {
-                    echo "error\n";
+                    $this->debug .= "error\n";
                 } else {
-                    echo "reduce ($r->number)\n";
+                    $this->debug .= "reduce ($r->number)\n";
                 }
                 $j++;
             }
         }
-        echo "\n";
+        $this->debug .= "\n";
     }
 
     protected function printDiagnostics() {
         // TODO check expected_srconf
         $expected_srconf = 0;
-        $filename = 'XXX';
         if ($this->nsrerr !== $expected_srconf || $this->nrrerr !== 0) {
-            echo "$filename: there are ";
+            $this->debug .= "$this->filename: there are ";
             if ($this->nsrerr !== $expected_srconf) {
-                echo " $this->nsrerr shift/reduce";
+                $this->debug .= " $this->nsrerr shift/reduce";
                 if ($this->nrrerr !== 0) {
-                    echo " and";
+                    $this->debug .= " and";
                 }
             }
             if ($this->nrrerr !== 0) {
-                echo " $this->nrrerr reduce/reduce";
+                $this->debug .= " $this->nrrerr reduce/reduce";
             }
-            echo " conflicts\n";
+            $this->debug .= " conflicts\n";
         }
     }
 
@@ -707,17 +711,16 @@ class Generator {
         $nnonts = iterator_count($this->context->nonTerminals());
         $nprods = count($this->parseResult->grams());
         $totalActs = $this->nacts + $this->nacts2;
-        $filename = 'XXX';
 
-        echo "\nStatistics for $filename:\n";
-        echo "\t$nterms terminal symbols\n";
-        echo "\t$nnonts nonterminal symbols\n";
-        echo "\t$nprods productions\n";
-        echo "\t$this->nstates states\n";
-        echo "\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n";
+        $this->debug .= "\nStatistics for $this->filename:\n";
+        $this->debug .= "\t$nterms terminal symbols\n";
+        $this->debug .= "\t$nnonts nonterminal symbols\n";
+        $this->debug .= "\t$nprods productions\n";
+        $this->debug .= "\t$this->nstates states\n";
+        $this->debug .= "\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n";
         // items?
-        echo "\t$this->nlooks lookahead sets used\n";
-        echo "\t$this->nacts+$this->nacts2=$totalActs action entries\n";
+        $this->debug .= "\t$this->nlooks lookahead sets used\n";
+        $this->debug .= "\t$this->nacts+$this->nacts2=$totalActs action entries\n";
         // bytes used?
     }
 

@@ -78,19 +78,22 @@ function isSameSet(Lr1 $left = null, Lr1 $right = null): bool
     return $p === null || $p->isHeadItem();
 }
 
-function dumpSet(Context $ctx, string $string)
+function dumpSet(Context $ctx, string $string): string
 {
+    $result = '';
     foreach ($ctx->symbols() as $symbol) {
         if (testBit($string, $symbol->code)) {
-            echo "{$symbol->name} ";
+            $result .= "{$symbol->name} ";
         }
     }
+    return $result;
 }
 
-function dumpLr1(Lr1 $lr1 = null) {
+function dumpLr1(Lr1 $lr1 = null): string {
+    $result = '';
     while ($lr1 !== null) {
-        echo $lr1->item, "\n";
+        $result .= $lr1->item . "\n";
         $lr1 = $lr1->next;
     }
-    echo "\n";
+    return $result . "\n";
 }

@@ -32,14 +32,14 @@ stmt: expr ','
     | expr ':'          { std::cout << $1 << std::endl; }
     ;
  
-expr: INT               { $$ = $1; }
-    | VAR               { $$ = vars[*$1];      delete $1; }
-    | VAR '=' expr      { $$ = vars[*$1] = $3; delete $1; }
-    | expr '+' expr     { $$ = $1 + $3; }
-    | expr '-' expr     { $$ = $1 - $3; }
-    | expr '*' expr     { $$ = $1 * $3; }
-    | expr '/' expr     { $$ = $1 / $3; }
-    | expr '%' expr     { $$ = $1 % $3; }
+expr: INT                       { $$ = $1; }
+    | VAR                       { $$ = vars[*$1];      delete $1; }
+    | VAR '=' expr              { $$ = vars[*$1] = $3; delete $1; }
+    | expr '+' expr             { $$ = $1 + $3; }
+    | expr '-' expr             { $$ = $1 - $3; }
+    | expr '*' expr             { $$ = $1 * $3; }
+    | expr '/' expr             { $$ = $1 / $3; }
+    | expr '%' expr             { $$ = $1 % $3; }
     | '+' expr  %prec BATATA    { $$ =  $2; }
     | '-' expr  %prec BATATA    { $$ = -$2; }
     | '(' expr ')'              { $$ =  $2; }
@@ -56,11 +56,8 @@ $parser = new PhpYacc\Yacc\Parser($lexer, $macroset);
 
 $parseResult = $parser->parse($source, "test.php");
 
-/*foreach ($parseResult->grams() as $g) {
-    echo $g->body, "\n";
-}*/
-
 $generator = new PhpYacc\Lalr\Generator;
 
 $lalrResult = $generator->compute($parseResult);
 
+var_dump($lalrResult);

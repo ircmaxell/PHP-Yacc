@@ -1,0 +1,32 @@
+EMPTY nonterminals: 
+First:
+  start	[ '1' ]
+state unknown:
+	(0) start : . start 
+		[ EOF ]
+state unknown:
+	(0) start : start . 
+		[ EOF ]
+Never reduced: 
+1 rule(s) never reduced
+state 0
+	(0) start : . start 
+
+	start		goto 1
+	.		error
+
+state 1
+	(0) start : start . 
+
+	EOF		accept
+	.		error
+
+
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/basic-usage/grammar.y:
+	3 terminal symbols
+	1 nonterminal symbols
+	2 productions
+	2 states
+	0 shift/reduce, 0 reduce/reduce conflicts
+	2 lookahead sets used
+	1+3=4 action entries
