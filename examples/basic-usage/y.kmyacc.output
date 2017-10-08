@@ -1,31 +1,31 @@
 EMPTY nonterminals: 
 First:
 start	[ '1' ]
-start	[ '1' ]
+expr	[ '1' ]
 state unknown:
-	(0) start : . start
+	(0) start : . expr
 		[ EOF ]
 state unknown:
-	(1) start : '1' .
+	(1) expr : '1' .
 		[ EOF ]
 state unknown:
-	(0) start : start .
+	(0) start : expr .
 		[ EOF ]
 state 0
-	(0) start : . start
+	(0) start : . expr
 
 	'1'		shift 2 and reduce (1)
-	start		goto 1
+	expr		goto 1
 	.		error
 
 state 1
-	(0) start : start .
+	(0) start : expr .
 
 	EOF		accept
 	.		error
 
 state 2
-	(1) start : '1' .
+	(1) expr : '1' .
 
 	.		reduce (1)
 

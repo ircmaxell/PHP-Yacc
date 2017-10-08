@@ -103,8 +103,8 @@ class Parser extends \PhpParser\ParserAbstract
     );
 
     protected $productions = array(
-        "start : start",
-        "start : '1'"
+        "start : expr",
+        "expr : '1'"
     );
 
     protected function initReduceCallbacks() {
