@@ -62,6 +62,8 @@ class Generator {
         $this->computeKernels();
         $this->computeLookaheads();
         $this->fillReduce();
+        $this->printDiagnostics();
+        $this->printStatistics();
     }
 
     protected function computeKernels()
@@ -690,6 +692,48 @@ class Generator {
             }
         }
         echo "\n";
+    }
+
+    protected function printDiagnostics() {
+        // TODO check expected_srconf
+        $expected_srconf = 0;
+        $filename = 'XXX';
+        if ($this->nsrerr !== $expected_srconf || $this->nrrerr !== 0) {
+            echo "$filename: there are ";
+            if ($this->nsrerr !== $expected_srconf) {
+                echo " $this->nsrerr shift/reduce";
+                if ($this->nrrerr !== 0) {
+                    echo " and";
+                }
+            }
+            if ($this->nrrerr !== 0) {
+                echo " $this->nrrerr reduce/reduce";
+            }
+            echo " conflicts\n";
+        }
+    }
+
+    protected function printStatistics() {
+        if (!DEBUG) {
+            return;
+        }
+
+        $nterms = iterator_count($this->context->terminals());
+        $nnonts = iterator_count($this->context->nonTerminals());
+        $nprods = count($this->parseResult->grams());
+        $totalActs = $this->nacts + $this->nacts2;
+        $filename = 'XXX';
+
+        echo "\nStatistics for $filename:\n";
+        echo "\t$nterms terminal symbols\n";
+        echo "\t$nnonts nonterminal symbols\n";
+        echo "\t$nprods productions\n";
+        echo "\t$this->nstates states\n";
+        echo "\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n";
+        // items?
+        echo "\t$this->nlooks lookahead sets used\n";
+        echo "\t$this->nacts+$this->nacts2=$totalActs action entries\n";
+        // bytes used?
     }
 
 }
