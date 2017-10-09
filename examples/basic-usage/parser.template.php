@@ -16,12 +16,8 @@ use PhpParser\Node\Stmt;
 #include;
 
 /* This is an automatically GENERATED file, which should not be manually edited.
- * Instead edit one of the following:
- *  * the grammar files grammar/php5.y or grammar/php7.y
- *  * the skeleton file grammar/parser.template
- *  * the preprocessing script grammar/rebuildParsers.php
  */
-class #(-p) extends \PhpParser\ParserAbstract
+class Parser extends \PhpParser\ParserAbstract
 {
     protected $tokenToSymbolMapSize = #(YYMAXLEX);
     protected $actionTableSize = #(YYLAST);

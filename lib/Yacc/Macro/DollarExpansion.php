@@ -17,11 +17,10 @@ class DollarExpansion extends Macro {
     const SEMVAL_RHS_UNTYPED = 4;
 
     protected $macros = [
-        self::SEMVAL_LHS_TYPED => "semval_l(%n, %l, %t)",
-        self::SEMVAL_LHS_UNTYPED => "semval_l(%n, %l)",
-        self::SEMVAL_RHS_TYPED => "semval_r(%n, %l, %t)",
-        self::SEMVAL_RHS_UNTYPED => "semval_r(%n, %l)",
-
+        self::SEMVAL_LHS_TYPED => '$this->semValue',
+        self::SEMVAL_LHS_UNTYPED => '$this->semValue',
+        self::SEMVAL_RHS_TYPED => '$stackPos-(%l-%n)',
+        self::SEMVAL_RHS_UNTYPED => '$stackPos-(%l-%n)',
     ];
 
     public function setMacro(int $name, string $value) {

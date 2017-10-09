@@ -31,6 +31,7 @@ class Symbol {
     protected $_precedence;
     protected $_associativity;
     protected $_name;
+    protected $_nb = 0;
 
     protected $_terminal = self::UNDEF;
 
@@ -42,6 +43,7 @@ class Symbol {
         $this->_precedence = $precedence;
         $this->_associativity = $associativity;
         $this->_type = $type;
+
     }
 
     public function isTerminal(): bool
@@ -61,12 +63,23 @@ class Symbol {
 
     public function __get($name)
     {
+        if ($name === 'nb') {
+            if ($this->_nb > $this->_code) {
+                die("Should never happen: {$this->_nb} > {$this->_code}");
+            }
+            return $this->_code - $this->_nb;
+        }
         return $this->{'_'.$name};
     }
 
     public function __set($name, $value)
     {
         $this->{'set' . $name}($value);
+    }
+
+    public function setNb(int $nb)
+    {
+        $this->_nb = $nb;
     }
 
     public function setTerminal(int $terminal)
@@ -104,7 +117,10 @@ class Symbol {
 
     public function setCode(int $code)
     {
-        $this->code = $code;
+        $this->_code = $code;
+        if ($code < $this->_nb) {
+            throw new \LogicException("Should never happen, code being less than nb");
+        }
     }
 
 }

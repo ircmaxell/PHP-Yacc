@@ -32,15 +32,11 @@ class MacroSet {
             // special case
             return iterator_to_array($this->macros[0]->apply($ctx, $symbols, $tokens, $n, $attribute));
         }
-        $next = $this->genId($tokens);
-        do {
-            $id = $next;
-            foreach ($this->macros as $macro) {
-                $tokens = $macro->apply($ctx, $symbols, $tokens, $n, $attribute);
-            }
-            $tokens = self::cache($tokens);
-            $next = $this->genId($tokens);
-        } while ($id !== $next);
+        foreach ($this->macros as $macro) {
+            $tokens = $macro->apply($ctx, $symbols, $tokens, $n, $attribute);
+        }
+        $tokens = self::cache($tokens);
+
         return iterator_to_array($tokens);
     }
 

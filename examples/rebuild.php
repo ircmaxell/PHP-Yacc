@@ -14,6 +14,8 @@ $parser = new PhpYacc\Yacc\Parser($lexer, $macroset);
 
 $generator = new PhpYacc\Lalr\Generator;
 
+$compiler = new PhpYacc\Code\Generator;
+
 
 foreach ($it as $file) {
     if (!$file->isDir() || $file->isDot()) {
@@ -41,10 +43,11 @@ foreach ($it as $file) {
 
     $lalrResult = $generator->compute($parseResult, $grammar);
 
-    file_put_contents("$dir/y.phpyacc.output", $lalrResult->output);
+    $code = $compiler->generate("Parser", $parseResult, $lalrResult);
 
+    file_put_contents("$dir/y.phpyacc.output", $lalrResult->output . "\n" . $compiler->output);
 
-
+    file_put_contents("$dir/parser.phpyacc.php", $code);
 
 
 

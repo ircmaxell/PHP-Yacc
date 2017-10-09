@@ -69,7 +69,7 @@ class Generator {
         $this->fillReduce();
         $this->printDiagnostics();
         $this->printStatistics();
-        return new LalrResult($this->parseResult->grams(), $this->states, $this->debug);
+        return new LalrResult($this->parseResult->grams(), $this->states, $this->nnonleafstates, $this->debug);
     }
 
     protected function computeKernels()
@@ -539,7 +539,7 @@ class Generator {
         if (DEBUG) {
             $this->debug .= "First:\n";
             foreach ($this->context->nonTerminals() as $symbol) {
-                $this->debug .= "  {$symbol->name}\t[ ";
+                $this->debug .= "{$symbol->name}\t[ ";
                 $this->debug .= dumpSet($this->context, $this->first[$symbol->code]);
                 if ($this->nullable[$symbol->code]) {
                     $this->debug .= "@ ";
@@ -718,6 +718,7 @@ class Generator {
         $this->debug .= "\t$nnonts nonterminal symbols\n";
         $this->debug .= "\t$nprods productions\n";
         $this->debug .= "\t$this->nstates states\n";
+        $this->debug .= "\t$this->nnonleafstates non leaf states\n";
         $this->debug .= "\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n";
         // items?
         $this->debug .= "\t$this->nlooks lookahead sets used\n";

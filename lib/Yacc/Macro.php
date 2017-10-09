@@ -20,7 +20,7 @@ abstract class Macro extends CoreMacro {
             if (isSymCh($string[$i])) {
                 do {
                     $buffer .= $string[$i++];
-                } while (isSymCh($string[$i]));
+                } while ($i < $length && isSymCh($string[$i]));
                 $type = ctype_digit($buffer) ? Tokens::NUMBER : Tokens::NAME;
                 $tokens[] = new Token($type, $buffer, $lineNumber, $filename);
                 $buffer = '';
