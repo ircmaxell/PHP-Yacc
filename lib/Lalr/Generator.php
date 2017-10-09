@@ -43,6 +43,7 @@ class Generator {
 
     public function compute(ParseResult $parseResult, string $filename = '')
     {
+        $this->debug = '';
         $this->parseResult = $parseResult;
         $this->filename = $filename;
         $this->context = $parseResult->ctx;

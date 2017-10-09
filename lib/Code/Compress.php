@@ -17,6 +17,7 @@ class Compress {
 
     public function compress(ParseResult $parse, LalrResult $lalr)
     {
+        $this->debug = '';
         $this->result = new CompressResult($lalr->nstates, $parse->ctx->nTerminals());
         $this->parse = $parse;
         $this->lalr = $lalr;
