@@ -11,6 +11,30 @@ class Context {
     protected $symbolHash = [];
     protected $symbols = [];
     protected $nilSymbol = null;
+    protected $finished = false;
+
+    public function finish()
+    {
+        if ($this->finished) {
+            return;
+        }
+        $this->finished = true;
+        $code = 0;
+        foreach ($this->terminals() as $term) {
+            echo "From $term->code to $code\n";
+            $term->code = $code++;
+        }
+        foreach ($this->nilSymbols() as $nil) {
+
+            echo "From $nil->code to $code\n";
+            $nil->code = $code++;
+        }
+        foreach ($this->nonTerminals() as $nonterm) {
+
+            echo "From $nonterm->code to $code\n";
+            $nonterm->code = $code++;
+        }
+    }
 
     public function nilSymbol(): Symbol
     {
@@ -33,6 +57,16 @@ class Context {
             }
         }
     }
+
+    public function nilSymbols(): Generator
+    {
+        foreach ($this->symbols as $symbol) {
+            if ($symbol->isNilSymbol()) {
+                yield $symbol;
+            }
+        }
+    }
+
 
     public function nonTerminals(): Generator
     {

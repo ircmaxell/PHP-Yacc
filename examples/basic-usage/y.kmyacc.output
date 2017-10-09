@@ -1,0 +1,42 @@
+EMPTY nonterminals: 
+First:
+start	[ '1' ]
+expr	[ '1' ]
+state unknown:
+	(0) start : . expr
+		[ EOF ]
+state unknown:
+	(1) expr : '1' .
+		[ EOF ]
+state unknown:
+	(0) start : expr .
+		[ EOF ]
+state 0
+	(0) start : . expr
+
+	'1'		shift 2 and reduce (1)
+	expr		goto 1
+	.		error
+
+state 1
+	(0) start : expr .
+
+	EOF		accept
+	.		error
+
+state 2
+	(1) expr : '1' .
+
+	.		reduce (1)
+
+
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/basic-usage/parser.kmyacc.phpy:
+	3 terminal symbols
+	2 nonterminal symbols
+	2 productions
+	3 states
+	0 shift/reduce, 0 reduce/reduce conflicts
+	3 items
+	3 lookahead sets used
+	2+4=6 action entries
+	1304 bytes used

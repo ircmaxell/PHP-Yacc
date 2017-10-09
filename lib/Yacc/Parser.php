@@ -43,6 +43,7 @@ class Parser  {
         $this->result->eofToken = $this->eofToken;
         $this->result->errorToken = $this->errorToken;
         $this->result->startPrime = $this->startPrime;
+        $this->context->finish();
         return $this->result;
     }
 

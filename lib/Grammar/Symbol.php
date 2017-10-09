@@ -102,4 +102,9 @@ class Symbol {
         $this->_associativity |= $flag;
     }
 
+    public function setCode(int $code)
+    {
+        $this->code = $code;
+    }
+
 }
