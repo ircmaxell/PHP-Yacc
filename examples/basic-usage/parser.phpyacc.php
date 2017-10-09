@@ -11,6 +11,11 @@ class Parser {
     protected $actionTableSize = 2;
     protected $gotoTableSize = 0;
     protected $tokenToSymbolMapSize = 257;
+    protected $symbolToName = [
+        'EOF',
+        'error',
+        '\'1\'',
+    ];
     protected $errorSymbol = 1;
     protected $tokenToSymbol = [
             0,    3,    3,    3,    3,    3,    3,    3,    3,    3,

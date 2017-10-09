@@ -44,7 +44,8 @@ class Generator {
         $template .= "    protected \$gotoTableSize = " . (count($r->yygoto)) . ";\n";
         $template .= "    protected \$tokenToSymbolMapSize = " . (max(255, max(array_keys($r->yytranslate))) + 1) . ";\n";
 
-
+        $template .= $this->handleTerminals($parse);
+        
         foreach ($parse->ctx->symbols() as $symbol) {
             if ($symbol->name === "error") {
                 $template .= '    protected $errorSymbol = ' . $symbol->code . ";\n";
