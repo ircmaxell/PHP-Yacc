@@ -60,12 +60,16 @@ class Template
             "n" => 0,
             "mac" => [],
         ];
+        $tokenmode = [
+            "enabled" => false,
+            "mac" => [],
+        ];
         $buffer = '';
         $this->print_line($this->lineno, $this->context->filename);
         foreach ($this->template as $line) {
             $line .= "\n";
             if ($tailcode) {
-                echo $buffer . $line;
+                fprintf($this->fp, "%s%s", $buffer, $line);
                 continue;
             }
             if ($skipmode) {
@@ -98,6 +102,27 @@ class Template
                     continue;
                 }
                 $reducemode['mac'][$reducemode['n']++] = $line;
+                continue;
+            }
+            if ($tokenmode['enabled']) {
+                if ($this->metamatch(trim($line), 'endtokenval')) {
+                    $tokenmode['enabled'] = false;
+                    $this->lineno++;
+                    for ($i = 1; $i < $this->context->nterminals; $i++) {
+                        $symbol = $this->context->symbol($i);
+                        if ($symbol->name[0] != '\'') {
+                            $str = $symbol->name;
+                            if ($i === 1) {
+                                $str = "YYERRTOK";
+                            }
+                            foreach ($tokenmode['mac'] as $mac) {
+                                $this->expand_mac($mac, $this->context->gram($symbol->value), $str);
+                            }
+                        }
+                    }
+                } else {
+                    $tokenmode['mac'][] = $line;
+                }
                 continue;
             }
             $p = $line;
@@ -144,7 +169,10 @@ class Template
                 } elseif ($this->metamatch($p, 'union')) {
                     throw new \LogicException("union is not implemented");
                 } elseif ($this->metamatch($p, 'tokenval')) {
-                    $this->gen_tokenval();
+                    $tokenmode = [
+                        "enabled" => true,
+                        "mac" => [],
+                    ];
                 } elseif ($this->metamatch($p, 'reduce')) {
                     $reducemode = [
                         "enabled" => true,
@@ -156,7 +184,7 @@ class Template
                     for ($i = 0; $i < $this->context->nterminals; $i++) {
                         if ($this->context->ctermindex[$i] > 0) {
                             $symbol = $this->context->symbol($i);
-                            fprintf($this->fp, '%s%s', $buffer, $this->lanugage->case_block($symbol->value, $symbol->name));
+                            fprintf($this->fp, "%s%s\n", $buffer, $this->language->case_block($symbol->value, $symbol->name));
                         }
                     }
                 } elseif ($this->metamatch($p, 'production-strings')) {

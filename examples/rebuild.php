@@ -6,16 +6,30 @@ use PhpYacc\Grammar\Context;
 
 const DEBUG = 1;
 
-$it = new DirectoryIterator(__DIR__);
-
 $generator = new PhpYacc\Generator;
 
+if (isset($argv[1])) {
+    buildFolder(realpath($argv[1]));
+} else {
+    buildAll(__DIR__);
+}
 
-foreach ($it as $file) {
-    if (!$file->isDir() || $file->isDot()) {
-        continue;
+
+function buildAll(string $dir)
+{
+    $it = new DirectoryIterator($dir);
+    foreach ($it as $file) {
+        if (!$file->isDir() || $file->isDot()) {
+            continue;
+        }
+        $dir = $file->getPathname();
+        buildFolder($dir);
     }
-    $dir = $file->getPathname();
+}
+
+
+function buildFolder(string $dir) {
+    global $generator;
     echo "Building $dir\n";
 
     $grammar = "$dir/grammar.y";
@@ -35,8 +49,4 @@ foreach ($it as $file) {
     $code = $generator->generate(file_get_contents($grammar), $grammar, file_get_contents($skeleton), "$dir/y.phpyacc.output");
 
     file_put_contents("$dir/parser.phpyacc.php", $code);
-
-
-
-
 }

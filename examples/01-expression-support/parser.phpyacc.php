@@ -13,17 +13,17 @@ use PhpParser\Node\Stmt;
  */
 class Parser extends \PhpParser\ParserAbstract
 {
-    protected $tokenToSymbolMapSize = 258;
+    protected $tokenToSymbolMapSize = 44;
     protected $actionTableSize      = 4;
     protected $gotoTableSize        = 1;
 
     protected $invalidSymbol       = 4;
-    protected $errorSymbol         = 1;
+    protected $errorSymbol         = 3;
     protected $defaultAction       = -32766;
     protected $unexpectedTokenRule = 32767;
 
     protected $YY2TBLSTATE = 0;
-    protected $YYNLSTATES  = 3;
+    protected $YYNLSTATES  = 5;
 
     protected $symbolToName = array(
         "EOF",
@@ -33,36 +33,15 @@ class Parser extends \PhpParser\ParserAbstract
     );
 
     protected $tokenToSymbol = array(
-            0,    4,    4,    4,    4,    4,    4,    4,    4,    4,
+            3,    4,    4,    4,    4,    4,    4,    4,    4,    4,
             4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
             4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
             4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    2,    4,    4,    4,    4,    4,    3,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-            4,    4,    4,    4,    4,    4,    1,    4
+            4,    4,    4,    2
     );
 
     protected $action = array(
-            5,    0,    0,    2
+            3,    0,    0,    2
     );
 
     protected $actionCheck = array(
@@ -70,11 +49,11 @@ class Parser extends \PhpParser\ParserAbstract
     );
 
     protected $actionBase = array(
-           -3,    1,   -3
+           -3,    1,   -3,    0,    0
     );
 
     protected $actionDefault = array(
-        32767,32767,32767
+        32767,32767,32767,    2,    1
     );
 
     protected $goto = array(
@@ -86,11 +65,11 @@ class Parser extends \PhpParser\ParserAbstract
     );
 
     protected $gotoBase = array(
-            0,   -2
+            0,   -2,    0
     );
 
     protected $gotoDefault = array(
-        -32768,    1
+        -32768,    1,-32768
     );
 
     protected $ruleToNonTerminal = array(

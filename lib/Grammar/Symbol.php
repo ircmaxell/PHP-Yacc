@@ -36,11 +36,12 @@ class Symbol
 
     protected $_terminal = self::UNDEF;
 
-    public function __construct(int $code, string $name, $value, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
+    public function __construct(int $code, string $name, $value, int $terminal, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
     {
         $this->_code = $code;
         $this->_name = $name;
-        $this->_value = $value;
+        $this->_terminal = $terminal;
+        $this->setValue($value);
         $this->_precedence = $precedence;
         $this->_associativity = $associativity;
         $this->_type = $type;
@@ -85,6 +86,7 @@ class Symbol
     public function setTerminal(int $terminal)
     {
         $this->_terminal = $terminal;
+        $this->setValue($this->_value); // force check to prevent issues
     }
 
     public function setAssociativity(int $associativity)
@@ -99,8 +101,10 @@ class Symbol
 
     public function setValue($value)
     {
-        if (!$this->isTerminal()) {
-            assert($value instanceof Production || $value === null);
+        if ($this->isTerminal() && !is_int($value)) {
+            throw new \InvalidArgumentException("Terminals value must be an integer, " . gettype($value) . " provided");
+        } elseif (!$this->isTerminal() && !($value instanceof Production || $value === null)) {
+            throw new \InvalidArgumentException("NonTerminals value must be a production, " . gettype($value) . " provided");
         }
         $this->_value = $value;
     }

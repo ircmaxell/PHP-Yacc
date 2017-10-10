@@ -490,15 +490,8 @@ class Compress
 
         foreach ($this->context->terminals as $term) {
             $value = $term->value;
-            if (is_string($value)) {
-                $term->value = ord($value);
-            } elseif (is_null($value) && substr($term->name, 0, 1) === "'") {
-                $term->value = ord($term->name[1]);
-            } elseif (!is_int($value)) {
-                $term->value = $minSymbolMap++;
-            }
-            if ($term->value + 1 > $this->result->yytranslatesize) {
-                $this->result->yytranslatesize = $term->value + 1;
+            if ($value + 1 > $this->result->yytranslatesize) {
+                $this->result->yytranslatesize = $value + 1;
             }
         }
 
