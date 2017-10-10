@@ -11,18 +11,19 @@ use PhpYacc\Lalr\Item;
  * @property Lr1|null $next
  * @property Symbol|null $left
  * @property Item $item
+ * @property Bitset|null $look
  */
 class Lr1
 {
     protected $_next;
     protected $_left;
     protected $_item;
-    public $look;
+    protected $_look;
 
-    public function __construct(Symbol $left = null, string $look, Item $item)
+    public function __construct(Symbol $left = null, Bitset $look, Item $item)
     {
         $this->_left = $left;
-        $this->look = $look;
+        $this->_look = $look;
         $this->_item = $item;
     }
 
@@ -44,6 +45,11 @@ class Lr1
     public function setItem(Item $item)
     {
         $this->_item = $item;
+    }
+
+    public function setLook(Bitset $look = null)
+    {
+        $this->_look = $look;
     }
 
     public function isTailItem(): bool

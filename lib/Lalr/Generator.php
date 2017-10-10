@@ -15,8 +15,6 @@ class Generator
 {
     const NON_ASSOC = -32768;
 
-    /** @var ParseResult */
-    protected $parseResult;
     /** @var Context */
     protected $context;
     protected $nullable;
@@ -24,7 +22,9 @@ class Generator
     /** @var State[][] */
     protected $statesThrough = [];
     protected $visited = [];
+    /** @var Bitset[] */
     protected $first;
+    /** @var Bitset[] */
     protected $follow;
     /** @var State[] $states */
     protected $states;
@@ -47,14 +47,18 @@ class Generator
         $nSymbols = $this->context->nsymbols;
         $this->nullable = array_fill(0, $nSymbols, false);
 
-        $this->blank = str_repeat("\0", ceil(($nSymbols + NBITS - 1) / NBITS));
-        $this->first = array_fill(0, $nSymbols, $this->blank);
-        $this->follow = array_fill(0, $nSymbols, $this->blank);
+        $this->blank = new Bitset($nSymbols);
         $this->states = [];
         $this->nlooks = $this->nstates = $this->nacts = $this->nacts2 = 0;
         $this->nnonleafstates = 0;
         $this->nsrerr = $this->nrrerr = 0;
+
+        $this->statesThrough = [];
+        $this->first = [];
+        $this->follow = [];
         foreach ($this->context->symbols as $s) {
+            $this->first[$s->code] = clone $this->blank;
+            $this->follow[$s->code] = clone $this->blank;
             $this->statesThrough[$s->code] = [];
         }
 
@@ -74,7 +78,7 @@ class Generator
     {
         $tmpList = new Lr1(
             null,
-            $this->blank,
+            clone $this->blank,
             new Item($this->context->gram(0), 1)
         );
         $this->findOrCreateState($this->context->nilsymbol, $tmpList);
@@ -90,7 +94,7 @@ class Generator
             /** @var Lr1 $x */
             for ($x = $p->items; $x !== null; $x = $x->next) {
                 if (!$x->isTailItem()) {
-                    $wp = new Lr1(null, $this->blank, $x->item->slice(1));
+                    $wp = new Lr1(null, clone $this->blank, $x->item->slice(1));
                     if ($tmpTail !== null) {
                         $tmpTail->next = $wp;
                     } else {
@@ -110,7 +114,7 @@ class Generator
                     /** @var Production $gram */
                     for ($gram = $g->value; $gram != null; $gram = $gram->link) {
                         if (isset($gram->body[1])) {
-                            $wp = new Lr1($g, $this->blank, new Item($gram, 2));
+                            $wp = new Lr1($g, clone $this->blank, new Item($gram, 2));
                             $tmpTail->next = $wp;
                             $tmpTail = $wp;
                         }
@@ -155,7 +159,7 @@ class Generator
 
     protected function computeLookaheads()
     {
-        setBit($this->states[0]->items->look, 0);
+        $this->states[0]->items->look->setBit(0);
         do {
             $changed = false;
             foreach ($this->states as $p) {
@@ -177,19 +181,19 @@ class Generator
                             }
                         }
                         assert($y->item == $s);
-                        $changed |= orbits($this->context, $y->look, $x->look);
+                        $changed |= $y->look->or($x->look);
                     }
                 }
                 foreach ($p->shifts as $t) {
                     for ($x = $t->items; $x !== null; $x = $x->next) {
                         if ($x->left !== null) {
-                            $changed |= orbits($this->context, $x->look, $this->follow[$x->left->code]);
+                            $changed |= $x->look->or($this->follow[$x->left->code]);
                         }
                     }
                 }
                 for ($x = $p->items; $x !== null; $x = $x->next) {
                     if ($x->isTailItem() && $x->isHeadItem()) {
-                        orbits($this->context, $x->look, $this->follow[$x->item[-1]->code]);
+                        $x->look->or($this->follow[$x->item[-1]->code]);
                     }
                 }
             }
@@ -229,7 +233,7 @@ class Generator
                     continue;
                 }
 
-                $alook = $x->look; // clone! bitset
+                $alook = clone $x->look;
                 $gram = $x->item->getProduction();
 
                 // find shift/reduce conflict
@@ -238,10 +242,10 @@ class Generator
                     if (!$e->isTerminal()) {
                         break;
                     }
-                    if (testBit($alook, $e->code)) {
+                    if ($alook->testBit($e->code)) {
                         $rel = $this->comparePrecedence($gram, $e);
                         if ($rel === self::NON_ASSOC) {
-                            clearBit($alook, $e->code);
+                            $alook->clearBit($e->code);
                             unset($p->shifts[$m]);
                             $tmpr[] = new Reduce($e, -1);
                         } elseif ($rel < 0) {
@@ -249,10 +253,10 @@ class Generator
                             unset($p->shifts[$m]);
                         } elseif ($rel > 0) {
                             // shift
-                            clearBit($alook, $e->code);
+                            $alook->clearBit($e->code);
                         } elseif ($rel == 0) {
                             // conflict
-                            clearBit($alook, $e->code);
+                            $alook->clearBit($e->code);
                             $this->nsrerr++;
                             $p->conflict = new Conflict\ShiftReduce($t, $gram->num, $e, $p->conflict);
                         }
@@ -260,7 +264,7 @@ class Generator
                 }
 
                 foreach ($tmpr as $reduce) {
-                    if (testBit($alook, $reduce->symbol->code)) {
+                    if ($alook->testBit($reduce->symbol->code)) {
                         // reduce/reduce conflict
                         $this->nrrerr++;
                         $p->conflict = new Conflict\ReduceReduce(
@@ -273,7 +277,7 @@ class Generator
                         if ($gram->num < $reduce->number) {
                             $reduce->number = $gram->num;
                         }
-                        clearBit($alook, $reduce->symbol->code);
+                        $alook->clearBit($reduce->symbol->code);
                     }
                 }
 
@@ -417,7 +421,7 @@ class Generator
     {
         foreach ($st->shifts as $t) {
             if (!$t->through->isTerminal()) {
-                $this->follow[$t->through->code] = $this->blank;
+                $this->follow[$t->through->code] = clone $this->blank;
                 for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
                     $this->computeFirst($this->follow[$t->through->code], $x->item);
                 }
@@ -427,17 +431,17 @@ class Generator
             /** @var Symbol $g */
             $g = $x->item[0] ?? null;
             if ($g !== null && !$g->isTerminal() && $this->isSeqNullable($x->item->slice(1))) {
-                orbits($this->context, $this->follow[$g->code], $x->look);
+                $this->follow[$g->code]->or($x->look);
             }
         }
         do {
             $changed = false;
             foreach ($st->shifts as $t) {
                 if (!$t->through->isTerminal()) {
-                    $p =& $this->follow[$t->through->code];
+                    $p = $this->follow[$t->through->code];
                     for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
                         if ($this->isSeqNullable($x->item) && $x->left != null) {
-                            $changed |= orbits($this->context, $p, $this->follow[$x->left->code]);
+                            $changed |= $p->or($this->follow[$x->left->code]);
                         }
                     }
                 }
@@ -445,15 +449,15 @@ class Generator
         } while ($changed);
     }
 
-    protected function computeFirst(string &$p, Item $item)
+    protected function computeFirst(Bitset $p, Item $item)
     {
         /** @var Symbol $g */
         foreach ($item as $g) {
             if ($g->isTerminal()) {
-                setBit($p, $g->code);
+                $p->setBit($g->code);
                 return;
             }
-            orbits($this->context, $p, $this->first[$g->code]);
+            $p->or($this->first[$g->code]);
             if (!$this->nullable[$g->code]) {
                 return;
             }
@@ -519,18 +523,14 @@ class Generator
                 for ($s = 1; $s < count($gram->body); $s++) {
                     $g = $gram->body[$s];
                     if ($g->isTerminal()) {
-                        if (!testBit($this->first[$h->code], $g->code)) {
+                        if (!$this->first[$h->code]->testBit($g->code)) {
                             $changed = true;
-                            setBit($this->first[$h->code], $g->code);
+                            $this->first[$h->code]->setBit($g->code);
                         }
                         continue 2;
                     }
 
-                    $changed |= orbits(
-                        $this->context,
-                        $this->first[$h->code],
-                        $this->first[$g->code]
-                    );
+                    $changed |= $this->first[$h->code]->or($this->first[$g->code]);
                     if (!$this->nullable[$g->code]) {
                         continue 2;
                     }
@@ -570,7 +570,7 @@ class Generator
                 }
             }
             if ($p->look === null) {
-                $p->look = $this->blank;
+                $p->look = clone $this->blank;
                 $this->nlooks++;
             }
             $tail = $p;
@@ -601,7 +601,7 @@ class Generator
             /** @var Production $gram */
             for ($gram = $x->value; $gram !== null; $gram = $gram->link) {
                 if ($gram->isEmpty()) {
-                    $p = new Lr1(null, $this->blank, new Item($gram, 1));
+                    $p = new Lr1(null, clone $this->blank, new Item($gram, 1));
                     $tail->next = $p;
                     $tail = $p;
                     $this->nlooks++;
