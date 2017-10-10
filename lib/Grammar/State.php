@@ -3,11 +3,9 @@ declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
-use PhpYacc\Lalr\{
-    Lr1,
-    Conflict,
-    Reduce
-};
+use PhpYacc\Lalr\Lr1;
+use PhpYacc\Lalr\Conflict;
+use PhpYacc\Lalr\Reduce;
 
 /**
  * @property Reduce[] $reduce

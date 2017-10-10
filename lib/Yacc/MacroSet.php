@@ -9,7 +9,6 @@ use Traversable;
 
 class MacroSet
 {
-
     protected $macros = [];
 
     public function __construct(MacroAbstract ...$macros)

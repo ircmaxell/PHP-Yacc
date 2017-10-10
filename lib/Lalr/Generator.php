@@ -4,11 +4,9 @@ namespace PhpYacc\Lalr;
 
 use PhpYacc\Lalr\Conflict\ReduceReduce;
 use PhpYacc\Lalr\Conflict\ShiftReduce;
-use PhpYacc\Grammar\{
-    Context,
-    Symbol,
-    State
-};
+use PhpYacc\Grammar\Context;
+use PhpYacc\Grammar\Symbol;
+use PhpYacc\Grammar\State;
 use PhpYacc\Yacc\Production;
 
 require_once __DIR__ . '/functions.php';
@@ -718,7 +716,7 @@ class Generator
             if ($this->nrrerr !== 0) {
                 $this->context->debug(" $this->nrrerr reduce/reduce");
             }
-            $this->context->debug( " conflicts\n");
+            $this->context->debug(" conflicts\n");
         }
     }
 

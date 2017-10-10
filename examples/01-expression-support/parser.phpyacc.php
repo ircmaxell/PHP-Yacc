@@ -5,7 +5,7 @@ class Parser
 {
     protected $tokenToSymbolMapSize = 258;
     protected $actionTableSize      = 4;
-    protected $gotoTableSize        = 1;
+    protected $gotoTableSize        = 0;
 
     protected $invalidSymbol       = 5;
     protected $errorSymbol         = 1;
@@ -13,7 +13,7 @@ class Parser
     protected $unexpectedTokenRule = 32767;
 
     protected $YY2TBLSTATE = 0;
-    protected $YYNLSTATES  = 4;
+    protected $YYNLSTATES  = 2;
     protected $symbolToName = [
         '$EOF',
         'error',
@@ -51,7 +51,7 @@ class Parser
     ];
 
     protected $action = [
-            3,    0,    0,    2,
+            4,    0,    0,    2,
     ];
 
     protected $actionCheck = [
@@ -59,7 +59,7 @@ class Parser
     ];
 
     protected $actionBase = [
-           -3,    1,   -3,    0,
+           -3,    1,
     ];
 
     protected $actionDefault = [
@@ -67,15 +67,14 @@ class Parser
     ];
 
     protected $goto = [
-            5,
     ];
 
     protected $gotoCheck = [
-            0,   -2,
+            0,    0,
     ];
 
     protected $gotoBase = [
-            0,   -2,
+            0,    0,
     ];
 
     protected $gotoDefault = [
