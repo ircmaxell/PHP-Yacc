@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace PhpYacc\Lalr\Conflict;
 
+use PhpYacc\Grammar\State;
 use PhpYacc\Grammar\Symbol;
 use PhpYacc\Lalr\Conflict;
-use PhpYacc\Lalr\State;
 
 class ShiftReduce extends Conflict
 {
