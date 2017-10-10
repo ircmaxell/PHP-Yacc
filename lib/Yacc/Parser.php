@@ -205,10 +205,10 @@ class Parser
 
     protected function doDeclaration()
     {
-        $this->eofToken = $this->context->internSymbol("EOF", true);
+        $this->eofToken = $this->context->internSymbol("\$EOF", true);
         $this->eofToken->value = 0;
         $this->errorToken = $this->context->internSymbol("error", true);
-        $this->startPrime = $this->context->internSymbol("start", false);
+        $this->startPrime = $this->context->internSymbol("\$start", false);
 
         while (($t = $this->lexer->get())->t !== Token::MARK) {
             switch ($t->t) {
