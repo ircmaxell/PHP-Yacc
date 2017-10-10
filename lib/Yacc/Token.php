@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
-class Tokens
+class Token
 {
     const NAME        = 0x0200;
     const NUMBER      = 0x0201;
@@ -24,4 +24,21 @@ class Tokens
 
     const EXPECT      = 0x010c;
     const PURE_PARSER = 0x010d;
+
+    public $t;
+    public $v;
+    public $ln;
+    public $fn;
+    public function __construct($token, string $value, int $lineNumber, string $filename)
+    {
+        $this->t = $token;
+        $this->v = $value;
+        $this->ln = $lineNumber;
+        $this->fn = $filename;
+    }
+
+    public function __toString(): string
+    {
+        return "[{$this->fn}:{$this->ln}] {$this->t} ({$this->v})";
+    }
 }

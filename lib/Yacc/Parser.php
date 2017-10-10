@@ -6,8 +6,6 @@ namespace PhpYacc\Yacc;
 use RuntimeException;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
-use PhpYacc\MacroSet;
-use PhpYacc\Token;
 
 class Parser
 {
@@ -95,8 +93,8 @@ class Parser
 
         $t = $this->lexer->get();
 
-        while ($t->t !== Tokens::MARK && $t->t !== EOF) {
-            if ($t->t === Tokens::NAME) {
+        while ($t->t !== Token::MARK && $t->t !== EOF) {
+            if ($t->t === Token::NAME) {
                 if ($this->lexer->peek()->t === '@') {
                     $attribute[0] = $t->v;
                     $this->lexer->get();
@@ -119,7 +117,7 @@ class Parser
                     throw new RuntimeException("Syntax Error, unexpected $t");
                 }
                 $attribute[1] = null;
-            } elseif ($t->t === Tokens::BEGININC) {
+            } elseif ($t->t === Token::BEGININC) {
                 $this->doCopy();
                 $t = $this->lexer->get();
                 continue;
@@ -145,11 +143,11 @@ class Parser
                 } elseif ($t->t === '{') {
                     $pos = $t->ln;
                     $action = $this->copyAction($gbuffer, $i - 1, '}', $attribute);
-                } elseif ($t->t === Tokens::PRECTOK) {
+                } elseif ($t->t === Token::PRECTOK) {
                     $lastTerm = $this->context->internSymbol($this->lexer->get()->v, false);
-                } elseif ($t->t === Tokens::NAME && $this->lexer->peek()->t === ':') {
+                } elseif ($t->t === Token::NAME && $this->lexer->peek()->t === ':') {
                     break;
-                } elseif ($t->t === Tokens::NAME && $this->lexer->peek()->t === '@') {
+                } elseif ($t->t === Token::NAME && $this->lexer->peek()->t === '@') {
                     $attribute[$i] = $t->v;
                     $this->lexer->get();
                 } elseif (isGsym($t)) {
@@ -215,37 +213,37 @@ class Parser
         $this->errorToken = $this->context->internSymbol("error", true);
         $this->startPrime = $this->context->internSymbol("start", false);
 
-        while (($t = $this->lexer->get())->t !== Tokens::MARK) {
+        while (($t = $this->lexer->get())->t !== Token::MARK) {
             switch ($t->t) {
-                case Tokens::TOKEN:
-                case Tokens::RIGHT:
-                case Tokens::LEFT:
-                case Tokens::NONASSOC:
+                case Token::TOKEN:
+                case Token::RIGHT:
+                case Token::LEFT:
+                case Token::NONASSOC:
                     $this->doToken($t);
                     break;
-                case Tokens::BEGININC:
+                case Token::BEGININC:
                     $this->doCopy();
                     break;
-                case Tokens::UNION:
+                case Token::UNION:
                     $this->doUnion();
                     $this->result->unioned = true;
                     break;
-                case Tokens::TYPE:
+                case Token::TYPE:
                     $this->doType();
                     break;
-                case Tokens::EXPECT:
+                case Token::EXPECT:
                     $t = $this->lexer->get();
-                    if ($t->t === Tokens::NUMBER) {
+                    if ($t->t === Token::NUMBER) {
                         $this->result->expected = (int) $t->v;
                     } else {
                         throw new RuntimeException("Missing number");
                     }
                     break;
-                case Tokens::START:
+                case Token::START:
                     $t = $this->lexer->get();
                     $this->result->startSymbol = $this->context->internSymbol($t->v, false);
                     break;
-                case Tokens::PURE_PARSER:
+                case Token::PURE_PARSER:
                     $this->result->pureFlag = true;
                     break;
                 case EOF:
@@ -275,13 +273,13 @@ class Parser
                 $p->type = $type;
             }
             switch ($tag->t) {
-                case Tokens::LEFT:
+                case Token::LEFT:
                     $p->associativity |= Symbol::LEFT;
                     break;
-                case Tokens::RIGHT:
+                case Token::RIGHT:
                     $p->associativity |= Symbol::RIGHT;
                     break;
-                case Tokens::NONASSOC:
+                case Token::NONASSOC:
                     $p->associativity |= Symbol::NON;
                     break;
             }
@@ -290,7 +288,7 @@ class Parser
                 $preIncr = 1;
             }
             $t = $this->lexer->get();
-            if ($t->t === Tokens::NUMBER) {
+            if ($t->t === Token::NUMBER) {
                 if ($p->value === null) {
                     $p->value = (int) $t->v;
                 } else {

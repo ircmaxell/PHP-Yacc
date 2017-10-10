@@ -2,15 +2,14 @@
 
 namespace PhpYacc\Yacc\Macro;
 
-use PhpYacc\Token;
-use PhpYacc\Yacc\Macro;
+use PhpYacc\Yacc\MacroAbstract;
 use Iterator;
 use Generator;
-use PhpYacc\Yacc\Tokens;
+use PhpYacc\Yacc\Token;
 use PhpYacc\Grammar\Context;
 use RuntimeException;
 
-class DollarExpansion extends Macro
+class DollarExpansion extends MacroAbstract
 {
     const SEMVAL_LHS_TYPED   = 1;
     const SEMVAL_LHS_UNTYPED = 2;
@@ -35,7 +34,7 @@ class DollarExpansion extends Macro
         for ($tokens->rewind(); $tokens->valid(); $tokens->next()) {
             $t = $tokens->current();
             switch ($t->t) {
-                case Tokens::NAME:
+                case Token::NAME:
                     $type = null;
                     $v = -1;
                     for ($i = 0; $i <= $n; $i++) {
@@ -69,7 +68,7 @@ class DollarExpansion extends Macro
                     $t = self::next($tokens);
                     if ($t->t === '<') {
                         $t = self::next($tokens);
-                        if ($t->t !== Tokens::NAME) {
+                        if ($t->t !== Token::NAME) {
                             throw new RuntimeException("type expected");
                         }
                         $type = $ctx->intern($t->v);
@@ -83,12 +82,12 @@ class DollarExpansion extends Macro
                         $v = 0;
                     } elseif ($t->t === '-') {
                         $t = self::next($tokens);
-                        if ($t->t !== Tokens::NUMBER) {
+                        if ($t->t !== Token::NUMBER) {
                             throw new RuntimeException("Number expected");
                         }
                         $v = -1 * ((int) $t->v);
                     } else {
-                        if ($t->t !== Tokens::NUMBER) {
+                        if ($t->t !== Token::NUMBER) {
                             throw new RuntimeException("Number expected");
                         }
                         $v = (int) $t->v;
