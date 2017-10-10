@@ -473,7 +473,7 @@ class Compress
         $this->result->yylen = [];
         foreach ($this->context->grams as $gram) {
             // TODO: This is wrong... I think...
-            $this->result->yylhs[] = $gram->body[1]->nb - 1;
+            $this->result->yylhs[] = $gram->body[0]->nb - 1;
             $this->result->yylen[] = count($gram->body) - 1;
         }
 
