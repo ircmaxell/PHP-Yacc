@@ -14,16 +14,16 @@ use PhpParser\Node\Stmt;
 class Parser extends \PhpParser\ParserAbstract
 {
     protected $tokenToSymbolMapSize = 258;
-    protected $actionTableSize = 4;
-    protected $gotoTableSize = 1;
+    protected $actionTableSize      = 4;
+    protected $gotoTableSize        = 1;
 
-    protected $invalidSymbol = 4;
-    protected $errorSymbol = 1;
-    protected $defaultAction = -32766;
+    protected $invalidSymbol       = 4;
+    protected $errorSymbol         = 1;
+    protected $defaultAction       = -32766;
     protected $unexpectedTokenRule = 32767;
 
-    protected $YY2TBLSTATE  = 0;
-    protected $YYNLSTATES   = 3;
+    protected $YY2TBLSTATE = 0;
+    protected $YYNLSTATES  = 3;
 
     protected $symbolToName = array(
         "EOF",

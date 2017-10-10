@@ -20,16 +20,16 @@ use PhpParser\Node\Stmt;
 class Parser extends \PhpParser\ParserAbstract
 {
     protected $tokenToSymbolMapSize = #(YYMAXLEX);
-    protected $actionTableSize = #(YYLAST);
-    protected $gotoTableSize = #(YYGLAST);
+    protected $actionTableSize      = #(YYLAST);
+    protected $gotoTableSize        = #(YYGLAST);
 
-    protected $invalidSymbol = #(YYBADCH);
-    protected $errorSymbol = #(YYINTERRTOK);
-    protected $defaultAction = #(YYDEFAULT);
+    protected $invalidSymbol       = #(YYBADCH);
+    protected $errorSymbol         = #(YYINTERRTOK);
+    protected $defaultAction       = #(YYDEFAULT);
     protected $unexpectedTokenRule = #(YYUNEXPECTED);
 
-    protected $YY2TBLSTATE  = #(YY2TBLSTATE);
-    protected $YYNLSTATES   = #(YYNLSTATES);
+    protected $YY2TBLSTATE = #(YY2TBLSTATE);
+    protected $YYNLSTATES  = #(YYNLSTATES);
 
     protected $symbolToName = array(
         #listvar terminals

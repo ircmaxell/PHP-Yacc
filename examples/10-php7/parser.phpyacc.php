@@ -1,16 +1,19 @@
 <?php
 declare(strict_types=1);
 use PhpYacc\Lexer;
-class Parser {
-    const SYMBOL_NONE = -1;
-    protected $unexpectedTokenRule = 32767;
-    protected $defaultAction = -32766;
-    protected $invalidSymbol = 165;
-    protected $YYNLSTATES = 920;
-    protected $YY2TBLSTATE = 0;
-    protected $actionTableSize = 4052;
-    protected $gotoTableSize = 526;
+class Parser
+{
     protected $tokenToSymbolMapSize = 392;
+    protected $actionTableSize      = 4052;
+    protected $gotoTableSize        = 526;
+
+    protected $invalidSymbol       = 165;
+    protected $errorSymbol         = 1;
+    protected $defaultAction       = -32766;
+    protected $unexpectedTokenRule = 32767;
+
+    protected $YY2TBLSTATE = 0;
+    protected $YYNLSTATES  = 920;
     protected $symbolToName = [
         '$EOF',
         'error',
@@ -178,7 +181,6 @@ class Parser {
         '\'"\'',
         '\'$\'',
     ];
-    protected $errorSymbol = 1;
     protected $tokenToSymbol = [
             0,  157,  157,  157,  157,  157,  157,  157,  157,  157,
           157,  157,  157,  157,  157,  157,  157,  157,  157,  157,
@@ -221,6 +223,7 @@ class Parser {
           157,  157,  138,  139,  140,  141,  142,  143,  144,  145,
           146,  147,
     ];
+
     protected $action = [
           760,  125,  126,  429,  128,  130, -282,  381,   42,  318,
           131,  132,   24,  124,   55,   77,   79,   54,   80,   81,
@@ -629,6 +632,7 @@ class Parser {
             0,  436,    0,    0,    0,    0,   37,    0,    0,    0,
             0,  267,
     ];
+
     protected $actionCheck = [
             1,    2,    3,    4,    5,    6,   79,   96,   97,   98,
            11,   12,   28,   14,   30,   31,   32,   33,   34,   35,
@@ -1037,6 +1041,7 @@ class Parser {
            -1,  146,   -1,   -1,   -1,   -1,  151,   -1,   -1,   -1,
            -1,  156,
     ];
+
     protected $actionBase = [
             0,   -1,  156,  312,  461,  610,  757,  901,  901,  901,
           901, 1046, 1270, 1494, 1382, 1158, 1158, 1606, 1606, 1606,
@@ -1131,6 +1136,7 @@ class Parser {
             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     ];
+
     protected $actionDefault = [
             3,32767,32767,32767,32767,32767,32767,32767,32767,   88,
         32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,
@@ -1225,6 +1231,7 @@ class Parser {
            67,   65,   64,   57,   56,   59,   75,   58,   62,   61,
            63,   72,   42,   41,   40,   39,   79,   78,   77,   76,
     ];
+
     protected $goto = [
           165,  165,  155,  150,  137,  155,  180,  155,  169,  141,
           185,  174,  153,  173,  142,  143,  154,  140,  156,  149,
@@ -1280,6 +1287,7 @@ class Parser {
             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
             0,    0,    0,    0,    0,  679,
     ];
+
     protected $gotoCheck = [
             0,    0, -555,    0,    0,  119,    0,  160, -147,  -21,
            76, -104, -234,  122,  116,  113,  -62,  -14,    0,    0,
@@ -1297,6 +1305,7 @@ class Parser {
           169,  -64,    0,  -32,    0,    0,   89,    0,  177,  -60,
             5,    0,    0,
     ];
+
     protected $gotoBase = [
             0,    0, -555,    0,    0,  119,    0,  160, -147,  -21,
            76, -104, -234,  122,  116,  113,  -62,  -14,    0,    0,
@@ -1314,6 +1323,7 @@ class Parser {
           169,  -64,    0,  -32,    0,    0,   89,    0,  177,  -60,
             5,    0,    0,
     ];
+
     protected $gotoDefault = [
         -32768,  338,  793,    2,  742,  893,  892,  530,  445,  525,
           680,  586,  582,  641,  724,  723,  324,  431,  312,  326,
@@ -1331,6 +1341,7 @@ class Parser {
           518,  244,  341,  349,  761,  292,  671,  380,  792,  770,
           277,  301,  460,
     ];
+
     protected $ruleToNonTerminal = [
             0,    1,    3,    3,    2,    5,    5,    5,    5,    5,
             5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
@@ -1384,6 +1395,7 @@ class Parser {
           128,  128,  128,  128,  140,  141,  139,  139,  139,  139,
           139,  139,  139,  142,  142,  142,  142,
     ];
+
     protected $ruleToLength = [
             1,    1,    2,    0,    1,    1,    1,    1,    1,    1,
             1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -1437,6 +1449,7 @@ class Parser {
             2,    2,    1,    2,    1,    1,    1,    4,    3,    3,
             3,    6,    3,    1,    1,    2,    1,
     ];
+
    protected $productions = [
         '$start : start',
         'start : top_statement_list',

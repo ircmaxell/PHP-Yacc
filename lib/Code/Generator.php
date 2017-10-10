@@ -26,46 +26,53 @@ class Generator
         }
         $template .= "use PhpYacc\\Lexer;\n";
 
-        $template .= "class $className {\n";
-        $template .= "    const SYMBOL_NONE = -1;\n";
-        $template .= "    protected \$unexpectedTokenRule = " . $r::YYUNEXPECTED . ";\n";
-        $template .= "    protected \$defaultAction = " . $r::YYDEFAULT . ";\n";
-        $template .= $this->handleInvalidSymbol($context);
+        $template .= "class $className\n{\n";
 
-        $template .= "    protected \$YYNLSTATES = {$context->nnonleafstates};\n";
-        $template .= "    protected \$YY2TBLSTATE = " . (count($r->yybase) - $context->nnonleafstates) . ";\n";
-        $template .= "    protected \$actionTableSize = " . (count($r->yyaction)) . ";\n";
-        $template .= "    protected \$gotoTableSize = " . (count($r->yygoto)) . ";\n";
         $template .= "    protected \$tokenToSymbolMapSize = " . (max(255, max(array_keys($r->yytranslate))) + 1) . ";\n";
-
-        $template .= $this->handleTerminals($context);
-        
+        $template .= "    protected \$actionTableSize      = " . (count($r->yyaction)) . ";\n";
+        $template .= "    protected \$gotoTableSize        = " . (count($r->yygoto)) . ";\n";
+        $template .= "\n";
+        $template .= $this->handleInvalidSymbol($context);
         foreach ($context->symbols as $symbol) {
             if ($symbol->name === "error") {
-                $template .= '    protected $errorSymbol = ' . $symbol->code . ";\n";
+                $template .= '    protected $errorSymbol         = ' . $symbol->code . ";\n";
                 $this->errorSymbol = $symbol->code;
             }
         }
 
-        $template .= '    protected $tokenToSymbol = ' . $this->packYYTranslate($r->yytranslate) . ";\n";
-        $template .= '    protected $action = ' . $this->printArray($r->yyaction) . ";\n";
-        $template .= '    protected $actionCheck = ' . $this->printArray($r->yycheck) . ";\n";
-        $template .= '    protected $actionBase = ' . $this->printArray($r->yybase) . ";\n";
-        $template .= '    protected $actionDefault = ' . $this->printArray($r->yydefault, $context->nstates) . ";\n";
+        $template .= "    protected \$defaultAction       = " . $r::YYDEFAULT . ";\n";
+
+        $template .= "    protected \$unexpectedTokenRule = " . $r::YYUNEXPECTED . ";\n";
+
+        $template .= "\n";
+
+
+        $template .= "    protected \$YY2TBLSTATE = " . (count($r->yybase) - $context->nnonleafstates) . ";\n";
+        $template .= "    protected \$YYNLSTATES  = {$context->nnonleafstates};\n";
+
+        $template .= $this->handleTerminals($context);
+        
+
+
+        $template .= '    protected $tokenToSymbol = ' . $this->packYYTranslate($r->yytranslate) . ";\n\n";
+        $template .= '    protected $action = ' . $this->printArray($r->yyaction) . ";\n\n";
+        $template .= '    protected $actionCheck = ' . $this->printArray($r->yycheck) . ";\n\n";
+        $template .= '    protected $actionBase = ' . $this->printArray($r->yybase) . ";\n\n";
+        $template .= '    protected $actionDefault = ' . $this->printArray($r->yydefault, $context->nstates) . ";\n\n";
 
 
 
-        $template .= '    protected $goto = ' . $this->printArray($r->yygoto) . ";\n";
+        $template .= '    protected $goto = ' . $this->printArray($r->yygoto) . ";\n\n";
 
-        $template .= '    protected $gotoCheck = ' . $this->printArray($r->yygbase) . ";\n";
+        $template .= '    protected $gotoCheck = ' . $this->printArray($r->yygbase) . ";\n\n";
 
-        $template .= '    protected $gotoBase = ' . $this->printArray($r->yygbase) . ";\n";
+        $template .= '    protected $gotoBase = ' . $this->printArray($r->yygbase) . ";\n\n";
 
-        $template .= '    protected $gotoDefault = ' . $this->printArray($r->yygdefault) . ";\n";
+        $template .= '    protected $gotoDefault = ' . $this->printArray($r->yygdefault) . ";\n\n";
   
-        $template .= '    protected $ruleToNonTerminal = ' . $this->printArray($r->yylhs) . ";\n";
+        $template .= '    protected $ruleToNonTerminal = ' . $this->printArray($r->yylhs) . ";\n\n";
 
-        $template .= '    protected $ruleToLength = ' . $this->printArray($r->yylen) . ";\n";
+        $template .= '    protected $ruleToLength = ' . $this->printArray($r->yylen) . ";\n\n";
 
 
         $template .= $this->handleProductionString($context);
@@ -84,7 +91,7 @@ class Generator
             $max = max($max, $term->code);
         }
         $this->invalidSymbol = $max + 1;
-        return "    protected \$invalidSymbol = {$this->invalidSymbol};\n";
+        return "    protected \$invalidSymbol       = {$this->invalidSymbol};\n";
     }
 
     protected function packYYTranslate(array $translate): string
