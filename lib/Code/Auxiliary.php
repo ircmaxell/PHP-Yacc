@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Code;
 
-class Aux
+class Auxiliary
 {
     public $next;
     public $index;

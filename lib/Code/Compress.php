@@ -248,7 +248,7 @@ class Compress
             if (count($prim->classes) < 2) {
                 continue;
             }
-            $p = new Aux;
+            $p = new Auxiliary;
             $this->best_covering($p, $prim);
             if ($p->gain < 1) {
                 continue;
@@ -356,7 +356,7 @@ class Compress
         }
     }
 
-    protected function best_covering(Aux $aux, Preimage $prim)
+    protected function best_covering(Auxiliary $aux, Preimage $prim)
     {
         $this->result->resetFrequency();
         $gain = 0;
