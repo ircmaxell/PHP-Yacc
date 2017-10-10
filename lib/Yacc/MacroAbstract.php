@@ -2,14 +2,11 @@
 
 namespace PhpYacc\Yacc;
 
-use PhpYacc\Grammar\Context;
-use Generator;
 use Iterator;
-use PhpYacc\Macro as CoreMacro;
-use PhpYacc\Token;
+use PhpYacc\Macro;
 
-abstract class Macro extends CoreMacro {
-
+abstract class MacroAbstract implements Macro
+{
     protected function parse(string $string, int $lineNumber, string $filename): array
     {
         $i = 0;
@@ -20,8 +17,8 @@ abstract class Macro extends CoreMacro {
             if (isSymCh($string[$i])) {
                 do {
                     $buffer .= $string[$i++];
-                } while (isSymCh($string[$i]));
-                $type = ctype_digit($buffer) ? Tokens::NUMBER : Tokens::NAME;
+                } while ($i < $length && isSymCh($string[$i]));
+                $type = ctype_digit($buffer) ? Token::NUMBER : Token::NAME;
                 $tokens[] = new Token($type, $buffer, $lineNumber, $filename);
                 $buffer = '';
             } else {
@@ -31,4 +28,12 @@ abstract class Macro extends CoreMacro {
         return $tokens;
     }
 
+    protected static function next(Iterator $it): Token
+    {
+        $it->next();
+        if (!$it->valid()) {
+            throw new RuntimeException("Syntax error, expected more tokens");
+        }
+        return $it->current();
+    }
 }

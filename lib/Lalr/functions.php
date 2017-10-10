@@ -31,7 +31,7 @@ function orbits(Context $ctx, string &$d, string $s): bool
     return $changed;
 }
 
-function testBit(string $s, int $i): int 
+function testBit(string $s, int $i): int
 {
     return (ord($s[(int) ($i / NBITS)]) >> ($i % NBITS)) & 1;
 }
@@ -89,7 +89,8 @@ function dumpSet(Context $ctx, string $string): string
     return $result;
 }
 
-function dumpLr1(Lr1 $lr1 = null): string {
+function dumpLr1(Lr1 $lr1 = null): string
+{
     $result = '';
     while ($lr1 !== null) {
         $result .= $lr1->item . "\n";

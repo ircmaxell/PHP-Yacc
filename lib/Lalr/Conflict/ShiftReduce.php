@@ -4,13 +4,11 @@ declare(strict_types=1);
 namespace PhpYacc\Lalr\Conflict;
 
 use PhpYacc\Grammar\Symbol;
-use PhpYacc\Lalr\{
-    Conflict,
-    State
-};
+use PhpYacc\Lalr\Conflict;
+use PhpYacc\Lalr\State;
 
-class ShiftReduce extends Conflict {
-
+class ShiftReduce extends Conflict
+{
     protected $state;
     protected $reduce;
 
@@ -35,5 +33,4 @@ class ShiftReduce extends Conflict {
     {
         return $this->reduce;
     }
-
 }

@@ -8,8 +8,8 @@ use PhpYacc\Lalr\{
     Conflict
 };
 
-class ReduceReduce extends Conflict {
-
+class ReduceReduce extends Conflict
+{
     protected $reduce1;
     protected $reduce2;
 
@@ -34,5 +34,4 @@ class ReduceReduce extends Conflict {
     {
         return $this->reduce2;
     }
-
 }

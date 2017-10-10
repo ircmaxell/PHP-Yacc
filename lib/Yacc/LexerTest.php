@@ -5,17 +5,17 @@ namespace PhpYacc\Yacc;
 
 use PHPUnit\Framework\TestCase;
 
-class LexerTest extends Testcase {
-
+class LexerTest extends Testcase
+{
     public static function provideTestAtoms()
     {
         return [
-            ["   \t", Tokens::SPACE],
-            ["\n", Tokens::NEWLINE],
-            ["/* Fooo*/", Tokens::COMMENT],
-            ["// Foo", Tokens::COMMENT],
-            ["%%", Tokens::MARK],
-            ["%token", Tokens::TOKEN],
+            ["   \t", Token::SPACE],
+            ["\n", Token::NEWLINE],
+            ["/* Fooo*/", Token::COMMENT],
+            ["// Foo", Token::COMMENT],
+            ["%%", Token::MARK],
+            ["%token", Token::TOKEN],
             ["'foo'", "'"],
         ];
     }
@@ -41,5 +41,4 @@ class LexerTest extends Testcase {
         $tok->init($f);
         return $tok;
     }
-
 }

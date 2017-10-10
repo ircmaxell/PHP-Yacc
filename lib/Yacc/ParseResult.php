@@ -5,7 +5,8 @@ namespace PhpYacc\Yacc;
 
 use PhpYacc\Grammar\Context;
 
-class ParseResult {
+class ParseResult
+{
     public $pureFlag = false;
     public $startSymbol = null;
     public $expected = null;

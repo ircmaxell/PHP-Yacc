@@ -2,8 +2,6 @@
 
 namespace PhpYacc\Yacc;
 
-use PhpYacc\Token;
-
 function isWhite(string $c): bool
 {
     return $c === ' ' || $c === "\t" || $c === "\r" || $c === "\x0b" || $c === "\x0c";
@@ -22,7 +20,7 @@ function isOctal(string $char): bool
 
 function isGsym(Token $t): bool
 {
-    return $t->t === Tokens::NAME || $t->t === "'";
+    return $t->t === Token::NAME || $t->t === "'";
 }
 
 function charval(string $string): string

@@ -13,7 +13,8 @@ use PhpYacc\Grammar\Symbol;
  * @property Lr1 $items
  * @property int $number
  */
-class State {
+class State
+{
 
     /** @var State[] */
     public $shifts = []; // public for indirect array modification
@@ -23,7 +24,8 @@ class State {
     protected $_items;
     protected $_number;
 
-    public function __construct(Symbol $through, Lr1 $items) {
+    public function __construct(Symbol $through, Lr1 $items)
+    {
         $this->_through = $through;
         $this->_items = $items;
     }
@@ -61,11 +63,13 @@ class State {
         $this->_items = $items;
     }
 
-    public function setNumber(int $number) {
+    public function setNumber(int $number)
+    {
         $this->_number = $number;
     }
 
-    public function isReduceOnly(): bool {
+    public function isReduceOnly(): bool
+    {
         return empty($this->shifts)
             && $this->_reduce[0]->symbol->isNilSymbol();
     }

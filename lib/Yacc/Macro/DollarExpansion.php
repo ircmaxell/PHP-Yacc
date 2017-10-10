@@ -2,29 +2,29 @@
 
 namespace PhpYacc\Yacc\Macro;
 
-use PhpYacc\Token;
-use PhpYacc\Yacc\Macro;
+use PhpYacc\Yacc\MacroAbstract;
 use Iterator;
 use Generator;
-use PhpYacc\Yacc\Tokens;
+use PhpYacc\Yacc\Token;
 use PhpYacc\Grammar\Context;
 use RuntimeException;
 
-class DollarExpansion extends Macro {
+class DollarExpansion extends MacroAbstract
+{
     const SEMVAL_LHS_TYPED   = 1;
     const SEMVAL_LHS_UNTYPED = 2;
     const SEMVAL_RHS_TYPED   = 3;
     const SEMVAL_RHS_UNTYPED = 4;
 
     protected $macros = [
-        self::SEMVAL_LHS_TYPED => "semval_l(%n, %l, %t)",
-        self::SEMVAL_LHS_UNTYPED => "semval_l(%n, %l)",
-        self::SEMVAL_RHS_TYPED => "semval_r(%n, %l, %t)",
-        self::SEMVAL_RHS_UNTYPED => "semval_r(%n, %l)",
-
+        self::SEMVAL_LHS_TYPED => '$this->semValue',
+        self::SEMVAL_LHS_UNTYPED => '$this->semValue',
+        self::SEMVAL_RHS_TYPED => '$stackPos-(%l-%n)',
+        self::SEMVAL_RHS_UNTYPED => '$stackPos-(%l-%n)',
     ];
 
-    public function setMacro(int $name, string $value) {
+    public function setMacro(int $name, string $value)
+    {
         $this->macros[$name] = $value;
     }
 
@@ -34,7 +34,7 @@ class DollarExpansion extends Macro {
         for ($tokens->rewind(); $tokens->valid(); $tokens->next()) {
             $t = $tokens->current();
             switch ($t->t) {
-                case Tokens::NAME:
+                case Token::NAME:
                     $type = null;
                     $v = -1;
                     for ($i = 0; $i <= $n; $i++) {
@@ -68,7 +68,7 @@ class DollarExpansion extends Macro {
                     $t = self::next($tokens);
                     if ($t->t === '<') {
                         $t = self::next($tokens);
-                        if ($t->t !== Tokens::NAME) {
+                        if ($t->t !== Token::NAME) {
                             throw new RuntimeException("type expected");
                         }
                         $type = $ctx->intern($t->v);
@@ -82,12 +82,12 @@ class DollarExpansion extends Macro {
                         $v = 0;
                     } elseif ($t->t === '-') {
                         $t = self::next($tokens);
-                        if ($t->t !== Tokens::NUMBER) {
+                        if ($t->t !== Token::NUMBER) {
                             throw new RuntimeException("Number expected");
                         }
                         $v = -1 * ((int) $t->v);
                     } else {
-                        if ($t->t !== Tokens::NUMBER) {
+                        if ($t->t !== Token::NUMBER) {
                             throw new RuntimeException("Number expected");
                         }
                         $v = (int) $t->v;
@@ -99,7 +99,7 @@ semval:
                     if ($type === null) {
                         $type = $symbols[$v]->type;
                     }
-                    if ($type === NULL /** && $ctx->unioned */ && false) {
+                    if ($type === null /** && $ctx->unioned */ && false) {
                         throw new RuntimeException("Type not defined for " . $symbols[$v]->name);
                     }
                     foreach ($this->parseDollar($t, $v, $n, $type ? $type->name : null) as $t) {
@@ -114,7 +114,6 @@ semval:
 
     protected function parseDollar(Token $t, int $nth, int $len, string $type = null): array
     {
-
         if ($t->t === '$') {
             if ($type) {
                 $mp = $this->macros[self::SEMVAL_LHS_TYPED];
@@ -149,9 +148,7 @@ semval:
             } else {
                 $result .= $mp[$i];
             }
-
         }
         return $this->parse($result, $t->ln, $t->fn);
     }
-
 }

@@ -5,13 +5,16 @@ namespace PhpYacc\Grammar;
 
 use Generator;
 
-class Context {
-
+class Context
+{
     protected $counter = 0;
     protected $symbolHash = [];
     protected $symbols = [];
     protected $nilSymbol = null;
     protected $finished = false;
+    protected $nterms;
+    protected $nnonterms;
+    protected $nb;
 
     public function finish()
     {
@@ -21,19 +24,21 @@ class Context {
         $this->finished = true;
         $code = 0;
         foreach ($this->terminals() as $term) {
-            echo "From $term->code to $code\n";
             $term->code = $code++;
         }
+        $this->nb = $code;
         foreach ($this->nilSymbols() as $nil) {
-
-            echo "From $nil->code to $code\n";
+            $nil->nb = $this->nb;
             $nil->code = $code++;
         }
         foreach ($this->nonTerminals() as $nonterm) {
-
-            echo "From $nonterm->code to $code\n";
+            $nonterm->nb = $this->nb;
             $nonterm->code = $code++;
         }
+
+        usort($this->symbols, function ($a, $b) {
+            return $a->code <=> $b->code;
+        });
     }
 
     public function nilSymbol(): Symbol
@@ -47,6 +52,16 @@ class Context {
     public function nSymbols(): int
     {
         return $this->counter;
+    }
+
+    public function nTerminals(): int
+    {
+        return $this->nterms;
+    }
+
+    public function nNonTerminals(): int
+    {
+        return $this->nnonterms;
     }
 
     public function terminals(): Generator
@@ -66,7 +81,6 @@ class Context {
             }
         }
     }
-
 
     public function nonTerminals(): Generator
     {
@@ -109,8 +123,18 @@ class Context {
 
     public function addSymbol(Symbol $symbol): Symbol
     {
+        $this->finished = false;
         $this->symbols[] = $symbol;
         $this->symbolHash[$symbol->name] = $symbol;
+        $this->nterms = 0;
+        $this->nnonterms = 0;
+        foreach ($this->symbols as $symbol) {
+            if ($symbol->isTerminal()) {
+                $this->nterms++;
+            } elseif ($symbol->isNonTerminal()) {
+                $this->nnonterms++;
+            }
+        }
         return $symbol;
     }
 
@@ -119,5 +143,12 @@ class Context {
         return $this->symbols;
     }
 
-
+    public function symbol(int $code): Symbol
+    {
+        foreach ($this->symbols as $symbol) {
+            if ($symbol->code === $code) {
+                return $symbol;
+            }
+        }
+    }
 }

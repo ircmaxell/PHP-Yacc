@@ -2,8 +2,7 @@
 
 namespace PhpYacc;
 
-interface Generator {
-
+interface Generator
+{
     public function printLine(int $line, int $char);
-
 }

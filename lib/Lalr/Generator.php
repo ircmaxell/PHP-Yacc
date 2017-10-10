@@ -12,8 +12,8 @@ use PhpYacc\Yacc\Production;
 
 require_once __DIR__ . '/functions.php';
 
-class Generator {
-
+class Generator
+{
     const NON_ASSOC = -32768;
 
     /** @var ParseResult */
@@ -43,6 +43,7 @@ class Generator {
 
     public function compute(ParseResult $parseResult, string $filename = '')
     {
+        $this->debug = '';
         $this->parseResult = $parseResult;
         $this->filename = $filename;
         $this->context = $parseResult->ctx;
@@ -69,14 +70,14 @@ class Generator {
         $this->fillReduce();
         $this->printDiagnostics();
         $this->printStatistics();
-        return new LalrResult($this->parseResult->grams(), $this->states, $this->debug);
+        return new LalrResult($this->parseResult->grams(), $this->states, $this->nnonleafstates, $this->debug);
     }
 
     protected function computeKernels()
     {
         $tmpList = new Lr1(
-            $this->parseResult->startPrime, 
-            $this->blank, 
+            $this->parseResult->startPrime,
+            $this->blank,
             new Item($this->parseResult->gram(0), 1)
         );
         $this->findOrCreateState($this->context->nilSymbol(), $tmpList);
@@ -120,7 +121,7 @@ class Generator {
                 }
             }
 
-            $tmpList = $this->sortList($tmpList, function(Lr1 $x, Lr1 $y) {
+            $tmpList = $this->sortList($tmpList, function (Lr1 $x, Lr1 $y) {
                 $gx = isset($x->item[-1]) ? $x->item[-1]->code : 0;
                 $gy = isset($y->item[-1]) ? $y->item[-1]->code : 0;
                 if ($gx !== $gy) {
@@ -136,7 +137,7 @@ class Generator {
 
             // Compute next states
             $nextst = [];
-            for ($tp = $tmpList; $tp !== null; ) {
+            for ($tp = $tmpList; $tp !== null;) {
                 $sp = null;
 
                 $g = $tp->item[-1];
@@ -155,7 +156,8 @@ class Generator {
         }
     }
 
-    protected function computeLookaheads() {
+    protected function computeLookaheads()
+    {
         setBit($this->states[0]->items->look, 0);
         do {
             $changed = false;
@@ -209,7 +211,8 @@ class Generator {
         }
     }
 
-    protected function fillReduce() {
+    protected function fillReduce()
+    {
         $this->clearVisited();
         foreach ($this->states as $p) {
             /** @var Reduce[] $tmpr */
@@ -264,7 +267,11 @@ class Generator {
                         // reduce/reduce conflict
                         $this->nrrerr++;
                         $p->conflict = new Conflict\ReduceReduce(
-                            $reduce->number, $gram->num, $reduce->symbol, $p->conflict);
+                            $reduce->number,
+                            $gram->num,
+                            $reduce->symbol,
+                            $p->conflict
+                        );
 
                         if ($gram->num < $reduce->number) {
                             $reduce->number = $gram->num;
@@ -292,7 +299,7 @@ class Generator {
 
                 $maxn = 0;
                 $nr = count($tmpr);
-                for ($j = 0; $j < $nr; ) {
+                for ($j = 0; $j < $nr;) {
                     for ($k = $j; $j < $nr; $j++) {
                         if ($tmpr[$j]->number != $tmpr[$k]->number) {
                             break;
@@ -306,11 +313,11 @@ class Generator {
             }
 
             // Squeeze tmpr
-            $tmpr = array_filter($tmpr, function(Reduce $reduce) use($tdefact) {
+            $tmpr = array_filter($tmpr, function (Reduce $reduce) use ($tdefact) {
                 return $reduce->number !== $tdefact;
             });
 
-            usort($tmpr, function(Reduce $x, Reduce $y) {
+            usort($tmpr, function (Reduce $x, Reduce $y) {
                 if ($x->symbol !== $y->symbol) {
                     return $x->symbol->code - $y->symbol->code;
                 }
@@ -347,7 +354,7 @@ class Generator {
         // Sort states in decreasing order of entries
         // do not move initial state
         $initState = array_shift($this->states);
-        usort($this->states, function(State $p, State $q) {
+        usort($this->states, function (State $p, State $q) {
             $pt = $pn = 0;
             foreach ($p->shifts as $x) {
                 if ($x->through->isTerminal()) {
@@ -387,7 +394,8 @@ class Generator {
         }
     }
 
-    protected function comparePrecedence(Production $gram, Symbol $x) {
+    protected function comparePrecedence(Production $gram, Symbol $x)
+    {
         if ($gram->associativity === Symbol::UNDEF
             || ($x->associativity & Symbol::MASK) === Symbol::UNDEF
         ) {
@@ -410,7 +418,8 @@ class Generator {
         throw new \Exception('Cannot happen');
     }
 
-    protected function computeFollow(State $st) {
+    protected function computeFollow(State $st)
+    {
         foreach ($st->shifts as $t) {
             if (!$t->through->isTerminal()) {
                 for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
@@ -440,7 +449,8 @@ class Generator {
         } while ($changed);
     }
 
-    protected function computeFirst(string &$p, Item $item) {
+    protected function computeFirst(string &$p, Item $item)
+    {
         /** @var Symbol $g */
         foreach ($item as $g) {
             if ($g->isTerminal()) {
@@ -454,7 +464,8 @@ class Generator {
         }
     }
 
-    protected function isSeqNullable(Item $item) {
+    protected function isSeqNullable(Item $item)
+    {
         /** @var Symbol $g */
         foreach ($item as $g) {
             if ($g->isTerminal() || !$this->nullable[$g->code]) {
@@ -520,7 +531,7 @@ class Generator {
                     }
 
                     $changed |= orbits(
-                        $this->context, 
+                        $this->context,
                         $this->first[$h->code],
                         $this->first[$g->code]
                     );
@@ -539,7 +550,7 @@ class Generator {
         if (DEBUG) {
             $this->debug .= "First:\n";
             foreach ($this->context->nonTerminals() as $symbol) {
-                $this->debug .= "  {$symbol->name}\t[ ";
+                $this->debug .= "{$symbol->name}\t[ ";
                 $this->debug .= dumpSet($this->context, $this->first[$symbol->code]);
                 if ($this->nullable[$symbol->code]) {
                     $this->debug .= "@ ";
@@ -583,7 +594,6 @@ class Generator {
     {
         $nSymbols = $this->context->nSymbols();
         $this->visited = array_fill(0, $nSymbols, false);
-
     }
 
     protected function findEmpty(Lr1 $tail, Symbol $x): Lr1
@@ -598,7 +608,7 @@ class Generator {
                     $tail->next = $p;
                     $tail = $p;
                     $this->nlooks++;
-                } else if (!$gram->body[1]->isTerminal()) {
+                } elseif (!$gram->body[1]->isTerminal()) {
                     $tail = $this->findEmpty($tail, $gram->body[1]);
                 }
             }
@@ -606,7 +616,8 @@ class Generator {
         return $tail;
     }
 
-    protected function sortList(Lr1 $list = null, callable $cmp) {
+    protected function sortList(Lr1 $list = null, callable $cmp)
+    {
         $array = [];
         for ($x = $list; $x !== null; $x = $x->next) {
             $array[] = $x;
@@ -629,18 +640,24 @@ class Generator {
         return $list;
     }
 
-    protected function printState(State $state) {
+    protected function printState(State $state)
+    {
         $this->debug .= "state " . $state->number . "\n";
         for ($conf = $state->conflict; $conf !== null; $conf = $conf->next()) {
             if ($conf instanceof ShiftReduce) {
                 $this->debug .= sprintf(
                     "%d: shift/reduce conflict (shift %d, reduce %d) on %s\n",
-                    $state->number, $conf->state()->number, $conf->reduce(),
-                    $conf->symbol()->name);
-            } else if ($conf instanceof ReduceReduce) {
+                    $state->number,
+                    $conf->state()->number,
+                    $conf->reduce(),
+                    $conf->symbol()->name
+                );
+            } elseif ($conf instanceof ReduceReduce) {
                 $this->debug .= sprintf(
                     "%d: reduce/reduce conflict (reduce %d, reduce %d) on %s\n",
-                    $state->number, $conf->reduce1(), $conf->reduce2(),
+                    $state->number,
+                    $conf->reduce1(),
+                    $conf->reduce2(),
                     $conf->symbol()->name
                 );
             }
@@ -674,7 +691,7 @@ class Generator {
                 $this->debug .= strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
                 if ($r->number === 0) {
                     $this->debug .= "accept\n";
-                } else if ($r->number < 0) {
+                } elseif ($r->number < 0) {
                     $this->debug .= "error\n";
                 } else {
                     $this->debug .= "reduce ($r->number)\n";
@@ -685,7 +702,8 @@ class Generator {
         $this->debug .= "\n";
     }
 
-    protected function printDiagnostics() {
+    protected function printDiagnostics()
+    {
         // TODO check expected_srconf
         $expected_srconf = 0;
         if ($this->nsrerr !== $expected_srconf || $this->nrrerr !== 0) {
@@ -703,7 +721,8 @@ class Generator {
         }
     }
 
-    protected function printStatistics() {
+    protected function printStatistics()
+    {
         if (!DEBUG) {
             return;
         }
@@ -718,11 +737,11 @@ class Generator {
         $this->debug .= "\t$nnonts nonterminal symbols\n";
         $this->debug .= "\t$nprods productions\n";
         $this->debug .= "\t$this->nstates states\n";
+        $this->debug .= "\t$this->nnonleafstates non leaf states\n";
         $this->debug .= "\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n";
         // items?
         $this->debug .= "\t$this->nlooks lookahead sets used\n";
         $this->debug .= "\t$this->nacts+$this->nacts2=$totalActs action entries\n";
         // bytes used?
     }
-
 }

@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
-use PhpYacc\Lexer as CoreLexer;
-use PhpYacc\Token;
 use RuntimeException;
 
 require_once __DIR__ . '/functions.php';
@@ -12,29 +10,29 @@ require_once __DIR__ . '/functions.php';
 const EOF = "EOF";
 const MAXTOKEN = 50000;
 
-class Lexer implements CoreLexer {
-
+class Lexer
+{
     const SPACE_TOKENS = [
-        Tokens::SPACE, 
-        Tokens::COMMENT, 
-        Tokens::NEWLINE,
+        Token::SPACE,
+        Token::COMMENT,
+        Token::NEWLINE,
     ];
 
     const TAG_MAP = [
-        "%%"            => Tokens::MARK,
-        "%{"            => Tokens::BEGININC,
-        "%}"            => Tokens::ENDINC,
-        "%token"        => Tokens::TOKEN,
-        "%term"         => Tokens::TOKEN,
-        "%left"         => Tokens::LEFT,
-        "%right"        => Tokens::RIGHT,
-        "%nonassoc"     => Tokens::NONASSOC,
-        "%prec"         => Tokens::PRECTOK,
-        "%type"         => Tokens::TYPE,
-        "%union"        => Tokens::UNION,
-        "%start"        => Tokens::START,
-        "%expect"       => Tokens::EXPECT,
-        "%pure_parser"  => Tokens::PURE_PARSER,
+        "%%"            => Token::MARK,
+        "%{"            => Token::BEGININC,
+        "%}"            => Token::ENDINC,
+        "%token"        => Token::TOKEN,
+        "%term"         => Token::TOKEN,
+        "%left"         => Token::LEFT,
+        "%right"        => Token::RIGHT,
+        "%nonassoc"     => Token::NONASSOC,
+        "%prec"         => Token::PRECTOK,
+        "%type"         => Token::TYPE,
+        "%union"        => Token::UNION,
+        "%start"        => Token::START,
+        "%expect"       => Token::EXPECT,
+        "%pure_parser"  => Token::PURE_PARSER,
     ];
     
 
@@ -69,7 +67,7 @@ class Lexer implements CoreLexer {
     public function unget()
     {
         if ($this->backToken) {
-          throw new RuntimeException("Too many ungetToken calls");
+            throw new RuntimeException("Too many ungetToken calls");
         }
         $this->backToken = $this->token;
     }
@@ -89,11 +87,11 @@ class Lexer implements CoreLexer {
                 $c = $this->getc();
             }
             $this->ungetc($c);
-            return $this->token(Tokens::SPACE, $p);
+            return $this->token(Token::SPACE, $p);
         }
         if ($c === "\n") {
             $this->lineNumber++;
-            return $this->token(Tokens::NEWLINE, $c);
+            return $this->token(Token::NEWLINE, $c);
         }
         if ($c === "/") {
             if (($c = $this->getc()) === '*') {
@@ -112,17 +110,17 @@ class Lexer implements CoreLexer {
                     $p .= $c;
                 }
                 $p .= "*/";
-                return $this->token(Tokens::COMMENT, $p);
+                return $this->token(Token::COMMENT, $p);
             } elseif ($c === '/') {
                 // skip // comment
                 $p = '//';
                 do {
                     $c = $this->getc();
-                    if ($c !== EOF) { 
+                    if ($c !== EOF) {
                         $p .= $c;
-                      }
+                    }
                 } while ($c !== "\n" && $c !== EOF);
-                return $this->token(Tokens::COMMENT, $p);
+                return $this->token(Token::COMMENT, $p);
             }
         }
         if ($c === EOF) {
@@ -153,7 +151,7 @@ class Lexer implements CoreLexer {
                         $c = $this->getc();
                     } while (isSymCh($c));
                     $this->ungetc($c);
-                    $tag = Tokens::NAME;
+                    $tag = Token::NAME;
                 } else {
                     $this->ungetc($c);
                 }
@@ -167,7 +165,7 @@ class Lexer implements CoreLexer {
                 $c = $this->getc();
             } while ($c !== EOF && isSymCh($c));
             $this->ungetc($c);
-            $tag = ctype_digit($p) ? Tokens::NUMBER : Tokens::NAME;
+            $tag = ctype_digit($p) ? Token::NUMBER : Token::NAME;
         } elseif ($c === '\'' || $c === '"') {
             $p .= $c;
             while (($c = $this->getc()) !== $tag) {
@@ -242,5 +240,4 @@ class Lexer implements CoreLexer {
         }
         $this->backChar = $c;
     }
-
 }
