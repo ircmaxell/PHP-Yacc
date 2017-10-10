@@ -383,7 +383,7 @@ class Generator
 
         foreach ($this->states as $i => $p) {
             $p->number = $i;
-            if (!empty($p->shifts) || $p->reduce[0]->symbol->isNilSymbol()) {
+            if (!empty($p->shifts) || !$p->reduce[0]->symbol->isNilSymbol()) {
                 $this->nnonleafstates = $i;
             }
         }
