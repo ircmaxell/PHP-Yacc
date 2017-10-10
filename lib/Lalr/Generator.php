@@ -352,25 +352,23 @@ class Generator
         // do not move initial state
         $initState = array_shift($this->states);
         usort($this->states, function (State $p, State $q) {
-            $pt = $pn = 0;
+            $numReduces = count($p->reduce) - 1; // -1 for default action
+            $pt = $numReduces;
+            $pn = count($p->shifts) + $numReduces;
             foreach ($p->shifts as $x) {
                 if ($x->through->isTerminal()) {
                     $pt++;
                 }
             }
-            $numReduces = count($p->reduce) - 1; // -1 for default action
-            $pt += $numReduces;
-            $pn += $numReduces;
 
-            $qt = $qn = 0;
+            $numReduces = count($q->reduce) - 1; // -1 for default action
+            $qt = $numReduces;
+            $qn = count($q->shifts) + $numReduces;
             foreach ($q->shifts as $x) {
                 if ($x->through->isTerminal()) {
                     $qt++;
                 }
             }
-            $numReduces = count($q->reduce) - 1; // -1 for default action
-            $qt += $numReduces;
-            $qn += $numReduces;
 
             if ($pt !== $qt) {
                 return $qt - $pt;
