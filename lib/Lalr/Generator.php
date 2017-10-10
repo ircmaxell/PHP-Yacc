@@ -4,10 +4,11 @@ namespace PhpYacc\Lalr;
 
 use PhpYacc\Lalr\Conflict\ReduceReduce;
 use PhpYacc\Lalr\Conflict\ShiftReduce;
-use PhpYacc\Lalr\Item;
-use PhpYacc\Grammar\Context;
-use PhpYacc\Yacc\ParseResult;
-use PhpYacc\Grammar\Symbol;
+use PhpYacc\Grammar\{
+    Context,
+    Symbol,
+    State
+};
 use PhpYacc\Yacc\Production;
 
 require_once __DIR__ . '/functions.php';
@@ -39,17 +40,13 @@ class Generator
     protected $nrrerr;
     protected $filename = '';
 
-    protected $debug = '';
-
-    public function compute(ParseResult $parseResult, string $filename = '')
+    public function compute(Context $context, string $filename = '')
     {
-        $this->debug = '';
-        $this->parseResult = $parseResult;
         $this->filename = $filename;
-        $this->context = $parseResult->ctx;
+        $this->context = $context;
         // Ensure nil symbol is part of nSymbols
         $this->context->nilSymbol();
-        $nSymbols = $this->context->nSymbols();
+        $nSymbols = $this->context->nsymbols;
         $this->nullable = array_fill(0, $nSymbols, false);
 
         $this->blank = str_repeat("\0", ceil(($nSymbols + NBITS - 1) / NBITS));
@@ -59,7 +56,7 @@ class Generator
         $this->nlooks = $this->nstates = $this->nacts = $this->nacts2 = 0;
         $this->nnonleafstates = 0;
         $this->nsrerr = $this->nrrerr = 0;
-        foreach ($this->context->symbols() as $s) {
+        foreach ($this->context->symbols as $s) {
             $this->statesThrough[$s->code] = [];
         }
 
@@ -70,17 +67,19 @@ class Generator
         $this->fillReduce();
         $this->printDiagnostics();
         $this->printStatistics();
-        return new LalrResult($this->parseResult->grams(), $this->states, $this->nnonleafstates, $this->debug);
+
+        $this->context->states = $this->states;
+        $this->context->nnonleafstates = $this->nnonleafstates;
     }
 
     protected function computeKernels()
     {
         $tmpList = new Lr1(
-            $this->parseResult->startPrime,
+            $this->context->startPrime,
             $this->blank,
-            new Item($this->parseResult->gram(0), 1)
+            new Item($this->context->gram(0), 1)
         );
-        $this->findOrCreateState($this->context->nilSymbol(), $tmpList);
+        $this->findOrCreateState($this->context->nilsymbol, $tmpList);
 
         // foreach by ref so that new additions to $this->states are also picked up
         foreach ($this->states as &$p) {
@@ -93,7 +92,7 @@ class Generator
             /** @var Lr1 $x */
             for ($x = $p->items; $x !== null; $x = $x->next) {
                 if (!$x->isTailItem()) {
-                    $wp = new Lr1($this->parseResult->startPrime, $this->blank, $x->item->slice(1));
+                    $wp = new Lr1($this->context->startPrime, $this->blank, $x->item->slice(1));
                     if ($tmpTail !== null) {
                         $tmpTail->next = $wp;
                     } else {
@@ -185,7 +184,7 @@ class Generator
                 }
                 foreach ($p->shifts as $t) {
                     for ($x = $t->items; $x !== null; $x = $x->next) {
-                        if ($x->left !== $this->parseResult->startPrime) {
+                        if ($x->left !== $this->context->startPrime) {
                             $changed |= orbits($this->context, $x->look, $this->follow[$x->left->code]);
                         }
                     }
@@ -200,12 +199,12 @@ class Generator
 
         if (DEBUG) {
             foreach ($this->states as $p) {
-                $this->debug .= "state unknown:\n";
+                $this->context->debug("state unknown:\n");
                 for ($x = $p->items; $x != null; $x = $x->next) {
-                    $this->debug .= "\t" . $x->item . "\n";
-                    $this->debug .= "\t\t[ ";
-                    $this->debug .= dumpSet($this->context, $x->look);
-                    $this->debug .= "]\n";
+                    $this->context->debug("\t" . $x->item . "\n");
+                    $this->context->debug("\t\t[ ");
+                    $this->context->debug(dumpSet($this->context, $x->look));
+                    $this->context->debug("]\n");
                 }
             }
         }
@@ -220,7 +219,7 @@ class Generator
 
             $tdefact = 0;
             foreach ($p->shifts as $t) {
-                if ($t->through === $this->parseResult->errorToken) {
+                if ($t->through === $this->context->errorToken) {
                     // shifting error
                     $tdefact = -1;
                 }
@@ -281,7 +280,7 @@ class Generator
                 }
 
                 foreach (forEachMember($this->context, $alook) as $e) {
-                    $sym = $this->context->symbols()[$e];
+                    $sym = $this->context->symbols[$e];
                     $tmpr[] = new Reduce($sym, $gram->num);
                 }
             }
@@ -323,7 +322,7 @@ class Generator
                 }
                 return $x->number - $y->number;
             });
-            $tmpr[] = new Reduce($this->context->nilSymbol(), $tdefact);
+            $tmpr[] = new Reduce($this->context->nilsymbol, $tdefact);
 
             // Squeeze shift actions (we deleted some keys)
             $p->shifts = array_values($p->shifts);
@@ -340,15 +339,15 @@ class Generator
         }
 
         $k = 0;
-        foreach ($this->parseResult->grams() as $gram) {
+        foreach ($this->context->grams as $gram) {
             if (!$this->visited[$gram->num]) {
                 $k++;
-                $this->debug .= "Never reduced: \n"; // TODO
+                $this->context->debug("Never reduced: \n"); // TODO
             }
         }
 
         if ($k) {
-            $this->debug .= $k . " rule(s) never reduced\n";
+            $this->context->debug($k . " rule(s) never reduced\n");
         }
 
         // Sort states in decreasing order of entries
@@ -440,7 +439,7 @@ class Generator
                 if (!$t->through->isTerminal()) {
                     $p =& $this->follow[$t->through->code];
                     for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
-                        if ($this->isSeqNullable($x->item) && $x->left != $this->parseResult->startPrime) {
+                        if ($this->isSeqNullable($x->item) && $x->left != $this->context->startPrime) {
                             $changed |= orbits($this->context, $p, $this->follow[$x->left->code]);
                         }
                     }
@@ -494,7 +493,7 @@ class Generator
     {
         do {
             $changed = false;
-            foreach ($this->parseResult->grams() as $gram) {
+            foreach ($this->context->grams as $gram) {
                 $left = $gram->body[0];
                 $right = $gram->body[1] ?? null;
                 if (($right === null || ($right->associativity & Production::EMPTY)) && !($left->associativity & Production::EMPTY)) {
@@ -505,10 +504,10 @@ class Generator
         } while ($changed);
 
         if (DEBUG) {
-            $this->debug .= "EMPTY nonterminals: \n";
-            foreach ($this->context->nonTerminals() as $symbol) {
+            $this->context->debug("EMPTY nonterminals: \n");
+            foreach ($this->context->nonterminals as $symbol) {
                 if ($symbol->associativity & Production::EMPTY) {
-                    $this->debug .= "  " . $symbol->name . "\n";
+                    $this->context->debug("  " . $symbol->name . "\n");
                 }
             }
         }
@@ -518,7 +517,7 @@ class Generator
     {
         do {
             $changed = false;
-            foreach ($this->parseResult->grams() as $gram) {
+            foreach ($this->context->grams as $gram) {
                 $h = $gram->body[0];
                 for ($s = 1; $s < count($gram->body); $s++) {
                     $g = $gram->body[$s];
@@ -548,14 +547,14 @@ class Generator
         } while ($changed);
 
         if (DEBUG) {
-            $this->debug .= "First:\n";
-            foreach ($this->context->nonTerminals() as $symbol) {
-                $this->debug .= "{$symbol->name}\t[ ";
-                $this->debug .= dumpSet($this->context, $this->first[$symbol->code]);
+            $this->context->debug("First:\n");
+            foreach ($this->context->nonterminals as $symbol) {
+                $this->context->debug("{$symbol->name}\t[ ");
+                $this->context->debug(dumpSet($this->context, $this->first[$symbol->code]));
                 if ($this->nullable[$symbol->code]) {
-                    $this->debug .= "@ ";
+                    $this->context->debug("@ ");
                 }
-                $this->debug .= "]\n";
+                $this->context->debug("]\n");
             }
         }
     }
@@ -565,7 +564,7 @@ class Generator
         $tail = null;
         for ($p = $items; $p !== null; $p = $p->next) {
             $p->look = null;
-            if ($p->left !== $this->parseResult->startPrime) {
+            if ($p->left !== $this->context->startPrime) {
                 for ($q = $items; $q !== $p; $q = $q->next) {
                     if ($q->left === $p->left) {
                         $p->look = $q->look;
@@ -592,7 +591,7 @@ class Generator
 
     protected function clearVisited()
     {
-        $nSymbols = $this->context->nSymbols();
+        $nSymbols = $this->context->nsymbols;
         $this->visited = array_fill(0, $nSymbols, false);
     }
 
@@ -604,7 +603,7 @@ class Generator
             /** @var Production $gram */
             for ($gram = $x->value; $gram !== null; $gram = $gram->link) {
                 if ($gram->isEmpty()) {
-                    $p = new Lr1($this->parseResult->startPrime, $this->blank, new Item($gram, 1));
+                    $p = new Lr1($this->context->startPrime, $this->blank, new Item($gram, 1));
                     $tail->next = $p;
                     $tail = $p;
                     $this->nlooks++;
@@ -642,31 +641,31 @@ class Generator
 
     protected function printState(State $state)
     {
-        $this->debug .= "state " . $state->number . "\n";
+        $this->context->debug("state " . $state->number . "\n");
         for ($conf = $state->conflict; $conf !== null; $conf = $conf->next()) {
             if ($conf instanceof ShiftReduce) {
-                $this->debug .= sprintf(
+                $this->context->debug(sprintf(
                     "%d: shift/reduce conflict (shift %d, reduce %d) on %s\n",
                     $state->number,
                     $conf->state()->number,
                     $conf->reduce(),
                     $conf->symbol()->name
-                );
+                ));
             } elseif ($conf instanceof ReduceReduce) {
-                $this->debug .= sprintf(
+                $this->context->debug(sprintf(
                     "%d: reduce/reduce conflict (reduce %d, reduce %d) on %s\n",
                     $state->number,
                     $conf->reduce1(),
                     $conf->reduce2(),
                     $conf->symbol()->name
-                );
+                ));
             }
         }
 
         for ($x = $state->items; $x !== null; $x = $x->next) {
-            $this->debug .= "\t" . $x->item . "\n";
+            $this->context->debug("\t" . $x->item . "\n");
         }
-        $this->debug .= "\n";
+        $this->context->debug("\n");
 
         $i = $j = 0;
         while (true) {
@@ -678,28 +677,28 @@ class Generator
 
             if ($s !== null && ($r === null || $s->through->code < $r->symbol->code)) {
                 $str = $s->through->name;
-                $this->debug .= strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
-                $this->debug .= $s->through->isTerminal() ? "shift" : "goto";
-                $this->debug .= " " . $s->number;
+                $this->context->debug(strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t");
+                $this->context->debug($s->through->isTerminal() ? "shift" : "goto");
+                $this->context->debug(" " . $s->number);
                 if ($s->isReduceOnly()) {
-                    $this->debug .= " and reduce (" . $s->reduce[0]->number . ")";
+                    $this->context->debug(" and reduce (" . $s->reduce[0]->number . ")");
                 }
-                $this->debug .= "\n";
+                $this->context->debug("\n");
                 $i++;
             } else {
                 $str = $r->symbol->isNilSymbol() ? "." : $r->symbol->name;
-                $this->debug .= strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t";
+                $this->context->debug(strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t");
                 if ($r->number === 0) {
-                    $this->debug .= "accept\n";
+                    $this->context->debug("accept\n");
                 } elseif ($r->number < 0) {
-                    $this->debug .= "error\n";
+                    $this->context->debug("error\n");
                 } else {
-                    $this->debug .= "reduce ($r->number)\n";
+                    $this->context->debug("reduce ($r->number)\n");
                 }
                 $j++;
             }
         }
-        $this->debug .= "\n";
+        $this->context->debug("\n");
     }
 
     protected function printDiagnostics()
@@ -707,17 +706,17 @@ class Generator
         // TODO check expected_srconf
         $expected_srconf = 0;
         if ($this->nsrerr !== $expected_srconf || $this->nrrerr !== 0) {
-            $this->debug .= "$this->filename: there are ";
+            $this->context->debug("$this->filename: there are ");
             if ($this->nsrerr !== $expected_srconf) {
-                $this->debug .= " $this->nsrerr shift/reduce";
+                $this->context->debug(" $this->nsrerr shift/reduce");
                 if ($this->nrrerr !== 0) {
-                    $this->debug .= " and";
+                    $this->context->debug(" and");
                 }
             }
             if ($this->nrrerr !== 0) {
-                $this->debug .= " $this->nrrerr reduce/reduce";
+                $this->context->debug(" $this->nrrerr reduce/reduce");
             }
-            $this->debug .= " conflicts\n";
+            $this->context->debug( " conflicts\n");
         }
     }
 
@@ -727,21 +726,21 @@ class Generator
             return;
         }
 
-        $nterms = iterator_count($this->context->terminals());
-        $nnonts = iterator_count($this->context->nonTerminals());
-        $nprods = count($this->parseResult->grams());
+        $nterms = iterator_count($this->context->terminals);
+        $nnonts = iterator_count($this->context->nonterminals);
+        $nprods = $this->context->ngrams;
         $totalActs = $this->nacts + $this->nacts2;
 
-        $this->debug .= "\nStatistics for $this->filename:\n";
-        $this->debug .= "\t$nterms terminal symbols\n";
-        $this->debug .= "\t$nnonts nonterminal symbols\n";
-        $this->debug .= "\t$nprods productions\n";
-        $this->debug .= "\t$this->nstates states\n";
-        $this->debug .= "\t$this->nnonleafstates non leaf states\n";
-        $this->debug .= "\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n";
+        $this->context->debug("\nStatistics for $this->filename:\n");
+        $this->context->debug("\t$nterms terminal symbols\n");
+        $this->context->debug("\t$nnonts nonterminal symbols\n");
+        $this->context->debug("\t$nprods productions\n");
+        $this->context->debug("\t$this->nstates states\n");
+        $this->context->debug("\t$this->nnonleafstates non leaf states\n");
+        $this->context->debug("\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n");
         // items?
-        $this->debug .= "\t$this->nlooks lookahead sets used\n";
-        $this->debug .= "\t$this->nacts+$this->nacts2=$totalActs action entries\n";
+        $this->context->debug("\t$this->nlooks lookahead sets used\n");
+        $this->context->debug("\t$this->nacts+$this->nacts2=$totalActs action entries\n");
         // bytes used?
     }
 }

@@ -64,32 +64,3 @@ Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/expression-support/gra
 	0 shift/reduce, 0 reduce/reduce conflicts
 	7 lookahead sets used
 	6+6=12 action entries
-
-State=>class:
-
-  0=>1     1=>2     2=>1     3=>0   
-
-Terminal action:
-     T\S   0   1   2
-     EOF  .   .    0
-     '+'  .   .    2
-     '1'  .    3  . 
-
-Nonterminal GOTO table:
-     T\S   0   1   2   3
-    expr   1  .    4  . 
-
-Nonterminal GOTO table:
-     T\S default   0   1   2   3
-    expr       1  =   .    4  . 
-
-Candidates of aux table:
-Used aux table:
-state 0 (class 1)
-state 1 (class 2)
-state 2 (class 1)
-state 3 (class 0)
-Order:
-2,1,0,
-Order:
-1,0,

@@ -3,18 +3,77 @@ declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
+use PhpYacc\Yacc\Production;
+
 use Generator;
 
+/**
+ * @property Symbol[] $symbols
+ * @property Symbol $nilsymbol
+ * @property Symbol[] $terminals
+ * @property Symbol[] $nonterminals
+ * @property int $nsymbols
+ * @property int $nterminals
+ * @property int $nnonterminals
+ * @property Production[] $grams
+ * @property int $nstates
+ * @property State[] $states
+ * @property int $nnonleafstates
+ */
 class Context
 {
-    protected $counter = 0;
+    protected $_nsymbols = 0;
     protected $symbolHash = [];
-    protected $symbols = [];
-    protected $nilSymbol = null;
+    protected $_symbols = [];
+    protected $_nilsymbol = null;
     protected $finished = false;
-    protected $nterms;
-    protected $nnonterms;
-    protected $nb;
+    protected $_nterminals;
+    protected $_nnonterminals;
+
+    protected $_states;
+    protected $_nstates = 0;
+    protected $_nnonleafstates = 0;
+
+    public $pureFlag = false;
+    public $startSymbol = null;
+    public $expected = null;
+    public $unioned = false;
+    public $eofToken = null;
+    public $errorToken = null;
+    public $startPrime = null;
+    protected $_grams = [];
+    protected $_ngrams = 0;
+
+    protected $debugFile;
+
+    public function __construct(string $file = null)
+    {
+        $this->debugFile = $file ? fopen($file, 'w') : null;
+    }
+
+    public function debug(string $data)
+    {
+        if ($this->debugFile) {
+            fwrite($this->debugFile, $data);
+        }
+    }
+
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'terminals': return $this->terminals();
+            case 'nonterminals': return $this->nonTerminals();
+        }
+        if (!isset($this->{'_' . $name})) {
+            throw new \LogicException("Should never happen: unknown property $name");
+        }
+        return $this->{'_' . $name};
+    }
+
+    public function __set($name, $value)
+    {
+        $this->{'set' . $name}($value);
+    }
 
     public function finish()
     {
@@ -26,47 +85,47 @@ class Context
         foreach ($this->terminals() as $term) {
             $term->code = $code++;
         }
-        $this->nb = $code;
+        $nb = $code;
         foreach ($this->nilSymbols() as $nil) {
-            $nil->nb = $this->nb;
+            $nil->nb = $nb;
             $nil->code = $code++;
         }
         foreach ($this->nonTerminals() as $nonterm) {
-            $nonterm->nb = $this->nb;
+            $nonterm->nb = $nb;
             $nonterm->code = $code++;
         }
 
-        usort($this->symbols, function ($a, $b) {
+        usort($this->_symbols, function ($a, $b) {
             return $a->code <=> $b->code;
         });
     }
 
     public function nilSymbol(): Symbol
     {
-        if ($this->nilSymbol === null) {
-            $this->nilSymbol = $this->intern("@nil");
+        if ($this->_nilsymbol === null) {
+            $this->_nilsymbol = $this->intern("@nil");
         }
-        return $this->nilSymbol;
+        return $this->_nilsymbol;
     }
 
     public function nSymbols(): int
     {
-        return $this->counter;
+        return $this->_nsymbols;
     }
 
     public function nTerminals(): int
     {
-        return $this->nterms;
+        return $this->_nterminals;
     }
 
     public function nNonTerminals(): int
     {
-        return $this->nnonterms;
+        return $this->_nnonterminals;
     }
 
     public function terminals(): Generator
     {
-        foreach ($this->symbols as $symbol) {
+        foreach ($this->_symbols as $symbol) {
             if ($symbol->isTerminal()) {
                 yield $symbol;
             }
@@ -75,7 +134,7 @@ class Context
 
     public function nilSymbols(): Generator
     {
-        foreach ($this->symbols as $symbol) {
+        foreach ($this->_symbols as $symbol) {
             if ($symbol->isNilSymbol()) {
                 yield $symbol;
             }
@@ -84,7 +143,7 @@ class Context
 
     public function nonTerminals(): Generator
     {
-        foreach ($this->symbols as $symbol) {
+        foreach ($this->_symbols as $symbol) {
             if ($symbol->isNonTerminal()) {
                 yield $symbol;
             }
@@ -117,22 +176,22 @@ class Context
         if (isset($this->symbolHash[$s])) {
             return $this->symbolHash[$s];
         }
-        $p = new Symbol($this->counter++, $s, 0);
+        $p = new Symbol($this->_nsymbols++, $s, 0);
         return $this->addSymbol($p);
     }
 
     public function addSymbol(Symbol $symbol): Symbol
     {
         $this->finished = false;
-        $this->symbols[] = $symbol;
+        $this->_symbols[] = $symbol;
         $this->symbolHash[$symbol->name] = $symbol;
-        $this->nterms = 0;
-        $this->nnonterms = 0;
-        foreach ($this->symbols as $symbol) {
+        $this->_nterminals = 0;
+        $this->_nnonterminals = 0;
+        foreach ($this->_symbols as $symbol) {
             if ($symbol->isTerminal()) {
-                $this->nterms++;
+                $this->_nterminals++;
             } elseif ($symbol->isNonTerminal()) {
-                $this->nnonterms++;
+                $this->_nnonterminals++;
             }
         }
         return $symbol;
@@ -140,15 +199,43 @@ class Context
 
     public function symbols(): array
     {
-        return $this->symbols;
+        return $this->_symbols;
     }
 
     public function symbol(int $code): Symbol
     {
-        foreach ($this->symbols as $symbol) {
+        foreach ($this->_symbols as $symbol) {
             if ($symbol->code === $code) {
                 return $symbol;
             }
         }
     }
+
+    public function addGram(Production $p)
+    {
+        $p->num = $this->_ngrams++;
+        $this->_grams[] = $p;
+        return $p;
+    }
+
+    public function gram(int $i): Production
+    {
+        assert($i < $this->_ngrams);
+        return $this->_grams[$i];
+    }
+
+    public function setStates(array $states)
+    {
+        foreach ($states as $state) {
+            assert($state instanceof State);
+        }
+        $this->_states = $states;
+        $this->_nstates = count($states);
+    }
+
+    public function setNNonLeafStates(int $n)
+    {
+        $this->_nnonleafstates = $n;
+    }
+
 }

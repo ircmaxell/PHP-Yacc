@@ -1,10 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpYacc\Lalr;
+namespace PhpYacc\Grammar;
 
-use ArrayObject;
-use PhpYacc\Grammar\Symbol;
+use PhpYacc\Lalr\{
+    Lr1,
+    Conflict,
+    Reduce
+};
 
 /**
  * @property Reduce[] $reduce

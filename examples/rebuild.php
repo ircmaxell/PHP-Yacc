@@ -2,6 +2,8 @@
 
 require __DIR__ . "/../vendor/autoload.php";
 
+use PhpYacc\Grammar\Context;
+
 const DEBUG = 1;
 
 $it = new DirectoryIterator(__DIR__);
@@ -39,13 +41,11 @@ foreach ($it as $file) {
 
 
 
-    $parseResult = $parser->parse(file_get_contents($grammar), $grammar);
+    $context = $parser->parse(file_get_contents($grammar), $grammar, new Context("$dir/y.phpyacc.output"));
 
-    $lalrResult = $generator->compute($parseResult, $grammar);
+    $generator->compute($context, $grammar);
 
-    $code = $compiler->generate("Parser", $parseResult, $lalrResult);
-
-    file_put_contents("$dir/y.phpyacc.output", $lalrResult->output . "\n" . $compiler->output);
+    $code = $compiler->generate("Parser", $context);
 
     file_put_contents("$dir/parser.phpyacc.php", $code);
 

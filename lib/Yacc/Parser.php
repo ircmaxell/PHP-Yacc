@@ -12,8 +12,6 @@ class Parser
     /** @var Context */
     protected $context;
     protected $lexer;
-    /** @var ParseResult */
-    protected $result;
     protected $macros;
 
     /** @var Symbol */
@@ -28,18 +26,17 @@ class Parser
         $this->macros = $macros;
     }
 
-    public function parse(string $code, string $filename)
+    public function parse(string $code, string $filename, Context $context = null)
     {
-        $this->result = new ParseResult(new Context);
+        $this->context = $context ?: new Context();
         $this->lexer->startLexing($code, $filename);
-        $this->context = $this->result->ctx;
         $this->doDeclaration();
         $this->doGrammar();
-        $this->result->eofToken = $this->eofToken;
-        $this->result->errorToken = $this->errorToken;
-        $this->result->startPrime = $this->startPrime;
+        $this->context->eofToken = $this->eofToken;
+        $this->context->errorToken = $this->errorToken;
+        $this->context->startPrime = $this->startPrime;
         $this->context->finish();
-        return $this->result;
+        return $this->context;
     }
 
     protected function copyAction(array $symbols, int $n, $delm, array $attribute): string
@@ -89,7 +86,7 @@ class Parser
         $gbuffer = [null];
         $r = new Production('', 0);
         $r->body = [$this->startPrime];
-        $this->result->addGram($r);
+        $this->context->addGram($r);
 
         $t = $this->lexer->get();
 
@@ -109,8 +106,8 @@ class Parser
                 } elseif (($tmp = $this->lexer->get())->t !== ':') {
                     throw new RuntimeException("':' expected, $tmp found");
                 }
-                if ($this->result->startSymbol === null) {
-                    $this->result->startSymbol = $gbuffer[0];
+                if ($this->context->startSymbol === null) {
+                    $this->context->startSymbol = $gbuffer[0];
                 }
             } elseif ($t->t === '|') {
                 if (!$gbuffer[0]) {
@@ -158,7 +155,7 @@ class Parser
                         $gbuffer[$i++] = $g;
                         $attribute[$i] = null;
                         $r->link = $r->body[0]->value;
-                        $g->value = $this->result->addGram($r);
+                        $g->value = $this->context->addGram($r);
                     }
                     $gbuffer[$i++] = $w = $this->context->internSymbol($t->v, false);
                     $attribute[$i] = null;
@@ -180,15 +177,15 @@ class Parser
             $r->precedence = $lastTerm->precedence;
             $r->associativity = $lastTerm->associativity & Symbol::MASK;
             $r->link = $r->body[0]->value;
-            $gbuffer[0]->value = $this->result->addGram($r);
+            $gbuffer[0]->value = $this->context->addGram($r);
 
             if ($t->t === ';') {
                 $t = $this->lexer->get();
             }
         }
-        $this->result->gram(0)->appendToBody($this->result->startSymbol);
+        $this->context->gram(0)->appendToBody($this->context->startSymbol);
         $this->startPrime->value = null;
-        foreach ($this->context->nonTerminals() as $key => $symbol) {
+        foreach ($this->context->nonterminals as $key => $symbol) {
             if ($symbol === $this->startPrime) {
                 continue;
             }
@@ -234,17 +231,17 @@ class Parser
                 case Token::EXPECT:
                     $t = $this->lexer->get();
                     if ($t->t === Token::NUMBER) {
-                        $this->result->expected = (int) $t->v;
+                        $this->context->expected = (int) $t->v;
                     } else {
                         throw new RuntimeException("Missing number");
                     }
                     break;
                 case Token::START:
                     $t = $this->lexer->get();
-                    $this->result->startSymbol = $this->context->internSymbol($t->v, false);
+                    $this->context->startSymbol = $this->context->internSymbol($t->v, false);
                     break;
                 case Token::PURE_PARSER:
-                    $this->result->pureFlag = true;
+                    $this->context->pureFlag = true;
                     break;
                 case EOF:
                     throw new RuntimeException("No grammar given");

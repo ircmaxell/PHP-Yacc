@@ -3,25 +3,22 @@ declare(strict_types=1);
 
 namespace PhpYacc\Code;
 
-use PhpYacc\Lalr\LalrResult;
-use PhpYacc\Yacc\ParseResult;
+use PhpYacc\Grammar\Context;
 
 require_once __DIR__ . "/functions.php";
 
 class Compress
 {
     protected $result;
-    protected $parse;
-    protected $lalr;
+    protected $context;
 
     public $debug = '';
 
-    public function compress(ParseResult $parse, LalrResult $lalr)
+    public function compress(Context $context)
     {
         $this->debug = '';
-        $this->result = new CompressResult($lalr->nstates, $parse->ctx->nTerminals());
-        $this->parse = $parse;
-        $this->lalr = $lalr;
+        $this->result = new CompressResult($context->nstates, $context->nterminals);
+        $this->context = $context;
 
         $this->makeup_table2();
         return $this->result;
@@ -31,12 +28,12 @@ class Compress
     {
         $primv = [];
 
-        for ($i = 0; $i < $this->lalr->nstates; $i++) {
+        for ($i = 0; $i < $this->context->nstates; $i++) {
             $primv[$i] = new Preimage($i);
         }
 
         for ($i = 0; $i < count($this->result->class2nd); $i++) {
-            for ($j = 0; $j < $this->parse->ctx->nTerminals(); $j++) {
+            for ($j = 0; $j < $this->context->nterminals; $j++) {
                 $s = $this->result->class_action[$i][$j];
                 if ($s > 0) {
                     $primv[$s]->classes[] = $i;
@@ -47,10 +44,10 @@ class Compress
         usort($primv, Preimage::class . "::compare");
 
         $nprims = 0;
-        for ($i = 0; $i < $this->lalr->nstates; $i++) {
+        for ($i = 0; $i < $this->context->nstates; $i++) {
             $p = $primv[$i];
             $this->result->prims[$nprims] = $p;
-            for (; $i < $this->lalr->nstates && Preimage::compare($p, $primv[$i]) === 0; $i++) {
+            for (; $i < $this->context->nstates && Preimage::compare($p, $primv[$i]) === 0; $i++) {
                 $this->result->primof[$primv[$i]->index] = $p;
             }
             $p->index = $nprims++;
@@ -59,12 +56,12 @@ class Compress
 
     protected function encode_shift_reduce(array $t, int $count = -1): array
     {
-        for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+        for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
             if (!isset($t[$i])) {
                 break;
             }
-            if ($t[$i] >= $this->lalr->nnonleafstates) {
-                $t[$i] = $this->lalr->nnonleafstates + $this->result->default_act[$t[$i]];
+            if ($t[$i] >= $this->context->nnonleafstates) {
+                $t[$i] = $this->context->nnonleafstates + $this->result->default_act[$t[$i]];
             }
         }
         if ($count === -1) {
@@ -75,28 +72,28 @@ class Compress
 
     protected function makeup_table2()
     {
-        $this->result->term_action = array_fill(0, $this->lalr->nnonleafstates, 0);
-        $this->result->class_action = array_fill(0, $this->lalr->nnonleafstates * 2, 0);
-        $this->result->nonterm_goto = array_fill(0, $this->lalr->nnonleafstates, 0);
-        $this->result->default_act = array_fill(0, $this->lalr->nstates, 0);
-        $this->result->default_goto = array_fill(0, $this->parse->ctx->nNonTerminals(), 0);
+        $this->result->term_action = array_fill(0, $this->context->nnonleafstates, 0);
+        $this->result->class_action = array_fill(0, $this->context->nnonleafstates * 2, 0);
+        $this->result->nonterm_goto = array_fill(0, $this->context->nnonleafstates, 0);
+        $this->result->default_act = array_fill(0, $this->context->nstates, 0);
+        $this->result->default_goto = array_fill(0, $this->context->nnonterminals, 0);
 
         $this->result->resetFrequency();
-        $this->result->state_imagesorted = array_fill(0, $this->lalr->nnonleafstates, 0);
-        $this->result->class_of = array_fill(0, $this->lalr->nstates, 0);
+        $this->result->state_imagesorted = array_fill(0, $this->context->nnonleafstates, 0);
+        $this->result->class_of = array_fill(0, $this->context->nstates, 0);
 
-        for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
-            $this->result->term_action[$i] = array_fill(0, $this->parse->ctx->nTerminals(), CompressResult::VACANT);
-            $this->result->nonterm_goto[$i] = array_fill(0, $this->parse->ctx->nNonTerminals(), CompressResult::VACANT);
+        for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
+            $this->result->term_action[$i] = array_fill(0, $this->context->nterminals, CompressResult::VACANT);
+            $this->result->nonterm_goto[$i] = array_fill(0, $this->context->nnonterminals, CompressResult::VACANT);
 
-            foreach ($this->lalr->states[$i]->shifts as $shift) {
+            foreach ($this->context->states[$i]->shifts as $shift) {
                 if ($shift->through->isTerminal()) {
                     $this->result->term_action[$i][$shift->through->code] = $shift->number;
                 } else {
                     $this->result->nonterm_goto[$i][$shift->through->nb] = $shift->number;
                 }
             }
-            foreach ($this->lalr->states[$i]->reduce as $reduce) {
+            foreach ($this->context->states[$i]->reduce as $reduce) {
                 if ($reduce->symbol->isNilSymbol()) {
                     break;
                 }
@@ -105,7 +102,7 @@ class Compress
             $this->result->state_imagesorted[$i] = $i;
         }
 
-        foreach ($this->lalr->states as $key => $state) {
+        foreach ($this->context->states as $key => $state) {
             foreach ($state->reduce as $r) {
                 if ($r->symbol->isNilSymbol()) {
                     break;
@@ -114,12 +111,12 @@ class Compress
             $this->result->default_act[$key] = $this->result->encode_rederr($r->number);
         }
 
-        for ($j = 0; $j < $this->parse->ctx->nNonTerminals(); $j++) {
+        for ($j = 0; $j < $this->context->nnonterminals; $j++) {
             $max = 0;
             $maxst = CompressResult::VACANT;
             $this->result->resetFrequency();
 
-            for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+            for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 $st = $this->result->nonterm_goto[$i][$j];
                 if ($st > 0) {
                     $this->result->frequency[$st]++;
@@ -137,10 +134,10 @@ class Compress
 
         $j = 0;
 
-        for ($i = 0; $i < $this->lalr->nnonleafstates;) {
+        for ($i = 0; $i < $this->context->nnonleafstates;) {
             $k = $this->result->state_imagesorted[$i];
             $this->result->class_action[$j] = $this->result->term_action[$k];
-            for (; $i < $this->lalr->nnonleafstates && $this->result->cmp_states($this->result->state_imagesorted[$i], $k) === 0; $i++) {
+            for (; $i < $this->context->nnonleafstates && $this->result->cmp_states($this->result->state_imagesorted[$i], $k) === 0; $i++) {
                 $this->result->class_of[$this->result->state_imagesorted[$i]] = $j;
             }
             $j++;
@@ -149,7 +146,7 @@ class Compress
 
         if (DEBUG) {
             $this->debug .= "State=>class:\n";
-            for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+            for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($i % 10 === 0) {
                     $this->debug .= "\n";
                 }
@@ -178,13 +175,13 @@ class Compress
         }
         $this->debug .= "\n";
         for ($j = 0; $j < $this->result->nterms; $j++) {
-            for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+            for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if (!is_vacant($this->result->term_action[$i][$j])) {
                     break;
                 }
             }
-            if ($i < $this->lalr->nnonleafstates) {
-                $this->debug .= sprintf("%8.8s", $this->parse->ctx->symbol($j)->name);
+            if ($i < $this->context->nnonleafstates) {
+                $this->debug .= sprintf("%8.8s", $this->context->symbol($j)->name);
                 for ($i = 0; $i < $this->result->nclasses; $i++) {
                     $this->debug .= printact($this->result->class_action[$i][$j]);
                 }
@@ -194,19 +191,19 @@ class Compress
 
         $this->debug .= "\nNonterminal GOTO table:\n";
         $this->debug .= sprintf("%8.8s", "T\\S");
-        for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+        for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
             $this->debug .= sprintf("%4d", $i);
         }
         $this->debug .= "\n";
-        foreach ($this->parse->ctx->nonTerminals() as $symbol) {
-            for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+        foreach ($this->context->nonterminals as $symbol) {
+            for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->result->nonterm_goto[$i][$symbol->nb] > 0) {
                     break;
                 }
             }
-            if ($i < $this->lalr->nnonleafstates) {
+            if ($i < $this->context->nnonleafstates) {
                 $this->debug .= sprintf("%8.8s", $symbol->name);
-                for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+                for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                     $this->debug .= printact($this->result->nonterm_goto[$i][$symbol->nb]);
                 }
                 $this->debug .= "\n";
@@ -215,20 +212,20 @@ class Compress
 
         $this->debug .= "\nNonterminal GOTO table:\n";
         $this->debug .= sprintf("%8.8s default", "T\\S");
-        for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+        for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
             $this->debug .= sprintf("%4d", $i);
         }
         $this->debug .= "\n";
-        foreach ($this->parse->ctx->nonTerminals() as $symbol) {
-            for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+        foreach ($this->context->nonterminals as $symbol) {
+            for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->result->nonterm_goto[$i][$symbol->nb] > 0) {
                     break;
                 }
             }
-            if ($i < $this->lalr->nnonleafstates) {
+            if ($i < $this->context->nnonleafstates) {
                 $this->debug .= sprintf("%8.8s", $symbol->name);
                 $this->debug .= sprintf("%8d", $this->result->default_goto[$symbol->nb]);
-                for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+                for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                     if ($this->result->nonterm_goto[$i][$symbol->nb] === $this->result->default_goto[$symbol->nb]) {
                         $this->debug .= "  = ";
                     } else {
@@ -349,7 +346,7 @@ class Compress
             }
         }
         if (DEBUG) {
-            for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+            for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->result->class2nd[$this->result->class_of[$i]] >= 0 && $this->result->class2nd[$this->result->class_of[$i]] !== $this->result->class_of[$i]) {
                     $this->debug .= sprintf("state %d (class %d): aux[%d]\n", $i, $this->result->class_of[$i], $this->result->class2nd[$this->result->class_of[$i]]);
                 } else {
@@ -397,12 +394,12 @@ class Compress
 
         $ncterms = 0;
         for ($j = 0; $j < $this->result->nterms; $j++) {
-            if ($j === $this->parse->errorToken->code) {
+            if ($j === $this->context->errorToken->code) {
                 $this->result->ctermindex[$j] = $ncterms;
                 $this->result->otermindex[$ncterms++] = $j;
                 continue;
             }
-            for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+            for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->result->term_action[$i][$j] !== CompressResult::VACANT) {
                     $this->result->ctermindex[$j] = $ncterms;
                     $this->result->otermindex[$ncterms++] = $j;
@@ -442,15 +439,15 @@ class Compress
         $this->pack_table($cterm_action, $this->result->naux, $ncterms, false, false, $this->result->yyaction, $this->result->yycheck, $base);
         $this->result->yydefault = $this->result->default_act;
 
-        $this->result->yybase = array_fill(0, $this->lalr->nnonleafstates * 2, 0);
-        $this->result->yybasesize = $this->lalr->nnonleafstates;
-        for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+        $this->result->yybase = array_fill(0, $this->context->nnonleafstates * 2, 0);
+        $this->result->yybasesize = $this->context->nnonleafstates;
+        for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
             $cl = $this->result->class_of[$i];
             $this->result->yybase[$i] = $base[$cl];
             if ($this->result->class2nd[$cl] >= 0 && $this->result->class2nd[$cl] != $cl) {
-                $this->result->yybase[$i + $this->lalr->nnonleafstates] = $base[$this->result->class2nd[$cl]];
-                if ($i + $this->lalr->nnonleafstates + 1 > $this->result->yybasesize) {
-                    $this->result->yybasesize = $i + $this->lalr->nnonleafstates + 1;
+                $this->result->yybase[$i + $this->context->nnonleafstates] = $base[$this->result->class2nd[$cl]];
+                if ($i + $this->context->nnonleafstates + 1 > $this->result->yybasesize) {
+                    $this->result->yybasesize = $i + $this->context->nnonleafstates + 1;
                 }
             }
         }
@@ -458,9 +455,9 @@ class Compress
         $this->result->yybase = array_slice($this->result->yybase, 0, $this->result->yybasesize);
 
         #642
-        $nonterm_transposed = array_fill(0, $this->parse->ctx->nNonTerminals(), array_fill(0, $this->lalr->nnonleafstates, 0));
+        $nonterm_transposed = array_fill(0, $this->context->nnonterminals, array_fill(0, $this->context->nnonleafstates, 0));
         foreach ($nonterm_transposed as $j => $_dump) {
-            for ($i = 0; $i < $this->lalr->nnonleafstates; $i++) {
+            for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 $nonterm_transposed[$j][$i] = $this->result->nonterm_goto[$i][$j];
                 if ($this->result->nonterm_goto[$i][$j] === $this->result->default_goto[$j]) {
                     $nonterm_transposed[$j][$i] = CompressResult::VACANT;
@@ -468,13 +465,13 @@ class Compress
             }
         }
 
-        $this->pack_table($nonterm_transposed, $this->parse->ctx->nNonTerminals(), $this->lalr->nnonleafstates, false, true, $this->result->yygoto, $this->result->yygcheck, $this->result->yygbase);
+        $this->pack_table($nonterm_transposed, $this->context->nnonterminals, $this->context->nnonleafstates, false, true, $this->result->yygoto, $this->result->yygcheck, $this->result->yygbase);
 
         $this->result->yygdefault = $this->result->default_goto;
 
         $this->result->yylhs = [];
         $this->result->yylen = [];
-        foreach ($this->lalr->grams as $gram) {
+        foreach ($this->context->grams as $gram) {
             // TODO: This is wrong... I think...
             $this->result->yylhs[] = $gram->body[1]->nb - 1;
             $this->result->yylen[] = count($gram->body) - 1;
@@ -483,7 +480,7 @@ class Compress
         $yytranslatesize = 0;
         $minSymbolMap = 256;
 
-        foreach ($this->parse->ctx->terminals() as $term) {
+        foreach ($this->context->terminals as $term) {
             $value = $term->value;
             if (is_string($value)) {
                 $term->value = ord($value);
@@ -501,16 +498,16 @@ class Compress
         $this->result->yyncterms = $ncterms;
 
         
-        for ($i = 0; $i < $this->parse->ctx->nTerminals(); $i++) {
+        for ($i = 0; $i < $this->context->nterminals; $i++) {
             if ($this->result->ctermindex[$i] >= 0) {
-                $symbol = $this->parse->ctx->symbol($i);
+                $symbol = $this->context->symbol($i);
                 $this->result->yytranslate[$symbol->value] = $this->result->ctermindex[$i];
             }
         }
 
         $this->result->yyaction = $this->encode_shift_reduce($this->result->yyaction);
         $this->result->yygoto = $this->encode_shift_reduce($this->result->yygoto);
-        $this->result->yygdefault = $this->encode_shift_reduce($this->result->yygdefault, $this->parse->ctx->nNonTerminals());
+        $this->result->yygdefault = $this->encode_shift_reduce($this->result->yygdefault, $this->context->nnonterminals);
     }
 
     protected function pack_table(array $transit, int $nrows, int $ncols, bool $dontcare, bool $checkrow, array &$outtable, array &$outcheck, array &$outbase)
