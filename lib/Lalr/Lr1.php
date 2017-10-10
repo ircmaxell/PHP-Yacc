@@ -7,14 +7,13 @@ use PhpYacc\Grammar\Symbol;
 
 use PhpYacc\Lalr\Item;
 
-
 /**
  * @property Lr1|null $next
  * @property Symbol $left
  * @property Item $item
  */
-class Lr1 {
-  
+class Lr1
+{
     protected $_next;
     protected $_left;
     protected $_item;
@@ -56,5 +55,4 @@ class Lr1 {
     {
         return $this->_item->isHeadItem();
     }
-
 }

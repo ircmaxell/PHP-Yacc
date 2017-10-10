@@ -9,8 +9,8 @@ use PhpYacc\Grammar\Symbol;
  * @property Symbol $symbol
  * @property int $number
  */
-class Reduce {
-  
+class Reduce
+{
     protected $_symbol;
     protected $_number;
 
@@ -30,7 +30,8 @@ class Reduce {
         $this->{'set' . $name}($value);
     }
 
-    public function setNumber(int $number) {
+    public function setNumber(int $number)
+    {
         $this->_number = $number;
     }
 }

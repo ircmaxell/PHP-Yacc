@@ -4,16 +4,13 @@ declare(strict_types=1);
 namespace PhpYacc\Yacc;
 
 use RuntimeException;
-use PhpYacc\Grammar\{
-    Context,
-    Symbol
-};
-use PhpYacc\{
-    MacroSet,
-    Token
-};
+use PhpYacc\Grammar\Context;
+use PhpYacc\Grammar\Symbol;
+use PhpYacc\MacroSet;
+use PhpYacc\Token;
 
-class Parser  {
+class Parser
+{
     /** @var Context */
     protected $context;
     protected $lexer;
@@ -65,7 +62,7 @@ class Parser  {
             $tokens[] = $t;
         }
         $expanded = $this->macros->apply($this->context, $symbols, $tokens, $n, $attribute);
-        return implode('', array_map(function(Token $t) {
+        return implode('', array_map(function (Token $t) {
             return $t->v;
         }, $expanded));
     }
@@ -244,7 +241,7 @@ class Parser  {
                         throw new RuntimeException("Missing number");
                     }
                     break;
-                case Tokens::START;
+                case Tokens::START:
                     $t = $this->lexer->get();
                     $this->result->startSymbol = $this->context->internSymbol($t->v, false);
                     break;
@@ -258,7 +255,6 @@ class Parser  {
                     throw new RuntimeException("Syntax error, unexpected {$t->v}");
             }
         }
-
     }
 
     protected $currentPrecedence = 0;
@@ -341,5 +337,4 @@ class Parser  {
         $this->unioned = true;
         return $this->context->intern($p);
     }
-
 }

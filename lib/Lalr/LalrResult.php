@@ -1,9 +1,11 @@
 <?php
 
 namespace PhpYacc\Lalr;
+
 use PhpYacc\Yacc\ParseResult;
 
-class LalrResult {
+class LalrResult
+{
     public $grams;
     public $nstates = 0;
     public $states;
@@ -18,5 +20,4 @@ class LalrResult {
         $this->output = $output;
         $this->nnonleafstates = $nnonleafstates;
     }
-
-} 
+}

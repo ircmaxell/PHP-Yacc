@@ -6,8 +6,8 @@ use PhpYacc\Grammar\Context;
 use Generator;
 use Iterator;
 
-abstract class Macro {
-
+abstract class Macro
+{
     abstract public function apply(Context $ctx, array $symbols, Iterator $tokens, int $n, array $attribute): Generator;
 
     protected static function next(Iterator $it): Token
@@ -18,5 +18,4 @@ abstract class Macro {
         }
         return $it->current();
     }
-
 }

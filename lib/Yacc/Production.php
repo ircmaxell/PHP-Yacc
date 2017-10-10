@@ -14,7 +14,8 @@ use PhpYacc\Grammar\Symbol;
  * @property Symbol[] $body
  * @property int $num
  */
-class Production {
+class Production
+{
     const EMPTY = 0x10;
 
     protected $_link;
@@ -75,15 +76,18 @@ class Production {
         $this->_action = $action;
     }
 
-    public function setNum(int $num) {
+    public function setNum(int $num)
+    {
         $this->_num = $num;
     }
 
-    public function appendToBody(Symbol $symbol) {
+    public function appendToBody(Symbol $symbol)
+    {
         $this->_body[] = $symbol;
     }
 
-    public function isEmpty(): bool {
+    public function isEmpty(): bool
+    {
         return count($this->_body) === 1;
     }
 }

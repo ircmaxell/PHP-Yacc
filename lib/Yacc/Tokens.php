@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
-class Tokens {
+class Tokens
+{
     const NAME        = 0x0200;
     const NUMBER      = 0x0201;
     const SPACE       = ' ';

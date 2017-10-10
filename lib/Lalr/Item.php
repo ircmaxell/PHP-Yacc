@@ -7,8 +7,8 @@ use IteratorAggregate;
 use ArrayAccess;
 use PhpYacc\Yacc\Production;
 
-class Item implements ArrayAccess, IteratorAggregate {
-
+class Item implements ArrayAccess, IteratorAggregate
+{
     protected $production;
     protected $pos = 0;
 
@@ -55,23 +55,28 @@ class Item implements ArrayAccess, IteratorAggregate {
         throw new \Exception("Not supported");
     }
 
-    public function isHeadItem() {
+    public function isHeadItem()
+    {
         return $this->pos === 1;
     }
 
-    public function isTailItem() {
+    public function isTailItem()
+    {
         return $this->pos === count($this->production->body);
     }
 
-    public function getProduction(): Production {
+    public function getProduction(): Production
+    {
         return $this->production;
     }
 
-    public function getPos(): int {
+    public function getPos(): int
+    {
         return $this->pos;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         $result = "(" . $this->production->num . ") ";
         for ($i = 0; $i < count($this->production->body); $i++) {
             if ($i === 1) {

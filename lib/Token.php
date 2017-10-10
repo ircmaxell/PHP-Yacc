@@ -2,7 +2,8 @@
 declare(strict_types=1);
 namespace PhpYacc;
 
-class Token {
+class Token
+{
     public $t;
     public $v;
     public function __construct($token, string $value, int $lineNumber, string $filename)

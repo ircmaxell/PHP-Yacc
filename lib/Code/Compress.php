@@ -8,7 +8,8 @@ use PhpYacc\Yacc\ParseResult;
 
 require_once __DIR__ . "/functions.php";
 
-class Compress {
+class Compress
+{
     protected $result;
     protected $parse;
     protected $lalr;
@@ -166,7 +167,6 @@ class Compress {
         $this->extract_common();
 
         $this->authodox_table();
-
     }
 
     protected function print_table()
@@ -389,7 +389,7 @@ class Compress {
         $aux->gain = $gain;
     }
 
-    protected function authodox_table() 
+    protected function authodox_table()
     {
         // TODO
         $this->result->ctermindex = array_fill(0, $this->result->nterms, -1);
@@ -408,7 +408,7 @@ class Compress {
                     $this->result->otermindex[$ncterms++] = $j;
                     break;
                 }
-            }            
+            }
         }
 
         $cterm_action = array_fill(0, $this->result->naux, array_fill(0, $ncterms, 0));
@@ -430,7 +430,6 @@ class Compress {
                         } elseif ($cterm_action[$i][$j] === CompressResult::VACANT) {
                             $cterm_action[$i][$j] = CompressResult::YYDEFAULT;
                         }
-
                     }
                 }
             }
@@ -512,7 +511,6 @@ class Compress {
         $this->result->yyaction = $this->encode_shift_reduce($this->result->yyaction);
         $this->result->yygoto = $this->encode_shift_reduce($this->result->yygoto);
         $this->result->yygdefault = $this->encode_shift_reduce($this->result->yygdefault, $this->parse->ctx->nNonTerminals());
-        
     }
 
     protected function pack_table(array $transit, int $nrows, int $ncols, bool $dontcare, bool $checkrow, array &$outtable, array &$outcheck, array &$outbase)
@@ -606,5 +604,4 @@ class Compress {
         $outcheck = array_slice($check, 0, $actpoolmax);
         $outbase = $base;
     }
-
 }

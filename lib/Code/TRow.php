@@ -3,16 +3,14 @@ declare(strict_types=1);
 
 namespace PhpYacc\Code;
 
-
 class TRow
 {
-
     public $index;
     public $mini;
     public $maxi;
     public $nent;
 
-    public function __construct(int $index) 
+    public function __construct(int $index)
     {
         $this->index = $index;
         $this->mini = -1;
@@ -40,5 +38,4 @@ class TRow
         }
         return $a->mini - $b->mini;
     }
-
 }

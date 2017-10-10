@@ -5,8 +5,8 @@ namespace PhpYacc\Grammar;
 
 use Generator;
 
-class Context {
-
+class Context
+{
     protected $counter = 0;
     protected $symbolHash = [];
     protected $symbols = [];
@@ -36,7 +36,7 @@ class Context {
             $nonterm->code = $code++;
         }
 
-        usort($this->symbols, function($a, $b) {
+        usort($this->symbols, function ($a, $b) {
             return $a->code <=> $b->code;
         });
     }
@@ -151,6 +151,4 @@ class Context {
             }
         }
     }
-
-
 }

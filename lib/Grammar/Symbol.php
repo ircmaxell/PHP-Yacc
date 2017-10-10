@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
+
 use PhpYacc\Yacc\Production;
 
 /**
@@ -13,8 +14,8 @@ use PhpYacc\Yacc\Production;
  * @property string $name
  * @property int $terminal
  */
-class Symbol {
-
+class Symbol
+{
     const UNDEF = 0;
     const LEFT = 1;
     const RIGHT = 2;
@@ -43,7 +44,6 @@ class Symbol {
         $this->_precedence = $precedence;
         $this->_associativity = $associativity;
         $this->_type = $type;
-
     }
 
     public function isTerminal(): bool
@@ -122,5 +122,4 @@ class Symbol {
             throw new \LogicException("Should never happen, code being less than nb");
         }
     }
-
 }

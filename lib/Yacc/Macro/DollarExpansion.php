@@ -10,7 +10,8 @@ use PhpYacc\Yacc\Tokens;
 use PhpYacc\Grammar\Context;
 use RuntimeException;
 
-class DollarExpansion extends Macro {
+class DollarExpansion extends Macro
+{
     const SEMVAL_LHS_TYPED   = 1;
     const SEMVAL_LHS_UNTYPED = 2;
     const SEMVAL_RHS_TYPED   = 3;
@@ -23,7 +24,8 @@ class DollarExpansion extends Macro {
         self::SEMVAL_RHS_UNTYPED => '$stackPos-(%l-%n)',
     ];
 
-    public function setMacro(int $name, string $value) {
+    public function setMacro(int $name, string $value)
+    {
         $this->macros[$name] = $value;
     }
 
@@ -98,7 +100,7 @@ semval:
                     if ($type === null) {
                         $type = $symbols[$v]->type;
                     }
-                    if ($type === NULL /** && $ctx->unioned */ && false) {
+                    if ($type === null /** && $ctx->unioned */ && false) {
                         throw new RuntimeException("Type not defined for " . $symbols[$v]->name);
                     }
                     foreach ($this->parseDollar($t, $v, $n, $type ? $type->name : null) as $t) {
@@ -113,7 +115,6 @@ semval:
 
     protected function parseDollar(Token $t, int $nth, int $len, string $type = null): array
     {
-
         if ($t->t === '$') {
             if ($type) {
                 $mp = $this->macros[self::SEMVAL_LHS_TYPED];
@@ -148,9 +149,7 @@ semval:
             } else {
                 $result .= $mp[$i];
             }
-
         }
         return $this->parse($result, $t->ln, $t->fn);
     }
-
 }

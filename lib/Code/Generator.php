@@ -6,9 +6,8 @@ namespace PhpYacc\Code;
 use PhpYacc\Lalr\LalrResult;
 use PhpYacc\Yacc\ParseResult;
 
-
-class Generator {
-
+class Generator
+{
     protected $invalidSymbol = 0;
     protected $errorSymbol = 0;
     public $output;
@@ -16,7 +15,6 @@ class Generator {
 
     public function generate(string $className, ParseResult $parse, LalrResult $lalr): string
     {
-
         $compress = new Compress;
         $r = $compress->compress($parse, $lalr);
         $this->output = $compress->debug;
@@ -161,6 +159,4 @@ class Generator {
         $result .= "        ];\n    }\n";
         return $result;
     }
-
-
 }

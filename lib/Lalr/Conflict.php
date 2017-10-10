@@ -5,8 +5,8 @@ namespace PhpYacc\Lalr;
 
 use PhpYacc\Grammar\Symbol;
 
-abstract class Conflict {
-
+abstract class Conflict
+{
     protected $next;
     protected $symbol;
 
@@ -40,5 +40,4 @@ abstract class Conflict {
     {
         $this->next = $next;
     }
-
 }

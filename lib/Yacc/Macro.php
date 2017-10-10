@@ -8,8 +8,8 @@ use Iterator;
 use PhpYacc\Macro as CoreMacro;
 use PhpYacc\Token;
 
-abstract class Macro extends CoreMacro {
-
+abstract class Macro extends CoreMacro
+{
     protected function parse(string $string, int $lineNumber, string $filename): array
     {
         $i = 0;
@@ -30,5 +30,4 @@ abstract class Macro extends CoreMacro {
         }
         return $tokens;
     }
-
 }

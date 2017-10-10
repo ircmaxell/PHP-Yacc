@@ -7,8 +7,8 @@ use PhpYacc\Grammar\Symbol;
 
 use PhpYacc\Lalr\State;
 
-class CompressResult {
-
+class CompressResult
+{
     const YYUNEXPECTED = 32767;
     const YYDEFAULT = -32766;
     const VACANT = -32768;
@@ -88,5 +88,4 @@ class CompressResult {
         }
         return 0;
     }
-
 }

@@ -8,8 +8,8 @@ use ArrayIterator;
 use Traversable;
 use CachingIterator;
 
-class MacroSet {
-
+class MacroSet
+{
     protected $macros = [];
 
     public function __construct(Macro ...$macros)
@@ -40,7 +40,8 @@ class MacroSet {
         return iterator_to_array($tokens);
     }
 
-    protected function genId(Traversable $it): string {
+    protected function genId(Traversable $it): string
+    {
         $id = '';
         foreach ($it as $t) {
             $id .= $t->v;
@@ -52,5 +53,4 @@ class MacroSet {
     {
         return new ArrayIterator(iterator_to_array($t));
     }
-
 }

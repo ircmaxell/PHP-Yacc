@@ -5,8 +5,8 @@ namespace PhpYacc\Yacc;
 
 use PHPUnit\Framework\TestCase;
 
-class LexerTest extends Testcase {
-
+class LexerTest extends Testcase
+{
     public static function provideTestAtoms()
     {
         return [
@@ -41,5 +41,4 @@ class LexerTest extends Testcase {
         $tok->init($f);
         return $tok;
     }
-
 }

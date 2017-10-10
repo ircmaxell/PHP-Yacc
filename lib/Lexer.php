@@ -2,8 +2,8 @@
 
 namespace PhpYacc;
 
-interface Lexer {
-
+interface Lexer
+{
     public function peek(): Token;
 
     public function get(): Token;
@@ -11,5 +11,4 @@ interface Lexer {
     public function unget();
 
     public function rawGet(): Token;
-
 }

@@ -12,11 +12,11 @@ require_once __DIR__ . '/functions.php';
 const EOF = "EOF";
 const MAXTOKEN = 50000;
 
-class Lexer implements CoreLexer {
-
+class Lexer implements CoreLexer
+{
     const SPACE_TOKENS = [
-        Tokens::SPACE, 
-        Tokens::COMMENT, 
+        Tokens::SPACE,
+        Tokens::COMMENT,
         Tokens::NEWLINE,
     ];
 
@@ -69,7 +69,7 @@ class Lexer implements CoreLexer {
     public function unget()
     {
         if ($this->backToken) {
-          throw new RuntimeException("Too many ungetToken calls");
+            throw new RuntimeException("Too many ungetToken calls");
         }
         $this->backToken = $this->token;
     }
@@ -118,9 +118,9 @@ class Lexer implements CoreLexer {
                 $p = '//';
                 do {
                     $c = $this->getc();
-                    if ($c !== EOF) { 
+                    if ($c !== EOF) {
                         $p .= $c;
-                      }
+                    }
                 } while ($c !== "\n" && $c !== EOF);
                 return $this->token(Tokens::COMMENT, $p);
             }
@@ -242,5 +242,4 @@ class Lexer implements CoreLexer {
         }
         $this->backChar = $c;
     }
-
 }

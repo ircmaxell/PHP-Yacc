@@ -3,10 +3,8 @@ declare(strict_types=1);
 
 namespace PhpYacc\Code;
 
-
 class Preimage
 {
-
     public $index = 0;
     public $classes = [];
 
@@ -27,5 +25,4 @@ class Preimage
         }
         return 0;
     }
-
 }
