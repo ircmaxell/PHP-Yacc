@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpYacc\Code;
+namespace PhpYacc\Compress;
 
 class Auxiliary
 {

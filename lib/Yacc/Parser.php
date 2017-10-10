@@ -26,10 +26,10 @@ class Parser
         $this->macros = $macros;
     }
 
-    public function parse(string $code, string $filename, Context $context = null)
+    public function parse(string $code, Context $context = null)
     {
         $this->context = $context ?: new Context();
-        $this->lexer->startLexing($code, $filename);
+        $this->lexer->startLexing($code, $this->context->filename);
         $this->doDeclaration();
         $this->doGrammar();
         $this->context->eofToken = $this->eofToken;

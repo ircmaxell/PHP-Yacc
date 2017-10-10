@@ -4,23 +4,23 @@ $start	[ '1' ]
 expr	[ '1' ]
 state unknown:
 	(0) $start : . expr 
-		[ $EOF ]
+		[ EOF ]
 state unknown:
 	(2) expr : '1' . 
-		[ $EOF '+' ]
+		[ EOF '+' ]
 state unknown:
 	(0) $start : expr . 
-		[ $EOF ]
+		[ EOF ]
 	(1) expr : expr . '+' expr 
-		[ $EOF '+' ]
+		[ EOF '+' ]
 state unknown:
 	(1) expr : expr '+' . expr 
-		[ $EOF '+' ]
+		[ EOF '+' ]
 state unknown:
 	(1) expr : expr . '+' expr 
-		[ $EOF '+' ]
+		[ EOF '+' ]
 	(1) expr : expr '+' expr . 
-		[ $EOF '+' ]
+		[ EOF '+' ]
 state 0
 	(0) $start : . expr 
 
@@ -32,7 +32,7 @@ state 1
 	(0) $start : expr . 
 	(1) expr : expr . '+' expr 
 
-	$EOF		accept
+	EOF		accept
 	'+'		shift 2
 	.		error
 
@@ -70,7 +70,7 @@ State=>class:
 
 Terminal action:
      T\S   0   1
-    $EOF  .    0
+     EOF  .    0
      '+'  .    2
      '1'   3  . 
 

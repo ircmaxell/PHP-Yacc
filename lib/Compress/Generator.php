@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpYacc\Code;
+namespace PhpYacc\Compress;
 
 use PhpYacc\Grammar\Context;
 
@@ -40,9 +40,9 @@ class Generator
             }
         }
 
-        $template .= "    protected \$defaultAction       = " . $r::YYDEFAULT . ";\n";
+        $template .= "    protected \$defaultAction       = " . Compress::YYDEFAULT . ";\n";
 
-        $template .= "    protected \$unexpectedTokenRule = " . $r::YYUNEXPECTED . ";\n";
+        $template .= "    protected \$unexpectedTokenRule = " . Compress::YYUNEXPECTED . ";\n";
 
         $template .= "\n";
 

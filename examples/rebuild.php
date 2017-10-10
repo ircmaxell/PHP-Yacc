@@ -8,15 +8,7 @@ const DEBUG = 1;
 
 $it = new DirectoryIterator(__DIR__);
 
-$lexer = new PhpYacc\Yacc\Lexer();
-$macroset = new PhpYacc\Yacc\MacroSet;
-
-$parser = new PhpYacc\Yacc\Parser($lexer, $macroset);
-
-
-$generator = new PhpYacc\Lalr\Generator;
-
-$compiler = new PhpYacc\Code\Generator;
+$generator = new PhpYacc\Generator;
 
 
 foreach ($it as $file) {
@@ -40,12 +32,7 @@ foreach ($it as $file) {
     echo "Kmyacc output: \"$output\"\n";
 
 
-
-    $context = $parser->parse(file_get_contents($grammar), $grammar, new Context("$dir/y.phpyacc.output"));
-
-    $generator->compute($context, $grammar);
-
-    $code = $compiler->generate("Parser", $context);
+    $code = $generator->generate(file_get_contents($grammar), $grammar, file_get_contents($skeleton), "$dir/y.phpyacc.output");
 
     file_put_contents("$dir/parser.phpyacc.php", $code);
 

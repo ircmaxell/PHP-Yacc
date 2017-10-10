@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace PhpYacc\Grammar;
 
 use PhpYacc\Yacc\Production;
-
+use PhpYacc\Yacc\Macro\DollarExpansion;
 use Generator;
 
 /**
@@ -23,6 +23,13 @@ use Generator;
  */
 class Context
 {
+    public $macros = [
+        DollarExpansion::SEMVAL_LHS_TYPED => '',
+        DollarExpansion::SEMVAL_LHS_UNTYPED => '',
+        DollarExpansion::SEMVAL_RHS_TYPED => '',
+        DollarExpansion::SEMVAL_RHS_UNTYPED => '',
+    ];
+
     protected $_nsymbols = 0;
     protected $symbolHash = [];
     protected $_symbols = [];
@@ -35,6 +42,11 @@ class Context
     protected $_nstates = 0;
     protected $_nnonleafstates = 0;
 
+    public $aflag = false;
+    public $tflag = false;
+    public $pspref = '';
+
+    public $filename = 'YY';
     public $pureFlag = false;
     public $startSymbol = null;
     public $expected = null;
@@ -45,10 +57,27 @@ class Context
     protected $_grams = [];
     protected $_ngrams = 0;
 
+    public $default_act = [];
+    public $default_goto = [];
+    public $term_action = [];
+    public $class_action = [];
+    public $nonterm_goto = [];
+    public $class_of = [];
+    public $ctermindex = [];
+    public $otermindex = [];
+    public $frequency = [];
+    public $state_imagesorted = [];
+    public $prims = [];
+    public $primof = [];
+    public $class2nd = [];
+    public $nclasses = 0;
+    public $naux = 0;
+
     protected $debugFile;
 
-    public function __construct(string $file = null)
+    public function __construct(string $filename = 'YY', string $file = null)
     {
+        $this->filename = $filename;
         $this->debugFile = $file ? fopen($file, 'w') : null;
     }
 

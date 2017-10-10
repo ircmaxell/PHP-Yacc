@@ -16,17 +16,6 @@ class DollarExpansion extends MacroAbstract
     const SEMVAL_RHS_TYPED   = 3;
     const SEMVAL_RHS_UNTYPED = 4;
 
-    protected $macros = [
-        self::SEMVAL_LHS_TYPED => '$this->semValue',
-        self::SEMVAL_LHS_UNTYPED => '$this->semValue',
-        self::SEMVAL_RHS_TYPED => '$stackPos-(%l-%n)',
-        self::SEMVAL_RHS_UNTYPED => '$stackPos-(%l-%n)',
-    ];
-
-    public function setMacro(int $name, string $value)
-    {
-        $this->macros[$name] = $value;
-    }
 
     public function apply(Context $ctx, array $symbols, Iterator $tokens, int $n, array $attribute): Generator
     {
@@ -102,7 +91,7 @@ semval:
                     if ($type === null /** && $ctx->unioned */ && false) {
                         throw new RuntimeException("Type not defined for " . $symbols[$v]->name);
                     }
-                    foreach ($this->parseDollar($t, $v, $n, $type ? $type->name : null) as $t) {
+                    foreach ($this->parseDollar($ctx, $t, $v, $n, $type ? $type->name : null) as $t) {
                         yield $t;
                     }
 
@@ -112,19 +101,19 @@ semval:
         }
     }
 
-    protected function parseDollar(Token $t, int $nth, int $len, string $type = null): array
+    protected function parseDollar(Context $ctx, Token $t, int $nth, int $len, string $type = null): array
     {
         if ($t->t === '$') {
             if ($type) {
-                $mp = $this->macros[self::SEMVAL_LHS_TYPED];
+                $mp = $ctx->macros[self::SEMVAL_LHS_TYPED];
             } else {
-                $mp = $this->macros[self::SEMVAL_LHS_UNTYPED];
+                $mp = $ctx->macros[self::SEMVAL_LHS_UNTYPED];
             }
         } else {
             if ($type) {
-                $mp = $this->macros[self::SEMVAL_RHS_TYPED];
+                $mp = $ctx->macros[self::SEMVAL_RHS_TYPED];
             } else {
-                $mp = $this->macros[self::SEMVAL_RHS_UNTYPED];
+                $mp = $ctx->macros[self::SEMVAL_RHS_UNTYPED];
             }
         }
 
