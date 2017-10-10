@@ -421,6 +421,7 @@ class Generator
     {
         foreach ($st->shifts as $t) {
             if (!$t->through->isTerminal()) {
+                $this->follow[$t->through->code] = $this->blank;
                 for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
                     $this->computeFirst($this->follow[$t->through->code], $x->item);
                 }
