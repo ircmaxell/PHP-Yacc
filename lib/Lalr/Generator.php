@@ -592,7 +592,8 @@ class Generator
     protected function clearVisited()
     {
         $nSymbols = $this->context->nsymbols;
-        $this->visited = array_fill(0, $nSymbols, false);
+        $nGrams = $this->context->ngrams;
+        $this->visited = array_fill(0, max($nSymbols, $nGrams), false);
     }
 
     protected function findEmpty(Lr1 $tail, Symbol $x): Lr1

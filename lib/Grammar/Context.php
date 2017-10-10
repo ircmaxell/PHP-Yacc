@@ -16,6 +16,7 @@ use Generator;
  * @property int $nterminals
  * @property int $nnonterminals
  * @property Production[] $grams
+ * @property int $ngrams
  * @property int $nstates
  * @property State[] $states
  * @property int $nnonleafstates
