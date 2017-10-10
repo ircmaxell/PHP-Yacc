@@ -287,7 +287,7 @@ class Generator
             if (!$tdefact) {
                 $tdefact = -1;
 
-                usort($tmpr, function (Reduce $x, Reduce $y) {
+                $this->stableSort($tmpr, function (Reduce $x, Reduce $y) {
                     if ($x->number != $y->number) {
                         return $y->number - $x->number;
                     }
@@ -314,7 +314,7 @@ class Generator
                 return $reduce->number !== $tdefact;
             });
 
-            usort($tmpr, function (Reduce $x, Reduce $y) {
+            $this->stableSort($tmpr, function (Reduce $x, Reduce $y) {
                 if ($x->symbol !== $y->symbol) {
                     return $x->symbol->code - $y->symbol->code;
                 }
@@ -351,7 +351,7 @@ class Generator
         // Sort states in decreasing order of entries
         // do not move initial state
         $initState = array_shift($this->states);
-        usort($this->states, function (State $p, State $q) {
+        $this->stableSort($this->states, function (State $p, State $q) {
             $numReduces = count($p->reduce) - 1; // -1 for default action
             $pt = $numReduces;
             $pn = count($p->shifts) + $numReduces;
@@ -620,7 +620,7 @@ class Generator
             $array[] = $x;
         }
 
-        usort($array, $cmp);
+        $this->stableSort($array, $cmp);
 
         $list = null;
         /** @var Lr1 $tail */
@@ -635,6 +635,27 @@ class Generator
             $x->next = null;
         }
         return $list;
+    }
+
+    protected function stableSort(array &$array, callable $cmp) {
+        $indexedArray = [];
+        $i = 0;
+        foreach ($array as $item) {
+            $indexedArray[] = [$item, $i++];
+        }
+
+        usort($indexedArray, function(array $a, array $b) use ($cmp) {
+            $result = $cmp($a[0], $b[0]);
+            if ($result !== 0) {
+                return $result;
+            }
+            return $a[1] - $b[1];
+        });
+
+        $array = [];
+        foreach ($indexedArray as $item) {
+            $array[] = $item[0];
+        }
     }
 
     protected function printState(State $state)
