@@ -75,7 +75,7 @@ class Generator
     protected function computeKernels()
     {
         $tmpList = new Lr1(
-            $this->context->startPrime,
+            null,
             $this->blank,
             new Item($this->context->gram(0), 1)
         );
@@ -92,7 +92,7 @@ class Generator
             /** @var Lr1 $x */
             for ($x = $p->items; $x !== null; $x = $x->next) {
                 if (!$x->isTailItem()) {
-                    $wp = new Lr1($this->context->startPrime, $this->blank, $x->item->slice(1));
+                    $wp = new Lr1(null, $this->blank, $x->item->slice(1));
                     if ($tmpTail !== null) {
                         $tmpTail->next = $wp;
                     } else {
@@ -184,7 +184,7 @@ class Generator
                 }
                 foreach ($p->shifts as $t) {
                     for ($x = $t->items; $x !== null; $x = $x->next) {
-                        if ($x->left !== $this->context->startPrime) {
+                        if ($x->left !== null) {
                             $changed |= orbits($this->context, $x->look, $this->follow[$x->left->code]);
                         }
                     }
@@ -439,7 +439,7 @@ class Generator
                 if (!$t->through->isTerminal()) {
                     $p =& $this->follow[$t->through->code];
                     for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
-                        if ($this->isSeqNullable($x->item) && $x->left != $this->context->startPrime) {
+                        if ($this->isSeqNullable($x->item) && $x->left != null) {
                             $changed |= orbits($this->context, $p, $this->follow[$x->left->code]);
                         }
                     }
@@ -564,7 +564,7 @@ class Generator
         $tail = null;
         for ($p = $items; $p !== null; $p = $p->next) {
             $p->look = null;
-            if ($p->left !== $this->context->startPrime) {
+            if ($p->left !== null) {
                 for ($q = $items; $q !== $p; $q = $q->next) {
                     if ($q->left === $p->left) {
                         $p->look = $q->look;
@@ -604,7 +604,7 @@ class Generator
             /** @var Production $gram */
             for ($gram = $x->value; $gram !== null; $gram = $gram->link) {
                 if ($gram->isEmpty()) {
-                    $p = new Lr1($this->context->startPrime, $this->blank, new Item($gram, 1));
+                    $p = new Lr1(null, $this->blank, new Item($gram, 1));
                     $tail->next = $p;
                     $tail = $p;
                     $this->nlooks++;

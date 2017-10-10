@@ -9,7 +9,7 @@ use PhpYacc\Lalr\Item;
 
 /**
  * @property Lr1|null $next
- * @property Symbol $left
+ * @property Symbol|null $left
  * @property Item $item
  */
 class Lr1
@@ -19,7 +19,7 @@ class Lr1
     protected $_item;
     public $look;
 
-    public function __construct(Symbol $left, string $look, Item $item)
+    public function __construct(Symbol $left = null, string $look, Item $item)
     {
         $this->_left = $left;
         $this->look = $look;
