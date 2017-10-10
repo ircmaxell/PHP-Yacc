@@ -12,7 +12,7 @@ class Parser {
     protected $gotoTableSize = 0;
     protected $tokenToSymbolMapSize = 257;
     protected $symbolToName = [
-        'EOF',
+        '$EOF',
         'error',
         '\'1\'',
     ];
@@ -75,7 +75,7 @@ class Parser {
             1,    1,
     ];
    protected $productions = [
-        'start : expr',
+        '$start : expr',
         'expr : \'1\'',
     ];
     protected function initReduceCallbacks() {

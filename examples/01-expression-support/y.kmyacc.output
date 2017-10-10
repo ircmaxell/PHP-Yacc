@@ -55,7 +55,7 @@ state 4
 	.		reduce (1)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/expression-support/parser.kmyacc.phpy:
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/parser.kmyacc.phpy:
 	5 terminal symbols
 	2 nonterminal symbols
 	3 productions

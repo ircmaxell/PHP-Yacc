@@ -30,7 +30,7 @@ state 2
 	.		reduce (1)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/basic-usage/parser.kmyacc.phpy:
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/00-basic-usage/parser.kmyacc.phpy:
 	3 terminal symbols
 	2 nonterminal symbols
 	2 productions

@@ -10,13 +10,13 @@ require_once __DIR__ . "/functions.php";
 class Compress
 {
     protected $result;
+    /**
+     * @var Context $context
+     */
     protected $context;
-
-    public $debug = '';
 
     public function compress(Context $context)
     {
-        $this->debug = '';
         $this->result = new CompressResult($context->nstates, $context->nterminals);
         $this->context = $context;
 
@@ -145,14 +145,14 @@ class Compress
         $this->result->nclasses = $j;
 
         if (DEBUG) {
-            $this->debug .= "State=>class:\n";
+            $this->context->debug("State=>class:\n");
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($i % 10 === 0) {
-                    $this->debug .= "\n";
+                    $this->context->debug("\n");
                 }
-                $this->debug .= sprintf("%3d=>%-3d ", $i, $this->result->class_of[$i]);
+                $this->context->debug(sprintf("%3d=>%-3d ", $i, $this->result->class_of[$i]));
             }
-            $this->debug .= "\n";
+            $this->context->debug("\n");
         }
 
         $this->compute_preimages();
@@ -168,12 +168,12 @@ class Compress
 
     protected function print_table()
     {
-        $this->debug .= "\nTerminal action:\n";
-        $this->debug .= sprintf("%8.8s", "T\\S");
+        $this->context->debug("\nTerminal action:\n");
+        $this->context->debug(sprintf("%8.8s", "T\\S"));
         for ($i = 0; $i < $this->result->nclasses; $i++) {
-            $this->debug .= sprintf("%4d", $i);
+            $this->context->debug(sprintf("%4d", $i));
         }
-        $this->debug .= "\n";
+        $this->context->debug("\n");
         for ($j = 0; $j < $this->result->nterms; $j++) {
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if (!is_vacant($this->result->term_action[$i][$j])) {
@@ -181,20 +181,20 @@ class Compress
                 }
             }
             if ($i < $this->context->nnonleafstates) {
-                $this->debug .= sprintf("%8.8s", $this->context->symbol($j)->name);
+                $this->context->debug(sprintf("%8.8s", $this->context->symbol($j)->name));
                 for ($i = 0; $i < $this->result->nclasses; $i++) {
-                    $this->debug .= printact($this->result->class_action[$i][$j]);
+                    $this->context->debug(printact($this->result->class_action[$i][$j]));
                 }
-                $this->debug .= "\n";
+                $this->context->debug("\n");
             }
         }
 
-        $this->debug .= "\nNonterminal GOTO table:\n";
-        $this->debug .= sprintf("%8.8s", "T\\S");
+        $this->context->debug("\nNonterminal GOTO table:\n");
+        $this->context->debug(sprintf("%8.8s", "T\\S"));
         for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-            $this->debug .= sprintf("%4d", $i);
+            $this->context->debug(sprintf("%4d", $i));
         }
-        $this->debug .= "\n";
+        $this->context->debug("\n");
         foreach ($this->context->nonterminals as $symbol) {
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->result->nonterm_goto[$i][$symbol->nb] > 0) {
@@ -202,20 +202,20 @@ class Compress
                 }
             }
             if ($i < $this->context->nnonleafstates) {
-                $this->debug .= sprintf("%8.8s", $symbol->name);
+                $this->context->debug(sprintf("%8.8s", $symbol->name));
                 for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-                    $this->debug .= printact($this->result->nonterm_goto[$i][$symbol->nb]);
+                    $this->context->debug(printact($this->result->nonterm_goto[$i][$symbol->nb]));
                 }
-                $this->debug .= "\n";
+                $this->context->debug("\n");
             }
         }
 
-        $this->debug .= "\nNonterminal GOTO table:\n";
-        $this->debug .= sprintf("%8.8s default", "T\\S");
+        $this->context->debug("\nNonterminal GOTO table:\n");
+        $this->context->debug(sprintf("%8.8s default", "T\\S"));
         for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-            $this->debug .= sprintf("%4d", $i);
+            $this->context->debug(sprintf("%4d", $i));
         }
-        $this->debug .= "\n";
+        $this->context->debug("\n");
         foreach ($this->context->nonterminals as $symbol) {
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->result->nonterm_goto[$i][$symbol->nb] > 0) {
@@ -223,16 +223,16 @@ class Compress
                 }
             }
             if ($i < $this->context->nnonleafstates) {
-                $this->debug .= sprintf("%8.8s", $symbol->name);
-                $this->debug .= sprintf("%8d", $this->result->default_goto[$symbol->nb]);
+                $this->context->debug(sprintf("%8.8s", $symbol->name));
+                $this->context->debug(sprintf("%8d", $this->result->default_goto[$symbol->nb]));
                 for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                     if ($this->result->nonterm_goto[$i][$symbol->nb] === $this->result->default_goto[$symbol->nb]) {
-                        $this->debug .= "  = ";
+                        $this->context->debug("  = ");
                     } else {
-                        $this->debug .= printact($this->result->nonterm_goto[$i][$symbol->nb]);
+                        $this->context->debug(printact($this->result->nonterm_goto[$i][$symbol->nb]));
                     }
                 }
-                $this->debug .= "\n";
+                $this->context->debug("\n");
             }
         }
     }
@@ -260,22 +260,22 @@ class Compress
         }
 
         if (DEBUG) {
-            $this->debug .= "\nCandidates of aux table:\n";
+            $this->context->debug("\nCandidates of aux table:\n");
             for ($p = $alist; $p !== null; $p = $p->next) {
-                $this->debug .= sprintf("Aux = (%d) ", $p->gain);
+                $this->context->debug(sprintf("Aux = (%d) ", $p->gain));
                 $f = 0;
                 for ($j = 0; $j < $this->result->nterms; $j++) {
                     if (!is_vacant($p->table[$j])) {
-                        $this->debug .= sprintf($f++ ? ",%d" : "%d", $p->table[$j]);
+                        $this->context->debug(sprintf($f++ ? ",%d" : "%d", $p->table[$j]));
                     }
                 }
-                $this->debug .= " * ";
+                $this->context->debug(" * ");
                 for ($j = 0; $j < count($p->preimage->classes); $j++) {
-                    $this->debug .= sprintf($j ? ",%d" : "%d", $p->preimage->classes[$j]);
+                    $this->context->debug(sprintf($j ? ",%d" : "%d", $p->preimage->classes[$j]));
                 }
-                $this->debug .= "\n";
+                $this->context->debug("\n");
             }
-            $this->debug .= "Used aux table:\n";
+            $this->context->debug("Used aux table:\n");
         }
         $this->result->naux = $this->result->nclasses;
         for (;;) {
@@ -323,22 +323,22 @@ class Compress
             }
 
             if (DEBUG) {
-                $this->debug .= sprintf("Selected aux[%d]: (%d) ", $maxaux->index, $maxaux->gain);
+                $this->context->debug(sprintf("Selected aux[%d]: (%d) ", $maxaux->index, $maxaux->gain));
                 $f = 0;
                 for ($j = 0; $j < $this->result->nterms; $j++) {
                     if (!is_vacant($maxaux->table[$j])) {
-                        $this->debug .= sprintf($f++ ? ",%d" : "%d", $maxaux->table[$j]);
+                        $this->context->debug(sprintf($f++ ? ",%d" : "%d", $maxaux->table[$j]));
                     }
                 }
-                $this->debug .= " * ";
+                $this->context->debug(" * ");
                 $f = 0;
                 for ($j = 0; $j < count($maxaux->preimage->classes); $j++) {
                     $cl = $maxaux->preimage->classes[$j];
                     if ($this->result->class2nd[$cl] === $maxaux->index) {
-                        $this->debug .= sprintf($f++ ? ",%d" : "%d", $cl);
+                        $this->context->debug(sprintf($f++ ? ",%d" : "%d", $cl));
                     }
                 }
-                $this->debug .= "\n";
+                $this->context->debug("\n");
             }
 
             for ($p = $alist; $p != null; $p = $p->next) {
@@ -348,9 +348,9 @@ class Compress
         if (DEBUG) {
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->result->class2nd[$this->result->class_of[$i]] >= 0 && $this->result->class2nd[$this->result->class_of[$i]] !== $this->result->class_of[$i]) {
-                    $this->debug .= sprintf("state %d (class %d): aux[%d]\n", $i, $this->result->class_of[$i], $this->result->class2nd[$this->result->class_of[$i]]);
+                    $this->context->debug(sprintf("state %d (class %d): aux[%d]\n", $i, $this->result->class_of[$i], $this->result->class2nd[$this->result->class_of[$i]]));
                 } else {
-                    $this->debug .= sprintf("state %d (class %d)\n", $i, $this->result->class_of[$i]);
+                    $this->context->debug(sprintf("state %d (class %d)\n", $i, $this->result->class_of[$i]));
                 }
             }
         }
@@ -473,7 +473,7 @@ class Compress
         $this->result->yylen = [];
         foreach ($this->context->grams as $gram) {
             // TODO: This is wrong... I think...
-            $this->result->yylhs[] = $gram->body[0]->nb - 1;
+            $this->result->yylhs[] = $gram->body[0]->nb;
             $this->result->yylen[] = count($gram->body) - 1;
         }
 
@@ -532,11 +532,11 @@ class Compress
         usort($trow, [TRow::class, 'compare']);
 
         if (DEBUG) {
-            $this->debug .= "Order:\n";
+            $this->context->debug("Order:\n");
             for ($i = 0; $i < $nrows; $i++) {
-                $this->debug .= sprintf("%d,", $trow[$i]->index);
+                $this->context->debug(sprintf("%d,", $trow[$i]->index));
             }
-            $this->debug .= "\n";
+            $this->context->debug("\n");
         }
 
         $poolsize = $nrows * $ncols;

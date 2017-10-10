@@ -12,7 +12,7 @@ class Parser {
     protected $gotoTableSize = 1;
     protected $tokenToSymbolMapSize = 258;
     protected $symbolToName = [
-        'EOF',
+        '$EOF',
         'error',
         '\'+\'',
         'T_FOO',
@@ -72,13 +72,13 @@ class Parser {
         -32768,    1,
     ];
     protected $ruleToNonTerminal = [
-            0,    0,    3,
+            0,    1,    1,
     ];
     protected $ruleToLength = [
             1,    3,    1,
     ];
    protected $productions = [
-        'start : expr',
+        '$start : expr',
         'expr : expr \'+\' expr',
         'expr : \'1\'',
     ];

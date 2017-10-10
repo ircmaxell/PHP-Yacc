@@ -1,0 +1,66 @@
+EMPTY nonterminals: 
+First:
+$start	[ '1' ]
+expr	[ '1' ]
+state unknown:
+	(0) $start : . expr 
+		[ $EOF ]
+state unknown:
+	(1) expr : '1' . 
+		[ $EOF ]
+state unknown:
+	(0) $start : expr . 
+		[ $EOF ]
+state 0
+	(0) $start : . expr 
+
+	'1'		shift 2 and reduce (1)
+	expr		goto 1
+	.		error
+
+state 1
+	(0) $start : expr . 
+
+	$EOF		accept
+	.		error
+
+state 2
+	(1) expr : '1' . 
+
+	.		reduce (1)
+
+
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/00-basic-usage/grammar.y:
+	3 terminal symbols
+	2 nonterminal symbols
+	2 productions
+	3 states
+	2 non leaf states
+	0 shift/reduce, 0 reduce/reduce conflicts
+	3 lookahead sets used
+	2+4=6 action entries
+State=>class:
+
+  0=>0     1=>1   
+
+Terminal action:
+     T\S   0   1
+    $EOF  .    0
+     '1'   2  . 
+
+Nonterminal GOTO table:
+     T\S   0   1
+    expr   1  . 
+
+Nonterminal GOTO table:
+     T\S default   0   1
+    expr       1  =   . 
+
+Candidates of aux table:
+Used aux table:
+state 0 (class 0)
+state 1 (class 1)
+Order:
+1,0,
+Order:
+0,1,

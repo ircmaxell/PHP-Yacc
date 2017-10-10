@@ -30674,7 +30674,7 @@ state 920
 	.		reduce (281)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/php7/parser.kmyacc.phpy:
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/10-php7/parser.kmyacc.phpy:
 	165 terminal symbols
 	143 nonterminal symbols
 	507 productions
