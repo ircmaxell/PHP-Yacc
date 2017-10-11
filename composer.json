@@ -11,7 +11,10 @@
     "autoload": {
         "psr-4": {
             "PhpYacc\\": "lib/"
-        }
+        },
+        "files": [
+            "lib/functions.php"
+        ]
     },
     "require": {
         "php": ">=7.0"

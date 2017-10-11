@@ -1,0 +1,119 @@
+EMPTY nonterminals: 
+First:
+$start	[ T_FOO '1' ]
+expr	[ T_FOO '1' ]
+state unknown:
+	(0) $start : . expr 
+		[ EOF ]
+state unknown:
+	(3) expr : T_FOO . expr 
+		[ EOF '+' ]
+state unknown:
+	(2) expr : '1' . 
+		[ EOF '+' ]
+state unknown:
+	(0) $start : expr . 
+		[ EOF ]
+	(1) expr : expr . '+' expr 
+		[ EOF '+' ]
+state unknown:
+	(1) expr : expr . '+' expr 
+		[ EOF '+' ]
+	(3) expr : T_FOO expr . 
+		[ EOF '+' ]
+state unknown:
+	(1) expr : expr '+' . expr 
+		[ EOF '+' ]
+state unknown:
+	(1) expr : expr . '+' expr 
+		[ EOF '+' ]
+	(1) expr : expr '+' expr . 
+		[ EOF '+' ]
+state 0
+	(0) $start : . expr 
+
+	T_FOO		shift 1
+	'1'		shift 4 and reduce (2)
+	expr		goto 3
+	.		error
+
+state 1
+	(3) expr : T_FOO . expr 
+
+	T_FOO		shift 1
+	'1'		shift 4 and reduce (2)
+	expr		goto 5 and reduce (3)
+	.		error
+
+state 2
+	(1) expr : expr '+' . expr 
+
+	T_FOO		shift 1
+	'1'		shift 4 and reduce (2)
+	expr		goto 6 and reduce (1)
+	.		error
+
+state 3
+	(0) $start : expr . 
+	(1) expr : expr . '+' expr 
+
+	EOF		accept
+	'+'		shift 2
+	.		error
+
+state 4
+	(2) expr : '1' . 
+
+	.		reduce (2)
+
+state 5
+	(1) expr : expr . '+' expr 
+	(3) expr : T_FOO expr . 
+
+	.		reduce (3)
+
+state 6
+	(1) expr : expr . '+' expr 
+	(1) expr : expr '+' expr . 
+
+	.		reduce (1)
+
+
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-complex-expression-support/grammar.y:
+	5 terminal symbols
+	2 nonterminal symbols
+	4 productions
+	7 states
+	4 non leaf states
+	0 shift/reduce, 0 reduce/reduce conflicts
+	10 lookahead sets used
+	12+8=20 action entries
+State=>class:
+
+  0=>0     1=>0     2=>0     3=>1   
+
+Terminal action:
+     T\S   0   1
+     EOF  .    0
+     '+'  .    2
+   T_FOO   1  . 
+     '1'   4  . 
+
+Nonterminal GOTO table:
+     T\S   0   1   2   3
+    expr   3   5   6  . 
+
+Nonterminal GOTO table:
+     T\S default   0   1   2   3
+    expr       3  =    5   6  . 
+
+Candidates of aux table:
+Used aux table:
+state 0 (class 0)
+state 1 (class 0)
+state 2 (class 0)
+state 3 (class 1)
+Order:
+1,0,
+Order:
+1,0,

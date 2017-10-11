@@ -55,8 +55,3 @@ function charval(string $string): int
     }
 }
 
-function parseDollar(int $type, int $nth, int $len, string $typename): string
-{
-    $result = '';
-    return $typename;
-}
