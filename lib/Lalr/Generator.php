@@ -36,14 +36,13 @@ class Generator
     protected $nnonleafstates;
     protected $nsrerr;
     protected $nrrerr;
-    protected $filename = '';
 
-    public function compute(Context $context, string $filename = '')
+    public function compute(Context $context)
     {
-        $this->filename = $filename;
         $this->context = $context;
         // Ensure nil symbol is part of nSymbols
         $this->context->nilSymbol();
+        $this->context->finish();
         $nSymbols = $this->context->nsymbols;
         $this->nullable = array_fill(0, $nSymbols, false);
 
@@ -637,14 +636,15 @@ class Generator
         return $list;
     }
 
-    protected function stableSort(array &$array, callable $cmp) {
+    protected function stableSort(array &$array, callable $cmp)
+    {
         $indexedArray = [];
         $i = 0;
         foreach ($array as $item) {
             $indexedArray[] = [$item, $i++];
         }
 
-        usort($indexedArray, function(array $a, array $b) use ($cmp) {
+        usort($indexedArray, function (array $a, array $b) use ($cmp) {
             $result = $cmp($a[0], $b[0]);
             if ($result !== 0) {
                 return $result;
@@ -725,7 +725,7 @@ class Generator
         // TODO check expected_srconf
         $expected_srconf = 0;
         if ($this->nsrerr !== $expected_srconf || $this->nrrerr !== 0) {
-            $this->context->debug("$this->filename: there are ");
+            $this->context->debug("{$this->context->filename}: there are ");
             if ($this->nsrerr !== $expected_srconf) {
                 $this->context->debug(" $this->nsrerr shift/reduce");
                 if ($this->nrrerr !== 0) {
@@ -747,10 +747,11 @@ class Generator
 
         $nterms = iterator_count($this->context->terminals);
         $nnonts = iterator_count($this->context->nonterminals);
+
         $nprods = $this->context->ngrams;
         $totalActs = $this->nacts + $this->nacts2;
 
-        $this->context->debug("\nStatistics for $this->filename:\n");
+        $this->context->debug("\nStatistics for {$this->context->filename}:\n");
         $this->context->debug("\t$nterms terminal symbols\n");
         $this->context->debug("\t$nnonts nonterminal symbols\n");
         $this->context->debug("\t$nprods productions\n");

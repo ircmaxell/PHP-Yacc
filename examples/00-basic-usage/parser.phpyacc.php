@@ -1,7 +1,17 @@
 <?php
-declare(strict_types=1);
-use PhpYacc\Lexer;
-class Parser
+
+namespace PhpParser\Parser;
+
+use PhpParser\Error;
+use PhpParser\Node;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Name;
+use PhpParser\Node\Scalar;
+use PhpParser\Node\Stmt;
+
+/* This is an automatically GENERATED file, which should not be manually edited.
+ */
+class Parser extends \PhpParser\ParserAbstract
 {
     protected $tokenToSymbolMapSize = 257;
     protected $actionTableSize      = 2;
@@ -14,12 +24,14 @@ class Parser
 
     protected $YY2TBLSTATE = 0;
     protected $YYNLSTATES  = 2;
-    protected $symbolToName = [
-        '$EOF',
-        'error',
-        '\'1\'',
-    ];
-    protected $tokenToSymbol = [
+
+    protected $symbolToName = array(
+        "EOF",
+        "error",
+        "'1'"
+    );
+
+    protected $tokenToSymbol = array(
             0,    3,    3,    3,    3,    3,    3,    3,    3,    3,
             3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
             3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
@@ -45,59 +57,59 @@ class Parser
             3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
             3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
             3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-            3,    3,    3,    3,    3,    3,    1,
-    ];
+            3,    3,    3,    3,    3,    3,    1
+    );
 
-    protected $action = [
-            3,    0,
-    ];
+    protected $action = array(
+            3,    0
+    );
 
-    protected $actionCheck = [
-            2,    0,
-    ];
+    protected $actionCheck = array(
+            2,    0
+    );
 
-    protected $actionBase = [
-           -2,    1,
-    ];
+    protected $actionBase = array(
+           -2,    1
+    );
 
-    protected $actionDefault = [
-        32767,32767,
-    ];
+    protected $actionDefault = array(
+        32767,32767
+    );
 
-    protected $goto = [
-    ];
+    protected $goto = array(
+    );
 
-    protected $gotoCheck = [
-            0,    0,
-    ];
+    protected $gotoCheck = array(
+    );
 
-    protected $gotoBase = [
-            0,    0,
-    ];
+    protected $gotoBase = array(
+            0,    0
+    );
 
-    protected $gotoDefault = [
-        -32768,    1,
-    ];
+    protected $gotoDefault = array(
+        -32768,    1
+    );
 
-    protected $ruleToNonTerminal = [
-            0,    1,
-    ];
+    protected $ruleToNonTerminal = array(
+            0,    1
+    );
 
-    protected $ruleToLength = [
-            1,    1,
-    ];
+    protected $ruleToLength = array(
+            1,    1
+    );
 
-   protected $productions = [
-        '$start : expr',
-        'expr : \'1\'',
-    ];
+    protected $productions = array(
+        "\$start : expr",
+        "expr : '1'"
+    );
+
     protected function initReduceCallbacks() {
         $this->reduceCallbacks = [
-            0 => function($stackPos) {
+            0 => function ($stackPos) {
                 $this->semValue = $this->semStack[$stackPos];
             },
-            1 => function($stackPos) {
-                $this->semValue = 1;
+            1 => function ($stackPos) {
+                1
             },
         ];
     }

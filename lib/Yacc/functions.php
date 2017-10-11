@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
@@ -23,16 +23,16 @@ function isGsym(Token $t): bool
     return $t->t === Token::NAME || $t->t === "'";
 }
 
-function charval(string $string): string
+function charval(string $string): int
 {
     $n = 0;
     $length = strlen($string);
     if ($length === 0) {
-        return $string;
+        return 0;
     }
     $c = $string[$n++];
     if ($c !== '\\') {
-        return $c;
+        return ord($c);
     }
     $c = $string[$n++];
     if (isOctal($c)) {
@@ -40,18 +40,18 @@ function charval(string $string): string
         for ($i = 0; $n < $length && isOctal($string[$n]) && $i < 3; $i++) {
             $value = $value * 8 + $string[$n++];
         }
-        return chr($value);
+        return $value;
     }
     switch ($c) {
-        case 'n': return "\n";
-        case 't': return "\t";
-        case 'b': return "\x08";
-        case 'r': return "\r";
-        case 'f': return "\x0C";
-        case 'v': return "\x0B";
-        case 'a': return "\x07";
+        case 'n': return ord("\n");
+        case 't': return ord("\t");
+        case 'b': return ord("\x08");
+        case 'r': return ord("\r");
+        case 'f': return ord("\x0C");
+        case 'v': return ord("\x0B");
+        case 'a': return ord("\x07");
         default:
-            return $c;
+            return ord($c);
     }
 }
 

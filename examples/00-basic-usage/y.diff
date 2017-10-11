@@ -1,0 +1,41 @@
+3c3
+< start	[ '1' ]
+---
+> $start	[ '1' ]
+6c6
+< 	(0) start : . expr
+---
+> 	(0) $start : . expr 
+9c9
+< 	(1) expr : '1' .
+---
+> 	(1) expr : '1' . 
+12c12
+< 	(0) start : expr .
+---
+> 	(0) $start : expr . 
+15c15
+< 	(0) start : . expr
+---
+> 	(0) $start : . expr 
+18d17
+< 	expr		goto 1
+19a19
+> 	expr		goto 1
+22c22
+< 	(0) start : expr .
+---
+> 	(0) $start : expr . 
+28c28
+< 	(1) expr : '1' .
+---
+> 	(1) expr : '1' . 
+33c33
+< Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/00-basic-usage/parser.kmyacc.phpy:
+---
+> Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/00-basic-usage/grammar.y:
+40d39
+< 	3 items
+43,44d41
+< 	1232 bytes used
+< 

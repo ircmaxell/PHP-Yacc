@@ -6,24 +6,30 @@ use PhpYacc\Grammar\Context;
 
 const DEBUG = 1;
 
-$it = new DirectoryIterator(__DIR__);
+$generator = new PhpYacc\Generator;
 
-$lexer = new PhpYacc\Yacc\Lexer();
-$macroset = new PhpYacc\Yacc\MacroSet;
-
-$parser = new PhpYacc\Yacc\Parser($lexer, $macroset);
-
-
-$generator = new PhpYacc\Lalr\Generator;
-
-$compiler = new PhpYacc\Code\Generator;
+if (isset($argv[1])) {
+    buildFolder(realpath($argv[1]));
+} else {
+    buildAll(__DIR__);
+}
 
 
-foreach ($it as $file) {
-    if (!$file->isDir() || $file->isDot()) {
-        continue;
+function buildAll(string $dir)
+{
+    $it = new DirectoryIterator($dir);
+    foreach ($it as $file) {
+        if (!$file->isDir() || $file->isDot()) {
+            continue;
+        }
+        $dir = $file->getPathname();
+        buildFolder($dir);
     }
-    $dir = $file->getPathname();
+}
+
+
+function buildFolder(string $dir) {
+    global $generator;
     echo "Building $dir\n";
 
     $grammar = "$dir/grammar.y";
@@ -40,16 +46,13 @@ foreach ($it as $file) {
     echo "Kmyacc output: \"$output\"\n";
 
 
-
-    $context = $parser->parse(file_get_contents($grammar), $grammar, new Context("$dir/y.phpyacc.output"));
-
-    $generator->compute($context, $grammar);
-
-    $code = $compiler->generate("Parser", $context);
+    $code = $generator->generate(file_get_contents($grammar), $grammar, file_get_contents($skeleton), "$dir/y.phpyacc.output");
 
     file_put_contents("$dir/parser.phpyacc.php", $code);
 
+    shell_exec("cd $dir && diff parser.kmyacc.php parser.phpyacc.php > parser.diff");
 
+    shell_exec("cd $dir && diff y.kmyacc.output y.phpyacc.output > y.diff");
 
 
 }

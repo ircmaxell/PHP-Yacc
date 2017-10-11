@@ -4,24 +4,24 @@ $start	[ '1' ]
 expr	[ '1' ]
 state unknown:
 	(0) $start : . expr 
-		[ $EOF ]
+		[ EOF ]
 state unknown:
 	(1) expr : '1' . 
-		[ $EOF ]
+		[ EOF ]
 state unknown:
 	(0) $start : expr . 
-		[ $EOF ]
+		[ EOF ]
 state 0
 	(0) $start : . expr 
 
 	'1'		shift 2 and reduce (1)
-	expr		goto 1
 	.		error
+	expr		goto 1
 
 state 1
 	(0) $start : expr . 
 
-	$EOF		accept
+	EOF		accept
 	.		error
 
 state 2
@@ -45,7 +45,7 @@ State=>class:
 
 Terminal action:
      T\S   0   1
-    $EOF  .    0
+     EOF  .    0
      '1'   2  . 
 
 Nonterminal GOTO table:

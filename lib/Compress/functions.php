@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpYacc\Code;
+namespace PhpYacc\Compress;
 
 function vacant_row(array $a): bool
 {
@@ -28,12 +28,7 @@ function eq_row(array $a, array $b): bool
 
 function is_vacant($x): bool
 {
-    return $x === CompressResult::VACANT;
-}
-
-function best_covering(array $table, Preimage $preimage): int
-{
-    // TODO
+    return $x === Compress::VACANT;
 }
 
 function printact(int $act): string

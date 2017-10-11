@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
+use function PhpYacc\Yacc\charval;
 use PhpYacc\Yacc\Production;
-
+use PhpYacc\Yacc\Macro\DollarExpansion;
 use Generator;
 
 /**
@@ -23,6 +24,13 @@ use Generator;
  */
 class Context
 {
+    public $macros = [
+        DollarExpansion::SEMVAL_LHS_TYPED => '',
+        DollarExpansion::SEMVAL_LHS_UNTYPED => '',
+        DollarExpansion::SEMVAL_RHS_TYPED => '',
+        DollarExpansion::SEMVAL_RHS_UNTYPED => '',
+    ];
+
     protected $_nsymbols = 0;
     protected $symbolHash = [];
     protected $_symbols = [];
@@ -35,6 +43,11 @@ class Context
     protected $_nstates = 0;
     protected $_nnonleafstates = 0;
 
+    public $aflag = false;
+    public $tflag = false;
+    public $pspref = '';
+
+    public $filename = 'YY';
     public $pureFlag = false;
     public $startSymbol = null;
     public $expected = null;
@@ -45,10 +58,27 @@ class Context
     protected $_grams = [];
     protected $_ngrams = 0;
 
+    public $default_act = [];
+    public $default_goto = [];
+    public $term_action = [];
+    public $class_action = [];
+    public $nonterm_goto = [];
+    public $class_of = [];
+    public $ctermindex = [];
+    public $otermindex = [];
+    public $frequency = [];
+    public $state_imagesorted = [];
+    public $prims = [];
+    public $primof = [];
+    public $class2nd = [];
+    public $nclasses = 0;
+    public $naux = 0;
+
     protected $debugFile;
 
-    public function __construct(string $file = null)
+    public function __construct(string $filename = 'YY', string $file = null)
     {
+        $this->filename = $filename;
         $this->debugFile = $file ? fopen($file, 'w') : null;
     }
 
@@ -86,11 +116,10 @@ class Context
         foreach ($this->terminals() as $term) {
             $term->code = $code++;
         }
-        $nb = $code;
         foreach ($this->nilSymbols() as $nil) {
-            $nil->nb = $nb;
             $nil->code = $code++;
         }
+        $nb = $code;
         foreach ($this->nonTerminals() as $nonterm) {
             $nonterm->nb = $nb;
             $nonterm->code = $code++;
@@ -104,7 +133,7 @@ class Context
     public function nilSymbol(): Symbol
     {
         if ($this->_nilsymbol === null) {
-            $this->_nilsymbol = $this->intern("@nil");
+            $this->_nilsymbol = $this->intern("@nil", false);
         }
         return $this->_nilsymbol;
     }
@@ -164,11 +193,20 @@ class Context
         if (!$p->isNilSymbol()) {
             return $p;
         }
+        if ($isTerm || $s[0] === "'") {
+            if ($s[0] === "'") {
+                $p->value = charval(substr($s, 1, 1));
+            } else {
+                $p->value = -1;
+            }
+            $p->terminal = Symbol::TERMINAL;
+        } else {
+            $p->value = null;
+            $p->terminal = Symbol::NONTERMINAL;
+        }
 
-        $p->terminal = ($isTerm || $p->name[0] === "'") ? Symbol::TERMINAL : Symbol::NONTERMINAL;
         $p->associativity   = Symbol::UNDEF;
         $p->precedence      = Symbol::UNDEF;
-        $p->value           = null;
         return $p;
     }
 
@@ -177,7 +215,7 @@ class Context
         if (isset($this->symbolHash[$s])) {
             return $this->symbolHash[$s];
         }
-        $p = new Symbol($this->_nsymbols++, $s, 0);
+        $p = new Symbol($this->_nsymbols++, $s);
         return $this->addSymbol($p);
     }
 
