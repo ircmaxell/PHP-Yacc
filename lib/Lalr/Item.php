@@ -77,21 +77,21 @@ class Item implements ArrayAccess, IteratorAggregate
 
     public function __toString()
     {
-        $result = "(" . $this->production->num . ") ";
+        $result = "(" . $this->production->num . ")";
         for ($i = 0; $i < count($this->production->body); $i++) {
             if ($i === 1) {
-                $result .= ": ";
+                $result .= " :";
             }
             if ($i === $this->pos) {
-                $result .= ". ";
+                $result .= " .";
             }
-            $result .= $this->production->body[$i]->name . " ";
+            $result .= " " . $this->production->body[$i]->name;
         }
         if ($i === 1) {
-            $result .= ": ";
+            $result .= " :";
         }
         if ($i === $this->pos) {
-            $result .= ". ";
+            $result .= " .";
         }
         return $result;
     }
