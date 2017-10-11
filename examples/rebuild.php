@@ -50,9 +50,9 @@ function buildFolder(string $dir) {
 
     file_put_contents("$dir/parser.phpyacc.php", $code);
 
-    shell_exec("cd $dir && diff parser.kmyacc.php parser.phpyacc.php > parser.diff");
+    shell_exec("cd $dir && diff -w parser.kmyacc.php parser.phpyacc.php > parser.diff");
 
-    shell_exec("cd $dir && diff y.kmyacc.output y.phpyacc.output > y.diff");
+    shell_exec("cd $dir && diff -w y.kmyacc.output y.phpyacc.output > y.diff");
 
 
 }
