@@ -52,7 +52,7 @@
 < define('YY2TBLSTATE', 3);
 ---
 > define('YY2TBLSTATE', 0);
-321,389c323
+321,342d322
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -75,7 +75,7 @@
 <                 case 0:
 <                     yyerror("syntax error");
 <                 case 1:
-<                 case 2:
+344,389d323
 <                     $yyerrflag = 3;
 <                     /* Pop until error-expecting state uncovered */
 < 
@@ -122,9 +122,7 @@
 < }
 < 
 < @tailcode;            case 2:
----
->             case 2:
-391,459c325
+391,437d324
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -172,7 +170,7 @@
 <           $yysstk[++$yysp] = $yystate = $yyn;
 <           break;
 < 
-<                 case 3:
+439,459d325
 <                     @if -t
 <                 YYTRACE_DISCARD($yychar);
 < @endif
@@ -194,8 +192,6 @@
 < }
 < 
 < @tailcode;            case 3:
----
->             case 3:
 461,529c327
 <                 @endreduce
 <         }
