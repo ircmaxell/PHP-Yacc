@@ -65,20 +65,14 @@ class Compress
         }
     }
 
-    protected function encode_shift_reduce(array $t, int $count = -1): array
+    protected function encode_shift_reduce(array $t, int $count): array
     {
-        for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-            if (!isset($t[$i])) {
-                break;
-            }
+        for ($i = 0; $i < $count; $i++) {
             if ($t[$i] >= $this->context->nnonleafstates) {
                 $t[$i] = $this->context->nnonleafstates + $this->context->default_act[$t[$i]];
             }
         }
-        if ($count === -1) {
-            return $t;
-        }
-        return array_slice($t, 0, $count);
+        return $t;
     }
 
     protected function makeup_table2()
@@ -319,7 +313,7 @@ class Compress
 
             for ($j = 0; $j < count($maxaux->preimage->classes); $j++) {
                 $cl = $maxaux->preimage->classes[$j];
-                if (eq_row($this->context->class_action[$cl], $maxaux->table)) {
+                if (eq_row($this->context->class_action[$cl], $maxaux->table, $this->context->nterminals)) {
                     $maxaux->index = $cl;
                 }
             }
@@ -428,7 +422,7 @@ class Compress
             }
         }
 
-        #502
+        #582
 
         for ($i = 0; $i < $this->context->nclasses; $i++) {
             if ($this->context->class2nd[$i] >= 0 && $this->context->class2nd[$i] != $i) {
@@ -487,7 +481,6 @@ class Compress
         $this->result->yylhs = [];
         $this->result->yylen = [];
         foreach ($this->context->grams as $gram) {
-            // TODO: This is wrong... I think...
             $this->result->yylhs[] = $gram->body[0]->nb;
             $this->result->yylen[] = count($gram->body) - 1;
         }
@@ -512,8 +505,8 @@ class Compress
             }
         }
 
-        $this->result->yyaction = $this->encode_shift_reduce($this->result->yyaction);
-        $this->result->yygoto = $this->encode_shift_reduce($this->result->yygoto);
+        $this->result->yyaction = $this->encode_shift_reduce($this->result->yyaction, count($this->result->yyaction));
+        $this->result->yygoto = $this->encode_shift_reduce($this->result->yygoto, count($this->result->yygoto));
         $this->result->yygdefault = $this->encode_shift_reduce($this->result->yygdefault, $this->context->nnonterminals);
     }
 
@@ -554,14 +547,14 @@ class Compress
 
         for ($ii = 0; $ii < $nrows; $ii++) {
             $i = $trow[$ii]->index;
-            if (vacant_row($transit[$i])) {
+            if (vacant_row($transit[$i], $ncols)) {
                 $base[$i] = 0;
-                continue;
+                goto ok;
             }
             for ($h = 0; $h < $ii; $h++) {
-                if (eq_row($transit[$trow[$h]->index], $transit[$i])) {
+                if (eq_row($transit[$trow[$h]->index], $transit[$i], $ncols)) {
                     $base[$i] = $base[$trow[$h]->index];
-                    continue 2;
+                    goto ok;
                 }
             }
             for ($j = 0; $j < $poolsize; $j++) {
@@ -573,7 +566,7 @@ class Compress
                     }
                     for ($h = 0; $h < $ii; $h++) {
                         if ($base[$trow[$h]->index] === $base[$i]) {
-                            continue 2;
+                            goto next;
                         }
                     }
                 }
@@ -584,12 +577,13 @@ class Compress
                             die("Can't happen");
                         }
                         if ($check[$jj] >= 0 && !($dontcare && $actpool[$jj] === $transit[$i][$k])) {
-                            continue 2;
+                            goto next;
                         }
                     }
                     $jj++;
                 }
                 break;
+                next:;
             }
             $jj = $j;
             for ($k = $trow[$ii]->mini; $k < $trow[$ii]->maxi; $k++) {
@@ -602,6 +596,7 @@ class Compress
             if ($jj >= $actpoolmax) {
                 $actpoolmax = $jj;
             }
+            ok:;
         }
 
         $outtable = array_slice($actpool, 0, $actpoolmax);

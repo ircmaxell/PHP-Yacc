@@ -3,30 +3,27 @@ declare(strict_types=1);
 
 namespace PhpYacc\Compress;
 
-function vacant_row(array $a): bool
+function vacant_row(array $array, int $length): bool
 {
-    foreach ($a as $value) {
-        if (!is_vacant($value)) {
+    for ($i = 0; $i < $length; $i++) {
+        if (!is_vacant(($array[$i]))) {
             return false;
         }
     }
     return true;
 }
 
-function eq_row(array $a, array $b): bool
+function eq_row(array $a, array $b, int $length): bool
 {
-    if (count($a) !== count($b)) {
-        return false;
-    }
-    foreach ($a as $key => $value) {
-        if ($value !== $b[$key]) {
+    for ($i = 0; $i < $length; $i++) {
+        if ($a[$i] !== $b[$i]) {
             return false;
         }
     }
     return true;
 }
 
-function is_vacant($x): bool
+function is_vacant(int $x): bool
 {
     return $x === Compress::VACANT;
 }

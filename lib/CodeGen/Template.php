@@ -195,7 +195,7 @@ class Template
                             fprintf($this->fp, " /* empty */");
                         }
                         for ($i = 1; $i < count($info); $i++) {
-                            fprintf($this->fp, " %s", $info[$i]->name);
+                            fprintf($this->fp, " %s", addcslashes($info[$i]->name, '$"'));
                         }
                         if ($gram->num + 1 === $this->context->ngrams) {
                             fwrite($this->fp, "\"\n");
