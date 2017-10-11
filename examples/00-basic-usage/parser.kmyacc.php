@@ -109,7 +109,7 @@ class Parser extends \PhpParser\ParserAbstract
                 $this->semValue = $this->semStack[$stackPos];
             },
             1 => function ($stackPos) {
-                 $this->semValue = 1; 
+                1
             },
         ];
     }

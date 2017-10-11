@@ -250,6 +250,15 @@ class Parser
                     throw new RuntimeException("Syntax error, unexpected {$t->v}");
             }
         }
+        $base = 256;
+        foreach ($this->context->terminals as $terminal) {
+            if ($terminal === $this->context->eofToken) {
+                continue;
+            }
+            if ($terminal->value < 0) {
+                $terminal->value = $base++;
+            }
+        }
     }
 
     protected $currentPrecedence = 0;

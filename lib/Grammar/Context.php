@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
+use function PhpYacc\Yacc\charval;
 use PhpYacc\Yacc\Production;
 use PhpYacc\Yacc\Macro\DollarExpansion;
 use Generator;
@@ -115,11 +116,10 @@ class Context
         foreach ($this->terminals() as $term) {
             $term->code = $code++;
         }
-        $nb = $code;
         foreach ($this->nilSymbols() as $nil) {
-            $nil->nb = $nb;
             $nil->code = $code++;
         }
+        $nb = $code;
         foreach ($this->nonTerminals() as $nonterm) {
             $nonterm->nb = $nb;
             $nonterm->code = $code++;
@@ -188,24 +188,34 @@ class Context
 
     public function internSymbol(string $s, bool $isTerm): Symbol
     {
-        $p = $this->intern($s, $isTerm || $s[0] === "'");
+        $p = $this->intern($s);
         
         if (!$p->isNilSymbol()) {
             return $p;
         }
+        if ($isTerm || $s[0] === "'") {
+            if ($s[0] === "'") {
+                $p->value = charval(substr($s, 1, 1));
+            } else {
+                $p->value = -1;
+            }
+            $p->terminal = Symbol::TERMINAL;
+        } else {
+            $p->value = null;
+            $p->terminal = Symbol::NONTERMINAL;
+        }
 
         $p->associativity   = Symbol::UNDEF;
         $p->precedence      = Symbol::UNDEF;
-        $p->value           = null;
         return $p;
     }
 
-    public function intern(string $s, bool $isTerm): Symbol
+    public function intern(string $s): Symbol
     {
         if (isset($this->symbolHash[$s])) {
             return $this->symbolHash[$s];
         }
-        $p = new Symbol($this->_nsymbols++, $s, $isTerm ? 0 : null, $isTerm ? Symbol::TERMINAL : Symbol::NONTERMINAL);
+        $p = new Symbol($this->_nsymbols++, $s);
         return $this->addSymbol($p);
     }
 

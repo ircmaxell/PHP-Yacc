@@ -88,11 +88,11 @@ class Template
                     foreach ($this->context->grams as $gram) {
                         if ($gram->action) {
                             for ($j = 0; $j < $reducemode['m']; $j++) {
-                                $this->expand_mac($reducemode['mac'][$j], $gram, null);
+                                $this->expand_mac($reducemode['mac'][$j], $gram->num, null);
                             }
                         } else {
                             for ($j = $reducemode['m']; $j < $reducemode['n']; $j++) {
-                                $this->expand_mac($reducemode['mac'][$j], $gram, null);
+                                $this->expand_mac($reducemode['mac'][$j], $gram->num, null);
                             }
                         }
                     }
@@ -116,7 +116,7 @@ class Template
                                 $str = "YYERRTOK";
                             }
                             foreach ($tokenmode['mac'] as $mac) {
-                                $this->expand_mac($mac, $this->context->gram($symbol->value), $str);
+                                $this->expand_mac($mac, $symbol->value, $str);
                             }
                         }
                     }
@@ -252,7 +252,7 @@ class Template
         }
     }
 
-    protected function expand_mac(string $def, Production $gram, string $str = null)
+    protected function expand_mac(string $def, int $value, string $str = null)
     {
         $result = '';
         for ($i = 0; $i < strlen($def); $i++) {
@@ -261,12 +261,13 @@ class Template
                 $p = $def[++$i];
                 switch ($p) {
                     case 'n':
-                        $result .= sprintf('%d', $gram->num);
+                        $result .= sprintf('%d', $value);
                         break;
                     case 's':
                         $result .= $str !== null ? $str : '';
                         break;
                     case 'b':
+                        $gram = $this->context->gram($value);
                         $this->print_line($gram->position);
                         $result .= $gram->action;
                         break;

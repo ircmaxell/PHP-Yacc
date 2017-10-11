@@ -486,7 +486,6 @@ class Compress
         }
 
         $this->result->yytranslatesize = 0;
-        $minSymbolMap = 256;
 
         foreach ($this->context->terminals as $term) {
             $value = $term->value;

@@ -1,0 +1,790 @@
+61,70c61,69
+<     case 0: return "EOF";
+<     case 256: return "error";
+<     case 257: return "NUMBER";
+<     case 43: return "'+'";
+<     case 45: return "'-'";
+<     case 42: return "'*'";
+<     case 47: return "'/'";
+<     case 94: return "'^'";
+<     case 40: return "'('";
+<     case 41: return "')'";
+---
+>     case 256: return 'error';
+>     case 257: return 'NUMBER';
+>     case 43: return '\'+\'';
+>     case 45: return '\'-\'';
+>     case 42: return '\'*\'';
+>     case 47: return '\'/\'';
+>     case 94: return '\'^\'';
+>     case 40: return '\'(\'';
+>     case 41: return '\')\'';
+77c76
+<     "start : statement",
+---
+>     "\$start : statement",
+178,179c177,179
+<        26,    9,    3,    0,    5,    6,    4,    7,    8,    9,
+<        27,    5,    6
+---
+>         5,    6,    7,    8,    9,    0,   27,    5,    6,    7,
+>         8,    9,   26,    9,    3,    0,    0,    0,    4,    7,
+>         8,    9
+182c182
+< define('YYLAST', 13);
+---
+> define('YYLAST', 22);
+185,186c185,187
+<         2,    7,    4,    0,    3,    4,    8,    5,    6,    7,
+<         9,    3,    4
+---
+>         3,    4,    5,    6,    7,    0,    9,    3,    4,    5,
+>         6,    7,    2,    7,    4,   -1,   -1,   -1,    8,    5,
+>         6,    7
+190,191c191,192
+<        -2,    1,    8,   -2,   -2,   -2,   -2,   -2,   -2,   -2,
+<         2,    2,    3,   -6,   -6,   -6,    0,    2,    2
+---
+>        10,   -3,    4,   10,   10,   10,   10,   10,   10,   10,
+>        14,   14,    5,    6,    6,    6
+194c195
+< define('YY2TBLSTATE', 3);
+---
+> define('YY2TBLSTATE', 0);
+321,389c322
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 2:
+---
+>             case 2:
+391,459c324
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 3:
+---
+>             case 3:
+461,529c326
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 4:
+---
+>             case 4:
+531,669c328,330
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 5:
+<                 { $yyval = $yyastk[$yysp-(3-1)] / $yyastk[$yysp-(3-3)]; } break;
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 6:
+---
+>             case 5:
+>                 { $yyval = $yyastk[$yysp-(3-1)]  $yyastk[$yysp-(3-3)]; } break;
+>             case 6:
+671,739c332
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 7:
+---
+>             case 7:
+741,809c334
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 8:
+---
+>             case 8:
+811,879c336
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 9:
+---
+>             case 9:
+881,949c338
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 10:
+---
+>             case 10:
+951,1019c340
+<                 @endreduce
+<         }
+<         /* Goto - shift nonterminal */
+<         $yysp -= $yyl;
+<         $yyn = $yylhs[$yyn];
+<         if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0 && $yyp < YYGLAST
+<             && $yygcheck[$yyp] == $yyn)
+<             $yystate = $yygoto[$yyp];
+<         else
+<             $yystate = $yygdefault[$yyn];
+< 
+<         $yysp++;
+< 
+<         $yysstk[$yysp] = $yystate;
+<         $yyastk[$yysp] = $yyval;
+<       }
+<         else {
+<             /* error */
+<             switch ($yyerrflag) {
+<                 case 0:
+<                     yyerror("syntax error");
+<                 case 1:
+<                 case 2:
+<                     $yyerrflag = 3;
+<                     /* Pop until error-expecting state uncovered */
+< 
+<                     while (!(($yyn = $yybase[$yystate] + YYINTERRTOK) >= 0
+<                         && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK
+<                         || ($yystate < YY2TBLSTATE
+<                             && ($yyn = $yybase[$yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+<                             && $yyn < YYLAST && $yycheck[$yyn] == YYINTERRTOK))) {
+<                         if ($yysp <= 0) {
+<                             yyflush();
+<                             return 1;
+<                         }
+<                         $yystate = $yysstk[--$yysp];
+<                         @if -t
+<                         YYTRACE_POP($yystate);
+< @endif
+<           }
+<                     $yyn = $yyaction[$yyn];
+<                     @if -t
+<                 YYTRACE_SHIFT(YYINTERRTOK);
+< @endif
+<           $yysstk[++$yysp] = $yystate = $yyn;
+<           break;
+< 
+<                 case 3:
+<                     @if -t
+<                 YYTRACE_DISCARD($yychar);
+< @endif
+<           if ($yychar == 0) {
+<               yyflush();
+<               return 1;
+<           }
+<           $yychar = -1;
+<           break;
+<             }
+<         }
+< 
+<         if ($yystate < YYNLSTATES)
+<             break;
+<         /* >= YYNLSTATES means shift-and-reduce */
+<         $yyn = $yystate - YYNLSTATES;
+<     }
+<   }
+< }
+< 
+< @tailcode;            case 11:
+---
+>             case 11:
+1021d341
+<                 @endreduce
+1057d376
+<                         @if -t
+1059d377
+< @endif
+1062d379
+<                     @if -t
+1064d380
+< @endif
+1069d384
+<                     @if -t
+1071d385
+< @endif
+1089d402
+< @tailcode;
+\ No newline at end of file

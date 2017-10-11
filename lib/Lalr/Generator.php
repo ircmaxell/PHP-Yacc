@@ -42,6 +42,7 @@ class Generator
         $this->context = $context;
         // Ensure nil symbol is part of nSymbols
         $this->context->nilSymbol();
+        $this->context->finish();
         $nSymbols = $this->context->nsymbols;
         $this->nullable = array_fill(0, $nSymbols, false);
 
@@ -746,6 +747,7 @@ class Generator
 
         $nterms = iterator_count($this->context->terminals);
         $nnonts = iterator_count($this->context->nonterminals);
+
         $nprods = $this->context->ngrams;
         $totalActs = $this->nacts + $this->nacts2;
 

@@ -1,0 +1,473 @@
+1c1,3
+< EMPTY nonterminals:  start statement
+---
+> EMPTY nonterminals: 
+>   $start
+>   statement
+3c5
+< start	[ NUMBER '-' '(' @ ]
+---
+> $start	[ NUMBER '-' '(' @ ]
+8c10
+< 	(0) start : . statement
+---
+> 	(0) $start : . statement 
+10c12
+< 	(1) statement : .
+---
+> 	(1) statement : . 
+13c15
+< 	(10) factor : NUMBER .
+---
+> 	(10) factor : NUMBER . 
+16c18
+< 	(9) expression : '-' . expression
+---
+> 	(9) expression : '-' . expression 
+19c21
+< 	(11) factor : '(' . expression ')'
+---
+> 	(11) factor : '(' . expression ')' 
+22c24
+< 	(0) start : statement .
+---
+> 	(0) $start : statement . 
+25c27
+< 	(2) statement : expression .
+---
+> 	(2) statement : expression . 
+27c29
+< 	(4) expression : expression . '*' expression
+---
+> 	(4) expression : expression . '*' expression 
+29c31
+< 	(5) expression : expression . '/' expression
+---
+> 	(5) expression : expression . '/' expression 
+31c33
+< 	(6) expression : expression . '+' expression
+---
+> 	(6) expression : expression . '+' expression 
+33c35
+< 	(7) expression : expression . '-' expression
+---
+> 	(7) expression : expression . '-' expression 
+35c37
+< 	(8) expression : expression . '^' expression
+---
+> 	(8) expression : expression . '^' expression 
+38c40
+< 	(3) expression : factor .
+---
+> 	(3) expression : factor . 
+41c43
+< 	(4) expression : expression . '*' expression
+---
+> 	(4) expression : expression . '*' expression 
+43c45
+< 	(5) expression : expression . '/' expression
+---
+> 	(5) expression : expression . '/' expression 
+45c47
+< 	(6) expression : expression . '+' expression
+---
+> 	(6) expression : expression . '+' expression 
+47c49
+< 	(7) expression : expression . '-' expression
+---
+> 	(7) expression : expression . '-' expression 
+49c51
+< 	(8) expression : expression . '^' expression
+---
+> 	(8) expression : expression . '^' expression 
+51c53
+< 	(9) expression : '-' expression .
+---
+> 	(9) expression : '-' expression . 
+54c56
+< 	(4) expression : expression . '*' expression
+---
+> 	(4) expression : expression . '*' expression 
+56c58
+< 	(5) expression : expression . '/' expression
+---
+> 	(5) expression : expression . '/' expression 
+58c60
+< 	(6) expression : expression . '+' expression
+---
+> 	(6) expression : expression . '+' expression 
+60c62
+< 	(7) expression : expression . '-' expression
+---
+> 	(7) expression : expression . '-' expression 
+62c64
+< 	(8) expression : expression . '^' expression
+---
+> 	(8) expression : expression . '^' expression 
+64c66
+< 	(11) factor : '(' expression . ')'
+---
+> 	(11) factor : '(' expression . ')' 
+67c69
+< 	(6) expression : expression '+' . expression
+---
+> 	(6) expression : expression '+' . expression 
+70c72
+< 	(7) expression : expression '-' . expression
+---
+> 	(7) expression : expression '-' . expression 
+73c75
+< 	(4) expression : expression '*' . expression
+---
+> 	(4) expression : expression '*' . expression 
+76c78
+< 	(5) expression : expression '/' . expression
+---
+> 	(5) expression : expression '/' . expression 
+79c81
+< 	(8) expression : expression '^' . expression
+---
+> 	(8) expression : expression '^' . expression 
+82c84
+< 	(11) factor : '(' expression ')' .
+---
+> 	(11) factor : '(' expression ')' . 
+85c87
+< 	(4) expression : expression . '*' expression
+---
+> 	(4) expression : expression . '*' expression 
+87c89
+< 	(5) expression : expression . '/' expression
+---
+> 	(5) expression : expression . '/' expression 
+89c91
+< 	(6) expression : expression . '+' expression
+---
+> 	(6) expression : expression . '+' expression 
+91c93
+< 	(6) expression : expression '+' expression .
+---
+> 	(6) expression : expression '+' expression . 
+93c95
+< 	(7) expression : expression . '-' expression
+---
+> 	(7) expression : expression . '-' expression 
+95c97
+< 	(8) expression : expression . '^' expression
+---
+> 	(8) expression : expression . '^' expression 
+98c100
+< 	(4) expression : expression . '*' expression
+---
+> 	(4) expression : expression . '*' expression 
+100c102
+< 	(5) expression : expression . '/' expression
+---
+> 	(5) expression : expression . '/' expression 
+102c104
+< 	(6) expression : expression . '+' expression
+---
+> 	(6) expression : expression . '+' expression 
+104c106
+< 	(7) expression : expression . '-' expression
+---
+> 	(7) expression : expression . '-' expression 
+106c108
+< 	(7) expression : expression '-' expression .
+---
+> 	(7) expression : expression '-' expression . 
+108c110
+< 	(8) expression : expression . '^' expression
+---
+> 	(8) expression : expression . '^' expression 
+111c113
+< 	(4) expression : expression . '*' expression
+---
+> 	(4) expression : expression . '*' expression 
+113c115
+< 	(4) expression : expression '*' expression .
+---
+> 	(4) expression : expression '*' expression . 
+115c117
+< 	(5) expression : expression . '/' expression
+---
+> 	(5) expression : expression . '/' expression 
+117c119
+< 	(6) expression : expression . '+' expression
+---
+> 	(6) expression : expression . '+' expression 
+119c121
+< 	(7) expression : expression . '-' expression
+---
+> 	(7) expression : expression . '-' expression 
+121c123
+< 	(8) expression : expression . '^' expression
+---
+> 	(8) expression : expression . '^' expression 
+124c126
+< 	(4) expression : expression . '*' expression
+---
+> 	(4) expression : expression . '*' expression 
+126c128
+< 	(5) expression : expression . '/' expression
+---
+> 	(5) expression : expression . '/' expression 
+128c130
+< 	(5) expression : expression '/' expression .
+---
+> 	(5) expression : expression '/' expression . 
+130c132
+< 	(6) expression : expression . '+' expression
+---
+> 	(6) expression : expression . '+' expression 
+132c134
+< 	(7) expression : expression . '-' expression
+---
+> 	(7) expression : expression . '-' expression 
+134c136
+< 	(8) expression : expression . '^' expression
+---
+> 	(8) expression : expression . '^' expression 
+137c139
+< 	(4) expression : expression . '*' expression
+---
+> 	(4) expression : expression . '*' expression 
+139c141
+< 	(5) expression : expression . '/' expression
+---
+> 	(5) expression : expression . '/' expression 
+141c143
+< 	(6) expression : expression . '+' expression
+---
+> 	(6) expression : expression . '+' expression 
+143c145
+< 	(7) expression : expression . '-' expression
+---
+> 	(7) expression : expression . '-' expression 
+145c147
+< 	(8) expression : expression . '^' expression
+---
+> 	(8) expression : expression . '^' expression 
+147c149
+< 	(8) expression : expression '^' expression .
+---
+> 	(8) expression : expression '^' expression . 
+150,151c152,153
+< 	(0) start : . statement
+< 	(1) statement : .
+---
+> 	(0) $start : . statement 
+> 	(1) statement : . 
+155a158
+> 	.		reduce (1)
+159d161
+< 	.		reduce (1)
+162,167c164,169
+< 	(4) expression : expression . '*' expression
+< 	(5) expression : expression . '/' expression
+< 	(6) expression : expression . '+' expression
+< 	(7) expression : expression . '-' expression
+< 	(8) expression : expression . '^' expression
+< 	(11) factor : '(' expression . ')'
+---
+> 	(4) expression : expression . '*' expression 
+> 	(5) expression : expression . '/' expression 
+> 	(6) expression : expression . '+' expression 
+> 	(7) expression : expression . '-' expression 
+> 	(8) expression : expression . '^' expression 
+> 	(11) factor : '(' expression . ')' 
+178,183c180,185
+< 	(2) statement : expression .
+< 	(4) expression : expression . '*' expression
+< 	(5) expression : expression . '/' expression
+< 	(6) expression : expression . '+' expression
+< 	(7) expression : expression . '-' expression
+< 	(8) expression : expression . '^' expression
+---
+> 	(2) statement : expression . 
+> 	(4) expression : expression . '*' expression 
+> 	(5) expression : expression . '/' expression 
+> 	(6) expression : expression . '+' expression 
+> 	(7) expression : expression . '-' expression 
+> 	(8) expression : expression . '^' expression 
+193c195
+< 	(9) expression : '-' . expression
+---
+> 	(9) expression : '-' . expression 
+197a200
+> 	.		error
+200d202
+< 	.		error
+203c205
+< 	(11) factor : '(' . expression ')'
+---
+> 	(11) factor : '(' . expression ')' 
+207a210
+> 	.		error
+210d212
+< 	.		error
+213c215
+< 	(6) expression : expression '+' . expression
+---
+> 	(6) expression : expression '+' . expression 
+217a220
+> 	.		error
+220d222
+< 	.		error
+223c225
+< 	(7) expression : expression '-' . expression
+---
+> 	(7) expression : expression '-' . expression 
+227a230
+> 	.		error
+230d232
+< 	.		error
+233c235
+< 	(4) expression : expression '*' . expression
+---
+> 	(4) expression : expression '*' . expression 
+237a240
+> 	.		error
+240d242
+< 	.		error
+243c245
+< 	(5) expression : expression '/' . expression
+---
+> 	(5) expression : expression '/' . expression 
+247a250
+> 	.		error
+250d252
+< 	.		error
+253c255
+< 	(8) expression : expression '^' . expression
+---
+> 	(8) expression : expression '^' . expression 
+257a260
+> 	.		error
+260d262
+< 	.		error
+263,268c265,270
+< 	(4) expression : expression . '*' expression
+< 	(5) expression : expression . '/' expression
+< 	(6) expression : expression . '+' expression
+< 	(6) expression : expression '+' expression .
+< 	(7) expression : expression . '-' expression
+< 	(8) expression : expression . '^' expression
+---
+> 	(4) expression : expression . '*' expression 
+> 	(5) expression : expression . '/' expression 
+> 	(6) expression : expression . '+' expression 
+> 	(6) expression : expression '+' expression . 
+> 	(7) expression : expression . '-' expression 
+> 	(8) expression : expression . '^' expression 
+276,281c278,283
+< 	(4) expression : expression . '*' expression
+< 	(5) expression : expression . '/' expression
+< 	(6) expression : expression . '+' expression
+< 	(7) expression : expression . '-' expression
+< 	(7) expression : expression '-' expression .
+< 	(8) expression : expression . '^' expression
+---
+> 	(4) expression : expression . '*' expression 
+> 	(5) expression : expression . '/' expression 
+> 	(6) expression : expression . '+' expression 
+> 	(7) expression : expression . '-' expression 
+> 	(7) expression : expression '-' expression . 
+> 	(8) expression : expression . '^' expression 
+289c291
+< 	(0) start : statement .
+---
+> 	(0) $start : statement . 
+295,300c297,302
+< 	(4) expression : expression . '*' expression
+< 	(4) expression : expression '*' expression .
+< 	(5) expression : expression . '/' expression
+< 	(6) expression : expression . '+' expression
+< 	(7) expression : expression . '-' expression
+< 	(8) expression : expression . '^' expression
+---
+> 	(4) expression : expression . '*' expression 
+> 	(4) expression : expression '*' expression . 
+> 	(5) expression : expression . '/' expression 
+> 	(6) expression : expression . '+' expression 
+> 	(7) expression : expression . '-' expression 
+> 	(8) expression : expression . '^' expression 
+306,311c308,313
+< 	(4) expression : expression . '*' expression
+< 	(5) expression : expression . '/' expression
+< 	(5) expression : expression '/' expression .
+< 	(6) expression : expression . '+' expression
+< 	(7) expression : expression . '-' expression
+< 	(8) expression : expression . '^' expression
+---
+> 	(4) expression : expression . '*' expression 
+> 	(5) expression : expression . '/' expression 
+> 	(5) expression : expression '/' expression . 
+> 	(6) expression : expression . '+' expression 
+> 	(7) expression : expression . '-' expression 
+> 	(8) expression : expression . '^' expression 
+317,322c319,324
+< 	(4) expression : expression . '*' expression
+< 	(5) expression : expression . '/' expression
+< 	(6) expression : expression . '+' expression
+< 	(7) expression : expression . '-' expression
+< 	(8) expression : expression . '^' expression
+< 	(8) expression : expression '^' expression .
+---
+> 	(4) expression : expression . '*' expression 
+> 	(5) expression : expression . '/' expression 
+> 	(6) expression : expression . '+' expression 
+> 	(7) expression : expression . '-' expression 
+> 	(8) expression : expression . '^' expression 
+> 	(8) expression : expression '^' expression . 
+328c330
+< 	(10) factor : NUMBER .
+---
+> 	(10) factor : NUMBER . 
+333c335
+< 	(3) expression : factor .
+---
+> 	(3) expression : factor . 
+338,343c340,345
+< 	(4) expression : expression . '*' expression
+< 	(5) expression : expression . '/' expression
+< 	(6) expression : expression . '+' expression
+< 	(7) expression : expression . '-' expression
+< 	(8) expression : expression . '^' expression
+< 	(9) expression : '-' expression .
+---
+> 	(4) expression : expression . '*' expression 
+> 	(5) expression : expression . '/' expression 
+> 	(6) expression : expression . '+' expression 
+> 	(7) expression : expression . '-' expression 
+> 	(8) expression : expression . '^' expression 
+> 	(9) expression : '-' expression . 
+348c350
+< 	(11) factor : '(' expression ')' .
+---
+> 	(11) factor : '(' expression ')' . 
+353c355
+< Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-custom-parser/parser.kmyacc.phpy:
+---
+> Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-custom-parser/grammar.y:
+360d361
+< 	66 items
+363,364d363
+< 	7544 bytes used
+< 
+395,397d393
+< Aux = (5) 7,8,9 * 0,1,2,3
+< Aux = (6) 7,8,9 * 1,2,3
+< Aux = (5) 5,6,7,8,9 * 2,3
+399d394
+< Selected aux[1]: (6) 7,8,9 * 1,2,3
+401,402c396,397
+< state 1 (class 3): aux[1]
+< state 2 (class 2): aux[1]
+---
+> state 1 (class 3)
+> state 2 (class 2)
+417c412
+< 4,3,1,2,5,0,
+---
+> 3,2,4,1,5,0,

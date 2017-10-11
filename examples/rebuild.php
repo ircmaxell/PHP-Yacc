@@ -49,4 +49,10 @@ function buildFolder(string $dir) {
     $code = $generator->generate(file_get_contents($grammar), $grammar, file_get_contents($skeleton), "$dir/y.phpyacc.output");
 
     file_put_contents("$dir/parser.phpyacc.php", $code);
+
+    shell_exec("cd $dir && diff parser.kmyacc.php parser.phpyacc.php > parser.diff");
+
+    shell_exec("cd $dir && diff y.kmyacc.output y.phpyacc.output > y.diff");
+
+
 }

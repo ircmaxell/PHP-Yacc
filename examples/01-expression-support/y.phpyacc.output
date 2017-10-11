@@ -2,7 +2,6 @@ EMPTY nonterminals:
 First:
 $start	[ '1' ]
 expr	[ '1' ]
-@nil	[ ]
 state unknown:
 	(0) $start : . expr 
 		[ EOF ]
@@ -25,9 +24,9 @@ state unknown:
 state 0
 	(0) $start : . expr 
 
-	'1'		shift 3
+	'1'		shift 3 and reduce (2)
+	.		error
 	expr		goto 1
-	@nil		error
 
 state 1
 	(0) $start : expr . 
@@ -35,62 +34,60 @@ state 1
 
 	EOF		accept
 	'+'		shift 2
-	@nil		error
+	.		error
 
 state 2
 	(1) expr : expr '+' . expr 
 
-	'1'		shift 3
-	expr		goto 4
-	@nil		error
+	'1'		shift 3 and reduce (2)
+	.		error
+	expr		goto 4 and reduce (1)
 
 state 3
 	(2) expr : '1' . 
 
-	@nil		reduce (2)
+	.		reduce (2)
 
 state 4
 	(1) expr : expr . '+' expr 
 	(1) expr : expr '+' expr . 
 
-	@nil		reduce (1)
+	.		reduce (1)
 
 
 Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/grammar.y:
 	5 terminal symbols
-	3 nonterminal symbols
+	2 nonterminal symbols
 	3 productions
 	5 states
-	5 non leaf states
+	3 non leaf states
 	0 shift/reduce, 0 reduce/reduce conflicts
 	7 lookahead sets used
 	6+6=12 action entries
 State=>class:
 
-  0=>1     1=>2     2=>1     3=>0     4=>0   
+  0=>0     1=>1     2=>0   
 
 Terminal action:
+     T\S   0   1
+     EOF  .    0
+     '+'  .    2
+     '1'   3  . 
+
+Nonterminal GOTO table:
      T\S   0   1   2
-     EOF  .   .    0
-     '+'  .   .    2
-     '1'  .    3  . 
+    expr   1  .    4
 
 Nonterminal GOTO table:
-     T\S   0   1   2   3   4
-    expr   1  .    4  .   . 
-
-Nonterminal GOTO table:
-     T\S default   0   1   2   3   4
-    expr       1  =   .    4  .   . 
+     T\S default   0   1   2
+    expr       1  =   .    4
 
 Candidates of aux table:
 Used aux table:
-state 0 (class 1)
-state 1 (class 2)
-state 2 (class 1)
-state 3 (class 0)
-state 4 (class 0)
+state 0 (class 0)
+state 1 (class 1)
+state 2 (class 0)
 Order:
-2,1,0,
+1,0,
 Order:
-1,0,2,
+1,0,

@@ -6,7 +6,6 @@ $start	[ NUMBER '-' '(' @ ]
 statement	[ NUMBER '-' '(' @ ]
 expression	[ NUMBER '-' '(' ]
 factor	[ NUMBER '(' ]
-@nil	[ ]
 state unknown:
 	(0) $start : . statement 
 		[ EOF ]
@@ -153,13 +152,13 @@ state 0
 	(0) $start : . statement 
 	(1) statement : . 
 
-	NUMBER		shift 16
+	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
+	.		reduce (1)
 	statement	goto 12
 	expression	goto 2
-	factor		goto 17
-	@nil		reduce (1)
+	factor		goto 17 and reduce (3)
 
 state 1
 	(4) expression : expression . '*' expression 
@@ -174,8 +173,8 @@ state 1
 	'*'		shift 7
 	'/'		shift 8
 	'^'		shift 9
-	')'		shift 19
-	@nil		error
+	')'		shift 19 and reduce (11)
+	.		error
 
 state 2
 	(2) statement : expression . 
@@ -190,77 +189,77 @@ state 2
 	'*'		shift 7
 	'/'		shift 8
 	'^'		shift 9
-	@nil		reduce (2)
+	.		reduce (2)
 
 state 3
 	(9) expression : '-' . expression 
 
-	NUMBER		shift 16
+	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	expression	goto 18
-	factor		goto 17
-	@nil		error
+	.		error
+	expression	goto 18 and reduce (9)
+	factor		goto 17 and reduce (3)
 
 state 4
 	(11) factor : '(' . expression ')' 
 
-	NUMBER		shift 16
+	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
+	.		error
 	expression	goto 1
-	factor		goto 17
-	@nil		error
+	factor		goto 17 and reduce (3)
 
 state 5
 	(6) expression : expression '+' . expression 
 
-	NUMBER		shift 16
+	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
+	.		error
 	expression	goto 10
-	factor		goto 17
-	@nil		error
+	factor		goto 17 and reduce (3)
 
 state 6
 	(7) expression : expression '-' . expression 
 
-	NUMBER		shift 16
+	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
+	.		error
 	expression	goto 11
-	factor		goto 17
-	@nil		error
+	factor		goto 17 and reduce (3)
 
 state 7
 	(4) expression : expression '*' . expression 
 
-	NUMBER		shift 16
+	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
+	.		error
 	expression	goto 13
-	factor		goto 17
-	@nil		error
+	factor		goto 17 and reduce (3)
 
 state 8
 	(5) expression : expression '/' . expression 
 
-	NUMBER		shift 16
+	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
+	.		error
 	expression	goto 14
-	factor		goto 17
-	@nil		error
+	factor		goto 17 and reduce (3)
 
 state 9
 	(8) expression : expression '^' . expression 
 
-	NUMBER		shift 16
+	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
+	.		error
 	expression	goto 15
-	factor		goto 17
-	@nil		error
+	factor		goto 17 and reduce (3)
 
 state 10
 	(4) expression : expression . '*' expression 
@@ -273,7 +272,7 @@ state 10
 	'*'		shift 7
 	'/'		shift 8
 	'^'		shift 9
-	@nil		reduce (6)
+	.		reduce (6)
 
 state 11
 	(4) expression : expression . '*' expression 
@@ -286,13 +285,13 @@ state 11
 	'*'		shift 7
 	'/'		shift 8
 	'^'		shift 9
-	@nil		reduce (7)
+	.		reduce (7)
 
 state 12
 	(0) $start : statement . 
 
 	EOF		accept
-	@nil		error
+	.		error
 
 state 13
 	(4) expression : expression . '*' expression 
@@ -303,7 +302,7 @@ state 13
 	(8) expression : expression . '^' expression 
 
 	'^'		shift 9
-	@nil		reduce (4)
+	.		reduce (4)
 
 state 14
 	(4) expression : expression . '*' expression 
@@ -314,7 +313,7 @@ state 14
 	(8) expression : expression . '^' expression 
 
 	'^'		shift 9
-	@nil		reduce (5)
+	.		reduce (5)
 
 state 15
 	(4) expression : expression . '*' expression 
@@ -325,17 +324,17 @@ state 15
 	(8) expression : expression '^' expression . 
 
 	'^'		shift 9
-	@nil		reduce (8)
+	.		reduce (8)
 
 state 16
 	(10) factor : NUMBER . 
 
-	@nil		reduce (10)
+	.		reduce (10)
 
 state 17
 	(3) expression : factor . 
 
-	@nil		reduce (3)
+	.		reduce (3)
 
 state 18
 	(4) expression : expression . '*' expression 
@@ -345,75 +344,71 @@ state 18
 	(8) expression : expression . '^' expression 
 	(9) expression : '-' expression . 
 
-	@nil		reduce (9)
+	.		reduce (9)
 
 state 19
 	(11) factor : '(' expression ')' . 
 
-	@nil		reduce (11)
+	.		reduce (11)
 
 
 Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-custom-parser/grammar.y:
 	11 terminal symbols
-	5 nonterminal symbols
+	4 nonterminal symbols
 	12 productions
 	20 states
-	20 non leaf states
+	16 non leaf states
 	0 shift/reduce, 0 reduce/reduce conflicts
 	29 lookahead sets used
 	82+21=103 action entries
 State=>class:
 
-  0=>5     1=>4     2=>3     3=>5     4=>5     5=>5     6=>5     7=>5     8=>5     9=>5   
- 10=>2    11=>2    12=>6    13=>1    14=>1    15=>1    16=>0    17=>0    18=>0    19=>0   
+  0=>4     1=>3     2=>2     3=>4     4=>4     5=>4     6=>4     7=>4     8=>4     9=>4   
+ 10=>1    11=>1    12=>5    13=>0    14=>0    15=>0   
 
 Terminal action:
-     T\S   0   1   2   3   4   5   6
-     EOF  .   .   .   .   .   .    0
-  NUMBER  .   .   .   .   .   16  . 
-     '+'  .   .   .    5   5  .   . 
-     '-'  .   .   .    6   6   3  . 
-     '*'  .   .    7   7   7  .   . 
-     '/'  .   .    8   8   8  .   . 
-     '^'  .    9   9   9   9  .   . 
-     '('  .   .   .   .   .    4  . 
-     ')'  .   .   .   .   19  .   . 
+     T\S   0   1   2   3   4   5
+     EOF  .   .   .   .   .    0
+  NUMBER  .   .   .   .   16  . 
+     '+'  .   .    5   5  .   . 
+     '-'  .   .    6   6   3  . 
+     '*'  .    7   7   7  .   . 
+     '/'  .    8   8   8  .   . 
+     '^'   9   9   9   9  .   . 
+     '('  .   .   .   .    4  . 
+     ')'  .   .   .   19  .   . 
 
 Nonterminal GOTO table:
-     T\S   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
-statemen  12  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . 
-expressi   2  .   .   18   1  10  11  13  14  15  .   .   .   .   .   .   .   .   .   . 
-  factor  17  .   .   17  17  17  17  17  17  17  .   .   .   .   .   .   .   .   .   . 
+     T\S   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+statemen  12  .   .   .   .   .   .   .   .   .   .   .   .   .   .   . 
+expressi   2  .   .   18   1  10  11  13  14  15  .   .   .   .   .   . 
+  factor  17  .   .   17  17  17  17  17  17  17  .   .   .   .   .   . 
 
 Nonterminal GOTO table:
-     T\S default   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
-statemen      12  =   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . 
-expressi       2  =   .   .   18   1  10  11  13  14  15  .   .   .   .   .   .   .   .   .   . 
-  factor      17  =   .   .   =   =   =   =   =   =   =   .   .   .   .   .   .   .   .   .   . 
+     T\S default   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+statemen      12  =   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . 
+expressi       2  =   .   .   18   1  10  11  13  14  15  .   .   .   .   .   . 
+  factor      17  =   .   .   =   =   =   =   =   =   =   .   .   .   .   .   . 
 
 Candidates of aux table:
 Used aux table:
-state 0 (class 5)
-state 1 (class 4)
-state 2 (class 3)
-state 3 (class 5)
-state 4 (class 5)
-state 5 (class 5)
-state 6 (class 5)
-state 7 (class 5)
-state 8 (class 5)
-state 9 (class 5)
-state 10 (class 2)
-state 11 (class 2)
-state 12 (class 6)
-state 13 (class 1)
-state 14 (class 1)
-state 15 (class 1)
-state 16 (class 0)
-state 17 (class 0)
-state 18 (class 0)
-state 19 (class 0)
+state 0 (class 4)
+state 1 (class 3)
+state 2 (class 2)
+state 3 (class 4)
+state 4 (class 4)
+state 5 (class 4)
+state 6 (class 4)
+state 7 (class 4)
+state 8 (class 4)
+state 9 (class 4)
+state 10 (class 1)
+state 11 (class 1)
+state 12 (class 5)
+state 13 (class 0)
+state 14 (class 0)
+state 15 (class 0)
 Order:
-4,3,5,2,6,1,0,
+3,2,4,1,5,0,
 Order:
-2,0,1,3,4,
+2,0,1,3,
