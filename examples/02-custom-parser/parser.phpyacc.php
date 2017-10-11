@@ -58,6 +58,7 @@ $yyterminals = array(
 function yytokname($n)
 {
     switch ($n) {
+    case 0: return 'EOF';
     case 256: return 'error';
     case 257: return 'NUMBER';
     case 43: return '\'+\'';

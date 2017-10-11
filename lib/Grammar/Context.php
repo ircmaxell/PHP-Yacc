@@ -116,13 +116,15 @@ class Context
         foreach ($this->terminals() as $term) {
             $term->code = $code++;
         }
-        foreach ($this->nilSymbols() as $nil) {
-            $nil->code = $code++;
-        }
+
         $nb = $code;
         foreach ($this->nonTerminals() as $nonterm) {
             $nonterm->nb = $nb;
             $nonterm->code = $code++;
+        }
+        foreach ($this->nilSymbols() as $nil) {
+            $nil->nb = $nb;
+            $nil->code = $code++;
         }
 
         usort($this->_symbols, function ($a, $b) {

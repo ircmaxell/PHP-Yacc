@@ -182,7 +182,7 @@ class Template
                     ];
                 } elseif ($this->metamatch($p, 'switch-for-token-name')) {
                     for ($i = 0; $i < $this->context->nterminals; $i++) {
-                        if ($this->context->ctermindex[$i] > 0) {
+                        if ($this->context->ctermindex[$i] >= 0) {
                             $symbol = $this->context->symbol($i);
                             fprintf($this->fp, "%s%s\n", $buffer, $this->language->case_block($symbol->value, $symbol->name));
                         }

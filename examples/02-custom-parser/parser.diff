@@ -1,4 +1,4 @@
-61,70c61,69
+61,70c61,70
 <     case 0: return "EOF";
 <     case 256: return "error";
 <     case 257: return "NUMBER";
@@ -10,6 +10,7 @@
 <     case 40: return "'('";
 <     case 41: return "')'";
 ---
+>     case 0: return 'EOF';
 >     case 256: return 'error';
 >     case 257: return 'NUMBER';
 >     case 43: return '\'+\'';
@@ -19,39 +20,39 @@
 >     case 94: return '\'^\'';
 >     case 40: return '\'(\'';
 >     case 41: return '\')\'';
-77c76
+77c77
 <     "start : statement",
 ---
 >     "\$start : statement",
-178,179c177,179
+178,179c178,180
 <        26,    9,    3,    0,    5,    6,    4,    7,    8,    9,
 <        27,    5,    6
 ---
 >         5,    6,    7,    8,    9,    0,   27,    5,    6,    7,
 >         8,    9,   26,    9,    3,    0,    0,    0,    4,    7,
 >         8,    9
-182c182
+182c183
 < define('YYLAST', 13);
 ---
 > define('YYLAST', 22);
-185,186c185,187
+185,186c186,188
 <         2,    7,    4,    0,    3,    4,    8,    5,    6,    7,
 <         9,    3,    4
 ---
 >         3,    4,    5,    6,    7,    0,    9,    3,    4,    5,
 >         6,    7,    2,    7,    4,   -1,   -1,   -1,    8,    5,
 >         6,    7
-190,191c191,192
+190,191c192,193
 <        -2,    1,    8,   -2,   -2,   -2,   -2,   -2,   -2,   -2,
 <         2,    2,    3,   -6,   -6,   -6,    0,    2,    2
 ---
 >        10,   -3,    4,   10,   10,   10,   10,   10,   10,   10,
 >        14,   14,    5,    6,    6,    6
-194c195
+194c196
 < define('YY2TBLSTATE', 3);
 ---
 > define('YY2TBLSTATE', 0);
-321,389c322
+321,389c323
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -123,7 +124,7 @@
 < @tailcode;            case 2:
 ---
 >             case 2:
-391,459c324
+391,459c325
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -195,7 +196,7 @@
 < @tailcode;            case 3:
 ---
 >             case 3:
-461,529c326
+461,529c327
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -267,7 +268,7 @@
 < @tailcode;            case 4:
 ---
 >             case 4:
-531,669c328,330
+531,669c329,331
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -411,7 +412,7 @@
 >             case 5:
 >                 { $yyval = $yyastk[$yysp-(3-1)]  $yyastk[$yysp-(3-3)]; } break;
 >             case 6:
-671,739c332
+671,739c333
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -483,7 +484,7 @@
 < @tailcode;            case 7:
 ---
 >             case 7:
-741,809c334
+741,809c335
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -555,7 +556,7 @@
 < @tailcode;            case 8:
 ---
 >             case 8:
-811,879c336
+811,879c337
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -627,7 +628,7 @@
 < @tailcode;            case 9:
 ---
 >             case 9:
-881,949c338
+881,949c339
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -699,7 +700,7 @@
 < @tailcode;            case 10:
 ---
 >             case 10:
-951,1019c340
+951,1019c341
 <                 @endreduce
 <         }
 <         /* Goto - shift nonterminal */
@@ -771,20 +772,20 @@
 < @tailcode;            case 11:
 ---
 >             case 11:
-1021d341
+1021d342
 <                 @endreduce
-1057d376
+1057d377
 <                         @if -t
-1059d377
+1059d378
 < @endif
-1062d379
+1062d380
 <                     @if -t
-1064d380
+1064d381
 < @endif
-1069d384
+1069d385
 <                     @if -t
-1071d385
+1071d386
 < @endif
-1089d402
+1089d403
 < @tailcode;
 \ No newline at end of file

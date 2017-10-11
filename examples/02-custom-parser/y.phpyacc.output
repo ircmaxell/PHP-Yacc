@@ -155,10 +155,10 @@ state 0
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	.		reduce (1)
 	statement	goto 12
 	expression	goto 2
 	factor		goto 17 and reduce (3)
+	.		reduce (1)
 
 state 1
 	(4) expression : expression . '*' expression 
@@ -197,9 +197,9 @@ state 3
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	.		error
 	expression	goto 18 and reduce (9)
 	factor		goto 17 and reduce (3)
+	.		error
 
 state 4
 	(11) factor : '(' . expression ')' 
@@ -207,9 +207,9 @@ state 4
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	.		error
 	expression	goto 1
 	factor		goto 17 and reduce (3)
+	.		error
 
 state 5
 	(6) expression : expression '+' . expression 
@@ -217,9 +217,9 @@ state 5
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	.		error
 	expression	goto 10
 	factor		goto 17 and reduce (3)
+	.		error
 
 state 6
 	(7) expression : expression '-' . expression 
@@ -227,9 +227,9 @@ state 6
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	.		error
 	expression	goto 11
 	factor		goto 17 and reduce (3)
+	.		error
 
 state 7
 	(4) expression : expression '*' . expression 
@@ -237,9 +237,9 @@ state 7
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	.		error
 	expression	goto 13
 	factor		goto 17 and reduce (3)
+	.		error
 
 state 8
 	(5) expression : expression '/' . expression 
@@ -247,9 +247,9 @@ state 8
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	.		error
 	expression	goto 14
 	factor		goto 17 and reduce (3)
+	.		error
 
 state 9
 	(8) expression : expression '^' . expression 
@@ -257,9 +257,9 @@ state 9
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
 	'('		shift 4
-	.		error
 	expression	goto 15
 	factor		goto 17 and reduce (3)
+	.		error
 
 state 10
 	(4) expression : expression . '*' expression 

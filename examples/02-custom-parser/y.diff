@@ -258,10 +258,6 @@
 ---
 > 	(0) $start : . statement 
 > 	(1) statement : . 
-155a158
-> 	.		reduce (1)
-159d161
-< 	.		reduce (1)
 162,167c164,169
 < 	(4) expression : expression . '*' expression
 < 	(5) expression : expression . '/' expression
@@ -294,58 +290,30 @@
 < 	(9) expression : '-' . expression
 ---
 > 	(9) expression : '-' . expression 
-197a200
-> 	.		error
-200d202
-< 	.		error
 203c205
 < 	(11) factor : '(' . expression ')'
 ---
 > 	(11) factor : '(' . expression ')' 
-207a210
-> 	.		error
-210d212
-< 	.		error
 213c215
 < 	(6) expression : expression '+' . expression
 ---
 > 	(6) expression : expression '+' . expression 
-217a220
-> 	.		error
-220d222
-< 	.		error
 223c225
 < 	(7) expression : expression '-' . expression
 ---
 > 	(7) expression : expression '-' . expression 
-227a230
-> 	.		error
-230d232
-< 	.		error
 233c235
 < 	(4) expression : expression '*' . expression
 ---
 > 	(4) expression : expression '*' . expression 
-237a240
-> 	.		error
-240d242
-< 	.		error
 243c245
 < 	(5) expression : expression '/' . expression
 ---
 > 	(5) expression : expression '/' . expression 
-247a250
-> 	.		error
-250d252
-< 	.		error
 253c255
 < 	(8) expression : expression '^' . expression
 ---
 > 	(8) expression : expression '^' . expression 
-257a260
-> 	.		error
-260d262
-< 	.		error
 263,268c265,270
 < 	(4) expression : expression . '*' expression
 < 	(5) expression : expression . '/' expression
