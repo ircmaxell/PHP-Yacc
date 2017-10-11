@@ -5,77 +5,19 @@
 6c6
 < 	(0) start : . expr
 ---
-> 	(0) $start : . expr 
-9c9
-< 	(3) expr : T_FOO . expr
----
-> 	(3) expr : T_FOO . expr 
-12c12
-< 	(2) expr : '1' .
----
-> 	(2) expr : '1' . 
+> 	(0) $start : . expr
 15c15
 < 	(0) start : expr .
 ---
-> 	(0) $start : expr . 
-17c17
-< 	(1) expr : expr . '+' expr
----
-> 	(1) expr : expr . '+' expr 
-20c20
-< 	(1) expr : expr . '+' expr
----
-> 	(1) expr : expr . '+' expr 
-22c22
-< 	(3) expr : T_FOO expr .
----
-> 	(3) expr : T_FOO expr . 
-25c25
-< 	(1) expr : expr '+' . expr
----
-> 	(1) expr : expr '+' . expr 
-28c28
-< 	(1) expr : expr . '+' expr
----
-> 	(1) expr : expr . '+' expr 
-30c30
-< 	(1) expr : expr '+' expr .
----
-> 	(1) expr : expr '+' expr . 
+> 	(0) $start : expr .
 33c33
 < 	(0) start : . expr
 ---
-> 	(0) $start : . expr 
-41c41
-< 	(3) expr : T_FOO . expr
----
-> 	(3) expr : T_FOO . expr 
-49c49
-< 	(1) expr : expr '+' . expr
----
-> 	(1) expr : expr '+' . expr 
-57,58c57,58
+> 	(0) $start : . expr
+57c57
 < 	(0) start : expr .
-< 	(1) expr : expr . '+' expr
 ---
-> 	(0) $start : expr . 
-> 	(1) expr : expr . '+' expr 
-65c65
-< 	(2) expr : '1' .
----
-> 	(2) expr : '1' . 
-70,71c70,71
-< 	(1) expr : expr . '+' expr
-< 	(3) expr : T_FOO expr .
----
-> 	(1) expr : expr . '+' expr 
-> 	(3) expr : T_FOO expr . 
-76,77c76,77
-< 	(1) expr : expr . '+' expr
-< 	(1) expr : expr '+' expr .
----
-> 	(1) expr : expr . '+' expr 
-> 	(1) expr : expr '+' expr . 
+> 	(0) $start : expr .
 82c82
 < Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-complex-expression-support/parser.kmyacc.phpy:
 ---

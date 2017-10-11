@@ -56,7 +56,7 @@ state 4
 
 
 Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/parser.kmyacc.phpy:
-	5 terminal symbols
+	4 terminal symbols
 	2 nonterminal symbols
 	3 productions
 	5 states
@@ -65,7 +65,7 @@ Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/
 	8 items
 	7 lookahead sets used
 	6+6=12 action entries
-	1984 bytes used
+	1920 bytes used
 
 State=>class:
 

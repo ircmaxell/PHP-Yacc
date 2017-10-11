@@ -5,63 +5,19 @@
 6c6
 < 	(0) start : . expr
 ---
-> 	(0) $start : . expr 
-9c9
-< 	(2) expr : '1' .
----
-> 	(2) expr : '1' . 
+> 	(0) $start : . expr
 12c12
 < 	(0) start : expr .
 ---
-> 	(0) $start : expr . 
-14c14
-< 	(1) expr : expr . '+' expr
----
-> 	(1) expr : expr . '+' expr 
-17c17
-< 	(1) expr : expr '+' . expr
----
-> 	(1) expr : expr '+' . expr 
-20c20
-< 	(1) expr : expr . '+' expr
----
-> 	(1) expr : expr . '+' expr 
-22c22
-< 	(1) expr : expr '+' expr .
----
-> 	(1) expr : expr '+' expr . 
+> 	(0) $start : expr .
 25c25
 < 	(0) start : . expr
 ---
-> 	(0) $start : . expr 
-28d27
-< 	expr		goto 1
-29a29
-> 	expr		goto 1
-32,33c32,33
+> 	(0) $start : . expr
+32c32
 < 	(0) start : expr .
-< 	(1) expr : expr . '+' expr
 ---
-> 	(0) $start : expr . 
-> 	(1) expr : expr . '+' expr 
-40c40
-< 	(1) expr : expr '+' . expr
----
-> 	(1) expr : expr '+' . expr 
-43d42
-< 	expr		goto 4 and reduce (1)
-44a44
-> 	expr		goto 4 and reduce (1)
-47c47
-< 	(2) expr : '1' .
----
-> 	(2) expr : '1' . 
-52,53c52,53
-< 	(1) expr : expr . '+' expr
-< 	(1) expr : expr '+' expr .
----
-> 	(1) expr : expr . '+' expr 
-> 	(1) expr : expr '+' expr . 
+> 	(0) $start : expr .
 58c58
 < Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/parser.kmyacc.phpy:
 ---
@@ -69,5 +25,5 @@
 65d64
 < 	8 items
 68,69d66
-< 	1984 bytes used
+< 	1920 bytes used
 < 

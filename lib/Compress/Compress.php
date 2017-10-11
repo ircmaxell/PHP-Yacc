@@ -442,7 +442,9 @@ class Compress
         }
 
         for ($i = $this->context->nclasses; $i < $this->context->naux; $i++) {
-            $cterm_action[$i] = $this->context->class_action[$i];
+            for ($j = 0; $j < $ncterms; $j++) {
+                $cterm_action[$i][$j] = $this->context->class_action[$i][$this->context->otermindex[$j]];
+            }
         }
         $base = [];
         $this->pack_table($cterm_action, $this->context->naux, $ncterms, false, false, $this->result->yyaction, $this->result->yycheck, $base);

@@ -1,156 +1,154 @@
-EMPTY nonterminals: 
-  $start
-  statement
+EMPTY nonterminals:  $start statement
 First:
 $start	[ NUMBER '-' '(' @ ]
 statement	[ NUMBER '-' '(' @ ]
 expression	[ NUMBER '-' '(' ]
 factor	[ NUMBER '(' ]
 state unknown:
-	(0) $start : . statement 
+	(0) $start : . statement
 		[ EOF ]
-	(1) statement : . 
-		[ EOF ]
-state unknown:
-	(10) factor : NUMBER . 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-state unknown:
-	(9) expression : '-' . expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-state unknown:
-	(11) factor : '(' . expression ')' 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-state unknown:
-	(0) $start : statement . 
+	(1) statement : .
 		[ EOF ]
 state unknown:
-	(2) statement : expression . 
+	(10) factor : NUMBER .
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+state unknown:
+	(9) expression : '-' . expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+state unknown:
+	(11) factor : '(' . expression ')'
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+state unknown:
+	(0) $start : statement .
 		[ EOF ]
-	(4) expression : expression . '*' expression 
+state unknown:
+	(2) statement : expression .
+		[ EOF ]
+	(4) expression : expression . '*' expression
 		[ EOF '+' '-' '*' '/' '^' ]
-	(5) expression : expression . '/' expression 
+	(5) expression : expression . '/' expression
 		[ EOF '+' '-' '*' '/' '^' ]
-	(6) expression : expression . '+' expression 
+	(6) expression : expression . '+' expression
 		[ EOF '+' '-' '*' '/' '^' ]
-	(7) expression : expression . '-' expression 
+	(7) expression : expression . '-' expression
 		[ EOF '+' '-' '*' '/' '^' ]
-	(8) expression : expression . '^' expression 
+	(8) expression : expression . '^' expression
 		[ EOF '+' '-' '*' '/' '^' ]
 state unknown:
-	(3) expression : factor . 
+	(3) expression : factor .
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(4) expression : expression . '*' expression 
+	(4) expression : expression . '*' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(5) expression : expression . '/' expression 
+	(5) expression : expression . '/' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(6) expression : expression . '+' expression 
+	(6) expression : expression . '+' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(7) expression : expression . '-' expression 
+	(7) expression : expression . '-' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(8) expression : expression . '^' expression 
+	(8) expression : expression . '^' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(9) expression : '-' expression . 
+	(9) expression : '-' expression .
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(4) expression : expression . '*' expression 
+	(4) expression : expression . '*' expression
 		[ '+' '-' '*' '/' '^' ')' ]
-	(5) expression : expression . '/' expression 
+	(5) expression : expression . '/' expression
 		[ '+' '-' '*' '/' '^' ')' ]
-	(6) expression : expression . '+' expression 
+	(6) expression : expression . '+' expression
 		[ '+' '-' '*' '/' '^' ')' ]
-	(7) expression : expression . '-' expression 
+	(7) expression : expression . '-' expression
 		[ '+' '-' '*' '/' '^' ')' ]
-	(8) expression : expression . '^' expression 
+	(8) expression : expression . '^' expression
 		[ '+' '-' '*' '/' '^' ')' ]
-	(11) factor : '(' expression . ')' 
+	(11) factor : '(' expression . ')'
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(6) expression : expression '+' . expression 
+	(6) expression : expression '+' . expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(7) expression : expression '-' . expression 
+	(7) expression : expression '-' . expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(4) expression : expression '*' . expression 
+	(4) expression : expression '*' . expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(5) expression : expression '/' . expression 
+	(5) expression : expression '/' . expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(8) expression : expression '^' . expression 
+	(8) expression : expression '^' . expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(11) factor : '(' expression ')' . 
+	(11) factor : '(' expression ')' .
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(4) expression : expression . '*' expression 
+	(4) expression : expression . '*' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(5) expression : expression . '/' expression 
+	(5) expression : expression . '/' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(6) expression : expression . '+' expression 
+	(6) expression : expression . '+' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(6) expression : expression '+' expression . 
+	(6) expression : expression '+' expression .
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(7) expression : expression . '-' expression 
+	(7) expression : expression . '-' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(8) expression : expression . '^' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-state unknown:
-	(4) expression : expression . '*' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(5) expression : expression . '/' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(6) expression : expression . '+' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(7) expression : expression . '-' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(7) expression : expression '-' expression . 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(8) expression : expression . '^' expression 
+	(8) expression : expression . '^' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(4) expression : expression . '*' expression 
+	(4) expression : expression . '*' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(4) expression : expression '*' expression . 
+	(5) expression : expression . '/' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(5) expression : expression . '/' expression 
+	(6) expression : expression . '+' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(6) expression : expression . '+' expression 
+	(7) expression : expression . '-' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(7) expression : expression . '-' expression 
+	(7) expression : expression '-' expression .
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(8) expression : expression . '^' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-state unknown:
-	(4) expression : expression . '*' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(5) expression : expression . '/' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(5) expression : expression '/' expression . 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(6) expression : expression . '+' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(7) expression : expression . '-' expression 
-		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(8) expression : expression . '^' expression 
+	(8) expression : expression . '^' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state unknown:
-	(4) expression : expression . '*' expression 
+	(4) expression : expression . '*' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(5) expression : expression . '/' expression 
+	(4) expression : expression '*' expression .
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(6) expression : expression . '+' expression 
+	(5) expression : expression . '/' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(7) expression : expression . '-' expression 
+	(6) expression : expression . '+' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(8) expression : expression . '^' expression 
+	(7) expression : expression . '-' expression
 		[ EOF '+' '-' '*' '/' '^' ')' ]
-	(8) expression : expression '^' expression . 
+	(8) expression : expression . '^' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+state unknown:
+	(4) expression : expression . '*' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(5) expression : expression . '/' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(5) expression : expression '/' expression .
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(6) expression : expression . '+' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(7) expression : expression . '-' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(8) expression : expression . '^' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+state unknown:
+	(4) expression : expression . '*' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(5) expression : expression . '/' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(6) expression : expression . '+' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(7) expression : expression . '-' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(8) expression : expression . '^' expression
+		[ EOF '+' '-' '*' '/' '^' ')' ]
+	(8) expression : expression '^' expression .
 		[ EOF '+' '-' '*' '/' '^' ')' ]
 state 0
-	(0) $start : . statement 
-	(1) statement : . 
+	(0) $start : . statement
+	(1) statement : .
 
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
@@ -161,12 +159,12 @@ state 0
 	.		reduce (1)
 
 state 1
-	(4) expression : expression . '*' expression 
-	(5) expression : expression . '/' expression 
-	(6) expression : expression . '+' expression 
-	(7) expression : expression . '-' expression 
-	(8) expression : expression . '^' expression 
-	(11) factor : '(' expression . ')' 
+	(4) expression : expression . '*' expression
+	(5) expression : expression . '/' expression
+	(6) expression : expression . '+' expression
+	(7) expression : expression . '-' expression
+	(8) expression : expression . '^' expression
+	(11) factor : '(' expression . ')'
 
 	'+'		shift 5
 	'-'		shift 6
@@ -177,12 +175,12 @@ state 1
 	.		error
 
 state 2
-	(2) statement : expression . 
-	(4) expression : expression . '*' expression 
-	(5) expression : expression . '/' expression 
-	(6) expression : expression . '+' expression 
-	(7) expression : expression . '-' expression 
-	(8) expression : expression . '^' expression 
+	(2) statement : expression .
+	(4) expression : expression . '*' expression
+	(5) expression : expression . '/' expression
+	(6) expression : expression . '+' expression
+	(7) expression : expression . '-' expression
+	(8) expression : expression . '^' expression
 
 	'+'		shift 5
 	'-'		shift 6
@@ -192,7 +190,7 @@ state 2
 	.		reduce (2)
 
 state 3
-	(9) expression : '-' . expression 
+	(9) expression : '-' . expression
 
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
@@ -202,7 +200,7 @@ state 3
 	.		error
 
 state 4
-	(11) factor : '(' . expression ')' 
+	(11) factor : '(' . expression ')'
 
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
@@ -212,7 +210,7 @@ state 4
 	.		error
 
 state 5
-	(6) expression : expression '+' . expression 
+	(6) expression : expression '+' . expression
 
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
@@ -222,7 +220,7 @@ state 5
 	.		error
 
 state 6
-	(7) expression : expression '-' . expression 
+	(7) expression : expression '-' . expression
 
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
@@ -232,7 +230,7 @@ state 6
 	.		error
 
 state 7
-	(4) expression : expression '*' . expression 
+	(4) expression : expression '*' . expression
 
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
@@ -242,7 +240,7 @@ state 7
 	.		error
 
 state 8
-	(5) expression : expression '/' . expression 
+	(5) expression : expression '/' . expression
 
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
@@ -252,7 +250,7 @@ state 8
 	.		error
 
 state 9
-	(8) expression : expression '^' . expression 
+	(8) expression : expression '^' . expression
 
 	NUMBER		shift 16 and reduce (10)
 	'-'		shift 3
@@ -262,12 +260,12 @@ state 9
 	.		error
 
 state 10
-	(4) expression : expression . '*' expression 
-	(5) expression : expression . '/' expression 
-	(6) expression : expression . '+' expression 
-	(6) expression : expression '+' expression . 
-	(7) expression : expression . '-' expression 
-	(8) expression : expression . '^' expression 
+	(4) expression : expression . '*' expression
+	(5) expression : expression . '/' expression
+	(6) expression : expression . '+' expression
+	(6) expression : expression '+' expression .
+	(7) expression : expression . '-' expression
+	(8) expression : expression . '^' expression
 
 	'*'		shift 7
 	'/'		shift 8
@@ -275,12 +273,12 @@ state 10
 	.		reduce (6)
 
 state 11
-	(4) expression : expression . '*' expression 
-	(5) expression : expression . '/' expression 
-	(6) expression : expression . '+' expression 
-	(7) expression : expression . '-' expression 
-	(7) expression : expression '-' expression . 
-	(8) expression : expression . '^' expression 
+	(4) expression : expression . '*' expression
+	(5) expression : expression . '/' expression
+	(6) expression : expression . '+' expression
+	(7) expression : expression . '-' expression
+	(7) expression : expression '-' expression .
+	(8) expression : expression . '^' expression
 
 	'*'		shift 7
 	'/'		shift 8
@@ -288,71 +286,71 @@ state 11
 	.		reduce (7)
 
 state 12
-	(0) $start : statement . 
+	(0) $start : statement .
 
 	EOF		accept
 	.		error
 
 state 13
-	(4) expression : expression . '*' expression 
-	(4) expression : expression '*' expression . 
-	(5) expression : expression . '/' expression 
-	(6) expression : expression . '+' expression 
-	(7) expression : expression . '-' expression 
-	(8) expression : expression . '^' expression 
+	(4) expression : expression . '*' expression
+	(4) expression : expression '*' expression .
+	(5) expression : expression . '/' expression
+	(6) expression : expression . '+' expression
+	(7) expression : expression . '-' expression
+	(8) expression : expression . '^' expression
 
 	'^'		shift 9
 	.		reduce (4)
 
 state 14
-	(4) expression : expression . '*' expression 
-	(5) expression : expression . '/' expression 
-	(5) expression : expression '/' expression . 
-	(6) expression : expression . '+' expression 
-	(7) expression : expression . '-' expression 
-	(8) expression : expression . '^' expression 
+	(4) expression : expression . '*' expression
+	(5) expression : expression . '/' expression
+	(5) expression : expression '/' expression .
+	(6) expression : expression . '+' expression
+	(7) expression : expression . '-' expression
+	(8) expression : expression . '^' expression
 
 	'^'		shift 9
 	.		reduce (5)
 
 state 15
-	(4) expression : expression . '*' expression 
-	(5) expression : expression . '/' expression 
-	(6) expression : expression . '+' expression 
-	(7) expression : expression . '-' expression 
-	(8) expression : expression . '^' expression 
-	(8) expression : expression '^' expression . 
+	(4) expression : expression . '*' expression
+	(5) expression : expression . '/' expression
+	(6) expression : expression . '+' expression
+	(7) expression : expression . '-' expression
+	(8) expression : expression . '^' expression
+	(8) expression : expression '^' expression .
 
 	'^'		shift 9
 	.		reduce (8)
 
 state 16
-	(10) factor : NUMBER . 
+	(10) factor : NUMBER .
 
 	.		reduce (10)
 
 state 17
-	(3) expression : factor . 
+	(3) expression : factor .
 
 	.		reduce (3)
 
 state 18
-	(4) expression : expression . '*' expression 
-	(5) expression : expression . '/' expression 
-	(6) expression : expression . '+' expression 
-	(7) expression : expression . '-' expression 
-	(8) expression : expression . '^' expression 
-	(9) expression : '-' expression . 
+	(4) expression : expression . '*' expression
+	(5) expression : expression . '/' expression
+	(6) expression : expression . '+' expression
+	(7) expression : expression . '-' expression
+	(8) expression : expression . '^' expression
+	(9) expression : '-' expression .
 
 	.		reduce (9)
 
 state 19
-	(11) factor : '(' expression ')' . 
+	(11) factor : '(' expression ')' .
 
 	.		reduce (11)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-custom-parser/grammar.y:
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/20-custom-parser/grammar.y:
 	11 terminal symbols
 	4 nonterminal symbols
 	12 productions

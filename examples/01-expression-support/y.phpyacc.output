@@ -3,60 +3,60 @@ First:
 $start	[ '1' ]
 expr	[ '1' ]
 state unknown:
-	(0) $start : . expr 
+	(0) $start : . expr
 		[ EOF ]
 state unknown:
-	(2) expr : '1' . 
+	(2) expr : '1' .
 		[ EOF '+' ]
 state unknown:
-	(0) $start : expr . 
+	(0) $start : expr .
 		[ EOF ]
-	(1) expr : expr . '+' expr 
+	(1) expr : expr . '+' expr
 		[ EOF '+' ]
 state unknown:
-	(1) expr : expr '+' . expr 
+	(1) expr : expr '+' . expr
 		[ EOF '+' ]
 state unknown:
-	(1) expr : expr . '+' expr 
+	(1) expr : expr . '+' expr
 		[ EOF '+' ]
-	(1) expr : expr '+' expr . 
+	(1) expr : expr '+' expr .
 		[ EOF '+' ]
 state 0
-	(0) $start : . expr 
+	(0) $start : . expr
 
 	'1'		shift 3 and reduce (2)
-	.		error
 	expr		goto 1
+	.		error
 
 state 1
-	(0) $start : expr . 
-	(1) expr : expr . '+' expr 
+	(0) $start : expr .
+	(1) expr : expr . '+' expr
 
 	EOF		accept
 	'+'		shift 2
 	.		error
 
 state 2
-	(1) expr : expr '+' . expr 
+	(1) expr : expr '+' . expr
 
 	'1'		shift 3 and reduce (2)
-	.		error
 	expr		goto 4 and reduce (1)
+	.		error
 
 state 3
-	(2) expr : '1' . 
+	(2) expr : '1' .
 
 	.		reduce (2)
 
 state 4
-	(1) expr : expr . '+' expr 
-	(1) expr : expr '+' expr . 
+	(1) expr : expr . '+' expr
+	(1) expr : expr '+' expr .
 
 	.		reduce (1)
 
 
 Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/grammar.y:
-	5 terminal symbols
+	4 terminal symbols
 	2 nonterminal symbols
 	3 productions
 	5 states

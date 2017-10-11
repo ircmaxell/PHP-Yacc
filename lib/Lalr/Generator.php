@@ -203,7 +203,7 @@ class Generator
             foreach ($this->states as $p) {
                 $this->context->debug("state unknown:\n");
                 for ($x = $p->items; $x != null; $x = $x->next) {
-                    $this->context->debug("\t" . $x->item . "\n");
+                    $this->context->debug("\t" . trim($x->item) . "\n");
                     $this->context->debug("\t\t[ ");
                     $this->context->debug(dumpSet($this->context, $x->look));
                     $this->context->debug("]\n");
@@ -505,12 +505,14 @@ class Generator
         } while ($changed);
 
         if (DEBUG) {
-            $this->context->debug("EMPTY nonterminals: \n");
+            $this->context->debug("EMPTY nonterminals: ");
             foreach ($this->context->nonterminals as $symbol) {
                 if ($symbol->associativity & Production::EMPTY) {
-                    $this->context->debug("  " . $symbol->name . "\n");
+                    $this->context->debug(" " . $symbol->name);
                 }
             }
+            $this->context->debug("\n");
+
         }
     }
 
@@ -661,7 +663,7 @@ class Generator
         }
 
         for ($x = $state->items; $x !== null; $x = $x->next) {
-            $this->context->debug("\t" . $x->item . "\n");
+            $this->context->debug("\t" . trim($x->item) . "\n");
         }
         $this->context->debug("\n");
 

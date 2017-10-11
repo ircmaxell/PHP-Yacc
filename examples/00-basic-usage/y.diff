@@ -5,31 +5,19 @@
 6c6
 < 	(0) start : . expr
 ---
-> 	(0) $start : . expr 
-9c9
-< 	(1) expr : '1' .
----
-> 	(1) expr : '1' . 
+> 	(0) $start : . expr
 12c12
 < 	(0) start : expr .
 ---
-> 	(0) $start : expr . 
+> 	(0) $start : expr .
 15c15
 < 	(0) start : . expr
 ---
-> 	(0) $start : . expr 
-18d17
-< 	expr		goto 1
-19a19
-> 	expr		goto 1
+> 	(0) $start : . expr
 22c22
 < 	(0) start : expr .
 ---
-> 	(0) $start : expr . 
-28c28
-< 	(1) expr : '1' .
----
-> 	(1) expr : '1' . 
+> 	(0) $start : expr .
 33c33
 < Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/00-basic-usage/parser.kmyacc.phpy:
 ---

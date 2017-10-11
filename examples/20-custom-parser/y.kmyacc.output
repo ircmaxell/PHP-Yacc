@@ -350,7 +350,7 @@ state 19
 	.		reduce (11)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-custom-parser/parser.kmyacc.phpy:
+Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/20-custom-parser/parser.kmyacc.phpy:
 	11 terminal symbols
 	4 nonterminal symbols
 	12 productions
