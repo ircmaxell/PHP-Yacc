@@ -512,7 +512,6 @@ class Generator
                 }
             }
             $this->context->debug("\n");
-
         }
     }
 

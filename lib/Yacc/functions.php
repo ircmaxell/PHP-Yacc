@@ -54,4 +54,3 @@ function charval(string $string): int
             return ord($c);
     }
 }
-

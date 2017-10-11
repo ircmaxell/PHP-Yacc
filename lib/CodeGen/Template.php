@@ -378,21 +378,6 @@ class Template
         }
     }
 
-    protected function printArray(array $array, int $limit = -1): string
-    {
-        $return = "[";
-        if ($limit !== -1) {
-            $array = array_slice($array, 0, $limit - 1);
-        }
-        foreach ($array as $key => $value) {
-            if ($key % 10 === 0) {
-                $return .= "\n        ";
-            }
-            $return .= sprintf("%5d,", $value);
-        }
-        return $return . "\n    ]";
-    }
-
     protected function parseTemplate(string $template)
     {
         $template = preg_replace("(\r\n|\r)", "\n", $template);

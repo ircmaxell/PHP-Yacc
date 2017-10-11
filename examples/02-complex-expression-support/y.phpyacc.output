@@ -107,6 +107,8 @@ Nonterminal GOTO table:
      T\S default   0   1   2   3
     expr       3  =    5   6  . 
 
+Number of prims: 3
+
 Candidates of aux table:
 Used aux table:
 state 0 (class 0)

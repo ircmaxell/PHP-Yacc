@@ -41,7 +41,7 @@ class Compress
             $primv[$i] = new Preimage($i);
         }
 
-        for ($i = 0; $i < count($this->context->class2nd); $i++) {
+        for ($i = 0; $i < $this->context->nclasses; $i++) {
             for ($j = 0; $j < $this->context->nterminals; $j++) {
                 $s = $this->context->class_action[$i][$j];
                 if ($s > 0) {
@@ -52,14 +52,16 @@ class Compress
 
         stable_sort($primv, Preimage::class . "::compare");
 
-        $nprims = 0;
-        for ($i = 0; $i < $this->context->nstates; $i++) {
+        $this->context->primof = array_fill(0, $this->context->nstates, 0);
+        $this->context->prims = array_fill(0, $this->context->nstates, 0);
+        $this->context->nprims = 0;
+        for ($i = 0; $i < $this->context->nstates;) {
             $p = $primv[$i];
-            $this->context->prims[$nprims] = $p;
+            $this->context->prims[$this->context->nprims] = $p;
             for (; $i < $this->context->nstates && Preimage::compare($p, $primv[$i]) === 0; $i++) {
                 $this->context->primof[$primv[$i]->index] = $p;
             }
-            $p->index = $nprims++;
+            $p->index = $this->context->nprims++;
         }
     }
 
@@ -253,7 +255,8 @@ class Compress
         $alist = null;
         $n = 0;
 
-        foreach ($this->context->prims as $prim) {
+        for ($i = 0; $i < $this->context->nprims; $i++) {
+            $prim = $this->context->prims[$i];
             if (count($prim->classes) < 2) {
                 continue;
             }
@@ -269,6 +272,7 @@ class Compress
         }
 
         if (DEBUG) {
+            $this->context->debug("\nNumber of prims: {$this->context->nprims}\n");
             $this->context->debug("\nCandidates of aux table:\n");
             for ($p = $alist; $p !== null; $p = $p->next) {
                 $this->context->debug(sprintf("Aux = (%d) ", $p->gain));

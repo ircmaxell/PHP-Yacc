@@ -388,11 +388,17 @@ statemen      12  =   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
 expressi       2  =   .   .   18   1  10  11  13  14  15  .   .   .   .   .   . 
   factor      17  =   .   .   =   =   =   =   =   =   =   .   .   .   .   .   . 
 
+Number of prims: 6
+
 Candidates of aux table:
+Aux = (5) 7,8,9 * 0,1,2,3
+Aux = (6) 7,8,9 * 1,2,3
+Aux = (5) 5,6,7,8,9 * 2,3
 Used aux table:
+Selected aux[1]: (6) 7,8,9 * 1,2,3
 state 0 (class 4)
-state 1 (class 3)
-state 2 (class 2)
+state 1 (class 3): aux[1]
+state 2 (class 2): aux[1]
 state 3 (class 4)
 state 4 (class 4)
 state 5 (class 4)
@@ -407,6 +413,6 @@ state 13 (class 0)
 state 14 (class 0)
 state 15 (class 0)
 Order:
-3,2,4,1,5,0,
+4,3,1,2,5,0,
 Order:
 2,0,1,3,

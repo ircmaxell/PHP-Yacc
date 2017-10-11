@@ -68,6 +68,7 @@ class Context
     public $otermindex = [];
     public $frequency = [];
     public $state_imagesorted = [];
+    public $nprims = 0;
     public $prims = [];
     public $primof = [];
     public $class2nd = [];
