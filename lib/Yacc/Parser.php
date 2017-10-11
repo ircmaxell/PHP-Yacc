@@ -280,7 +280,7 @@ class Parser
                     $p->associativity |= Symbol::NON;
                     break;
             }
-            if ($p->associativity !== Symbol::UNDEF) {
+            if ($tag->t !== Token::TOKEN) {
                 $p->precedence = $this->currentPrecedence;
                 $preIncr = 1;
             }
