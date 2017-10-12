@@ -543,6 +543,7 @@ class Compress
         $actpool = array_fill(0, $poolsize, 0);
         $check = array_fill(0, $poolsize, -1);
         $base = array_fill(0, $nrows, 0);
+        $handledBases = [];
         $actpoolmax = 0;
 
         for ($ii = 0; $ii < $nrows; $ii++) {
@@ -564,10 +565,8 @@ class Compress
                     if ($base[$i] === 0) {
                         continue;
                     }
-                    for ($h = 0; $h < $ii; $h++) {
-                        if ($base[$trow[$h]->index] === $base[$i]) {
-                            goto next;
-                        }
+                    if (isset($handledBases[$base[$i]])) {
+                        continue;
                     }
                 }
 
@@ -585,6 +584,8 @@ class Compress
                 break;
                 next:;
             }
+
+            $handledBases[$base[$i]] = true;
             $jj = $j;
             for ($k = $trow[$ii]->mini; $k < $trow[$ii]->maxi; $k++) {
                 if (self::VACANT !== $transit[$i][$k]) {
