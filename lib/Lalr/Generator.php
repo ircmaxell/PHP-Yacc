@@ -109,7 +109,7 @@ class Generator
             for ($tp = $tmpList; $tp != null; $tp = $tp->next) {
                 /** @var Symbol $g */
                 $g = $tp->item[-1];
-                if ($g !== null && !$g->isTerminal() && !$this->visited[$g->code]) {
+                if ($g !== null && !$g->isterminal && !$this->visited[$g->code]) {
                     $this->visited[$g->code] = true;
                     /** @var Production $gram */
                     for ($gram = $g->value; $gram != null; $gram = $gram->link) {
@@ -239,7 +239,7 @@ class Generator
                 // find shift/reduce conflict
                 foreach ($p->shifts as $m => $t) {
                     $e = $t->through;
-                    if (!$e->isTerminal()) {
+                    if (!$e->isterminal) {
                         break;
                     }
                     if ($alook->testBit($e->code)) {
@@ -360,7 +360,7 @@ class Generator
             $pt = $numReduces;
             $pn = count($p->shifts) + $numReduces;
             foreach ($p->shifts as $x) {
-                if ($x->through->isTerminal()) {
+                if ($x->through->isterminal) {
                     $pt++;
                 }
             }
@@ -369,7 +369,7 @@ class Generator
             $qt = $numReduces;
             $qn = count($q->shifts) + $numReduces;
             foreach ($q->shifts as $x) {
-                if ($x->through->isTerminal()) {
+                if ($x->through->isterminal) {
                     $qt++;
                 }
             }
@@ -420,7 +420,7 @@ class Generator
     protected function computeFollow(State $st)
     {
         foreach ($st->shifts as $t) {
-            if (!$t->through->isTerminal()) {
+            if (!$t->through->isterminal) {
                 $this->follow[$t->through->code] = clone $this->blank;
                 for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
                     $this->computeFirst($this->follow[$t->through->code], $x->item);
@@ -430,14 +430,14 @@ class Generator
         for ($x = $st->items; $x !== null; $x = $x->next) {
             /** @var Symbol $g */
             $g = $x->item[0] ?? null;
-            if ($g !== null && !$g->isTerminal() && $this->isSeqNullable($x->item->slice(1))) {
+            if ($g !== null && !$g->isterminal && $this->isSeqNullable($x->item->slice(1))) {
                 $this->follow[$g->code]->or($x->look);
             }
         }
         do {
             $changed = false;
             foreach ($st->shifts as $t) {
-                if (!$t->through->isTerminal()) {
+                if (!$t->through->isterminal) {
                     $p = $this->follow[$t->through->code];
                     for ($x = $t->items; $x !== null && !$x->isHeadItem(); $x = $x->next) {
                         if ($this->isSeqNullable($x->item) && $x->left != null) {
@@ -453,7 +453,7 @@ class Generator
     {
         /** @var Symbol $g */
         foreach ($item as $g) {
-            if ($g->isTerminal()) {
+            if ($g->isterminal) {
                 $p->setBit($g->code);
                 return;
             }
@@ -468,7 +468,7 @@ class Generator
     {
         /** @var Symbol $g */
         foreach ($item as $g) {
-            if ($g->isTerminal() || !$this->nullable[$g->code]) {
+            if ($g->isterminal || !$this->nullable[$g->code]) {
                 return false;
             }
         }
@@ -523,7 +523,7 @@ class Generator
                 $h = $gram->body[0];
                 for ($s = 1; $s < count($gram->body); $s++) {
                     $g = $gram->body[$s];
-                    if ($g->isTerminal()) {
+                    if ($g->isterminal) {
                         if (!$this->first[$h->code]->testBit($g->code)) {
                             $changed = true;
                             $this->first[$h->code]->setBit($g->code);
@@ -580,7 +580,7 @@ class Generator
         for ($p = $items; $p !== null; $p = $p->next) {
             /** @var Symbol $g */
             $g = $p->item[0] ?? null;
-            if ($g !== null && !$g->isTerminal()) {
+            if ($g !== null && !$g->isterminal) {
                 $tail = $this->findEmpty($tail, $g);
             }
         }
@@ -606,7 +606,7 @@ class Generator
                     $tail->next = $p;
                     $tail = $p;
                     $this->nlooks++;
-                } elseif (!$gram->body[1]->isTerminal()) {
+                } elseif (!$gram->body[1]->isterminal) {
                     $tail = $this->findEmpty($tail, $gram->body[1]);
                 }
             }
@@ -677,7 +677,7 @@ class Generator
             if ($s !== null && ($r === null || $s->through->code < $r->symbol->code)) {
                 $str = $s->through->name;
                 $this->context->debug(strlen($str) < 8 ? "\t$str\t\t" : "\t$str\t");
-                $this->context->debug($s->through->isTerminal() ? "shift" : "goto");
+                $this->context->debug($s->through->isterminal ? "shift" : "goto");
                 $this->context->debug(" " . $s->number);
                 if ($s->isReduceOnly()) {
                     $this->context->debug(" and reduce (" . $s->reduce[0]->number . ")");

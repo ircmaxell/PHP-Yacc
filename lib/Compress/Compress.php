@@ -92,7 +92,7 @@ class Compress
             $this->context->nonterm_goto[$i] = array_fill(0, $this->context->nnonterminals, self::VACANT);
 
             foreach ($this->context->states[$i]->shifts as $shift) {
-                if ($shift->through->isTerminal()) {
+                if ($shift->through->isterminal) {
                     $this->context->term_action[$i][$shift->through->code] = $shift->number;
                 } else {
                     $this->context->nonterm_goto[$i][$shift->through->nb] = $shift->number;
@@ -611,7 +611,7 @@ class Compress
 
     public function convert_symbol(Symbol $symbol): int
     {
-        return $symbol->isTerminal() ? $this->context->ctermindex[$symbol->code] : $symbol->code;
+        return $symbol->isterminal ? $this->context->ctermindex[$symbol->code] : $symbol->code;
     }
 
     public function resetFrequency()

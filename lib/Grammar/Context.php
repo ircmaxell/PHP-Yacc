@@ -142,7 +142,7 @@ class Context
     public function terminals(): Generator
     {
         foreach ($this->_symbols as $symbol) {
-            if ($symbol->isTerminal()) {
+            if ($symbol->isterminal) {
                 yield $symbol;
             }
         }
@@ -160,7 +160,7 @@ class Context
     public function nonTerminals(): Generator
     {
         foreach ($this->_symbols as $symbol) {
-            if ($symbol->isNonTerminal()) {
+            if ($symbol->isnonterminal) {
                 yield $symbol;
             }
         }
@@ -213,9 +213,9 @@ class Context
         $this->nterminals = 0;
         $this->nnonterminals = 0;
         foreach ($this->_symbols as $symbol) {
-            if ($symbol->isTerminal()) {
+            if ($symbol->isterminal) {
                 $this->nterminals++;
-            } elseif ($symbol->isNonTerminal()) {
+            } elseif ($symbol->isnonterminal) {
                 $this->nnonterminals++;
             }
         }

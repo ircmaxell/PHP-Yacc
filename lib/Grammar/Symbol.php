@@ -34,27 +34,20 @@ class Symbol
     protected $_name;
     protected $_nb = 0;
 
+    public $isterminal = false;
+    public $isnonterminal = false;
+
     protected $_terminal = self::UNDEF;
 
     public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
     {
         $this->_code = $code;
         $this->_name = $name;
-        $this->_terminal = $terminal;
         $this->_value = $value;
+        $this->setTerminal($terminal);
         $this->_precedence = $precedence;
         $this->_associativity = $associativity;
         $this->_type = $type;
-    }
-
-    public function isTerminal(): bool
-    {
-        return $this->_terminal === self::TERMINAL;
-    }
-
-    public function isNonTerminal(): bool
-    {
-        return $this->_terminal === self::NONTERMINAL;
     }
 
     public function isNilSymbol(): bool
@@ -86,6 +79,16 @@ class Symbol
     public function setTerminal(int $terminal)
     {
         $this->_terminal = $terminal;
+        if ($terminal === self::TERMINAL) {
+            $this->isterminal = true;
+            $this->isnonterminal = false;
+        } elseif ($terminal === self::NONTERMINAL) {
+            $this->isterminal = false;
+            $this->isnonterminal = true;
+        } else {
+            $this->isterminal = false;
+            $this->isnonterminal = false;
+        }
         $this->setValue($this->_value); // force check to prevent issues
     }
 
@@ -101,9 +104,9 @@ class Symbol
 
     public function setValue($value)
     {
-        if ($this->isTerminal() && !is_int($value)) {
+        if ($this->isterminal && !is_int($value)) {
             throw new \InvalidArgumentException("Terminals value must be an integer, " . gettype($value) . " provided");
-        } elseif ($this->isNonTerminal() && !($value instanceof Production || $value === null)) {
+        } elseif ($this->isnonterminal  && !($value instanceof Production || $value === null)) {
             throw new \InvalidArgumentException("NonTerminals value must be a production, " . gettype($value) . " provided");
         }
         $this->_value = $value;

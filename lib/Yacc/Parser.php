@@ -101,7 +101,7 @@ class Parser
                 }
                 $gbuffer[0] = $this->context->internSymbol($t->v, false);
                 $attribute[1] = null;
-                if ($gbuffer[0]->isTerminal()) {
+                if ($gbuffer[0]->isterminal) {
                     throw new RuntimeException("Nonterminal symbol expected: $t");
                 } elseif (($tmp = $this->lexer->get())->t !== ':') {
                     throw new RuntimeException("':' expected, $tmp found");
@@ -159,7 +159,7 @@ class Parser
                     }
                     $gbuffer[$i++] = $w = $this->context->internSymbol($t->v, false);
                     $attribute[$i] = null;
-                    if ($w->isTerminal()) {
+                    if ($w->isterminal) {
                         $lastTerm = $w;
                     }
                     $action = null;
