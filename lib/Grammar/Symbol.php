@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
+use PhpYacc\Exception\LogicException;
 use PhpYacc\Yacc\Production;
 
 /**
@@ -105,9 +106,9 @@ class Symbol
     public function setValue($value)
     {
         if ($this->isterminal && !is_int($value)) {
-            throw new \InvalidArgumentException("Terminals value must be an integer, " . gettype($value) . " provided");
+            throw new LogicException("Terminals value must be an integer, " . gettype($value) . " provided");
         } elseif ($this->isnonterminal  && !($value instanceof Production || $value === null)) {
-            throw new \InvalidArgumentException("NonTerminals value must be a production, " . gettype($value) . " provided");
+            throw new LogicException("NonTerminals value must be a production, " . gettype($value) . " provided");
         }
         $this->_value = $value;
     }
@@ -126,7 +127,7 @@ class Symbol
     {
         $this->_code = $code;
         if ($code < $this->_nb) {
-            throw new \LogicException("Should never happen, code being less than nb");
+            throw new LogicException("Should never happen, code being less than nb");
         }
     }
 }

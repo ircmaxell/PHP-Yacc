@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PhpYacc\Yacc;
 
 use function PhpYacc\character_value;
+use PhpYacc\Exception\ParseException;
 use RuntimeException;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
@@ -47,7 +48,7 @@ class Parser
         while (($t = $this->lexer->rawGet())->t !== $delm || $ct > 0) {
             switch ($t->t) {
                 case EOF:
-                    throw new RuntimeException("Unexpected EOF");
+                    throw ParseException::unexpected($t, Token::decode($delm));
                 case '{':
                     $ct++;
                     break;
@@ -170,7 +171,7 @@ class Parser
             }
             if (!$action) {
                 if ($i > 1 && $gbuffer[0]->type !== null && $gbuffer[0]->type !== $gbuffer[1]->type) {
-                    throw new RuntimeException("Stack types are different");
+                    throw new ParseException("Stack types are different");
                 }
             }
             $r = new Production($action, $pos);
@@ -191,7 +192,7 @@ class Parser
                 continue;
             }
             if (($j = $symbol->value) === null) {
-                throw new RuntimeException("Nonterminal {$symbol->name} used but not defined");
+                throw new ParseException("Nonterminal {$symbol->name} used but not defined");
             }
             $k = null;
             while ($j) {
@@ -234,7 +235,7 @@ class Parser
                     if ($t->t === Token::NUMBER) {
                         $this->context->expected = (int) $t->v;
                     } else {
-                        throw new RuntimeException("Missing number");
+                        throw ParseException::unexpected($t, Token::NUMBER);
                     }
                     break;
                 case Token::START:
@@ -245,10 +246,9 @@ class Parser
                     $this->context->pureFlag = true;
                     break;
                 case EOF:
-                    throw new RuntimeException("No grammar given");
+                    throw new ParseException("No grammar given");
                 default:
-                var_dump($t);
-                    throw new RuntimeException("Syntax error, unexpected {$t->v}");
+                    throw new ParseException("Syntax error, unexpected {$t->v}");
             }
         }
         $base = 256;
@@ -299,7 +299,7 @@ class Parser
                 if ($p->value === null) {
                     $p->value = (int) $t->v;
                 } else {
-                    throw new RuntimeException("Token {$p->name} already has a value");
+                    throw new ParseException("Unexpected Token::NUMBER as {$p->name} already has a value");
                 }
                 $t = $this->lexer->get();
             }
@@ -325,7 +325,8 @@ class Parser
             switch ($t->t) {
                 case "\n":
                 case EOF:
-                    throw new RuntimeException("Missing closing >");
+                    throw ParseException::unexpected($t, ">");
+
                 case '<':
                     $ct++;
                     break;

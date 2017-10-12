@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace PhpYacc\CodeGen;
 
+use PhpYacc\Exception\LogicException;
+use PhpYacc\Exception\TemplateException;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Compress\Compress;
 use PhpYacc\Compress\CompressResult;
@@ -141,20 +143,20 @@ class Template
                         $i++;
                     }
                     if (!isset($line[$i])) {
-                        throw new \LogicException('$(: missing ")"');
+                        throw new TemplateException('$(: missing ")"');
                     }
                     $length = $i - $start;
 
                     $buffer .= $this->gen_valueof(substr($val, 0, $length));
                 } elseif ($this->metamatch($p, 'TYPEOF(')) {
-                    throw new \LogicException("TYPEOF is not implemented");
+                    throw new LogicException("TYPEOF is not implemented");
                 } else {
                     break;
                 }
             }
             if (isset($p[0]) && $p[0] === $this->metachar) {
                 if (trim($buffer) !== '') {
-                    throw new RuntimeException("Non-blank character before \$-keyword");
+                    throw new TemplateException("Non-blank character before \$-keyword");
                 }
                 if ($this->metamatch($p, 'header')) {
                     // Skip
@@ -165,9 +167,9 @@ class Template
                     $tailcode = true;
                     continue;
                 } elseif ($this->metamatch($p, 'verification-table')) {
-                    throw new \LogicException("verification-table is not implemented");
+                    throw new TemplateException("verification-table is not implemented");
                 } elseif ($this->metamatch($p, 'union')) {
-                    throw new \LogicException("union is not implemented");
+                    throw new TemplateException("union is not implemented");
                 } elseif ($this->metamatch($p, 'tokenval')) {
                     $tokenmode = [
                         "enabled" => true,
@@ -213,7 +215,7 @@ class Template
                 } elseif ($this->metamatch($p, 'endif')) {
                     $skipmode = false;
                 } else {
-                    throw new RuntimeException("Unknown \$: $line");
+                    throw new TemplateException("Unknown \$: $line");
                 }
                 $linechanged = true;
             } else {
@@ -248,7 +250,7 @@ class Template
             case '%pure_parser':
                 return $this->context->pureFlag;
             default:
-                throw new RuntimeException("$dump: unknown switch: $test");
+                throw new TemplateException("$dump: unknown switch: $test");
         }
     }
 
@@ -322,7 +324,7 @@ class Template
             }
             fprintf($this->fp, "\n");
         } else {
-            throw new RuntimeException("\$listvar: unknown variable $var");
+            throw new TemplateException("\$listvar: unknown variable $var");
         }
     }
 
@@ -374,7 +376,7 @@ class Template
             case '-p':
 
             default:
-                throw new \LogicException("Unknown variable: \$($var)");
+                throw new TemplateException("Unknown variable: \$($var)");
         }
     }
 
@@ -399,7 +401,7 @@ class Template
             } elseif ($this->metamatch($p, "meta")) {
                 if (!isset($p[6]) || isWhite(($p[6]))) {
                     var_dump($p);
-                    throw new \LogicException("\$meta: missing character in definition: $p");
+                    throw new TemplateException("\$meta: missing character in definition: $p");
                 }
                 $this->metachar = $p[6];
             } elseif ($this->metamatch($p, "semval")) {
@@ -426,7 +428,7 @@ class Template
         } elseif (strpos($macro, '(%n,%t)') !== false) {
             $this->context->macros[DollarExpansion::SEMVAL_RHS_TYPED] = ltrim(substr($macro, 7));
         } else {
-            throw new \RuntimeException("\$semval: bad format $macro");
+            throw new TemplateException("\$semval: bad format $macro");
         }
     }
 

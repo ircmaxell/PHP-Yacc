@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PhpYacc\Grammar;
 
 use function PhpYacc\character_value;
+use PhpYacc\Exception\LogicException;
 use PhpYacc\Yacc\Production;
 use PhpYacc\Yacc\Macro\DollarExpansion;
 use Generator;
@@ -95,7 +96,7 @@ class Context
             case 'nonterminals': return $this->nonTerminals();
         }
         if (!isset($this->{'_' . $name})) {
-            throw new \LogicException("Should never happen: unknown property $name");
+            throw new LogicException("Should never happen: unknown property $name");
         }
         return $this->{'_' . $name};
     }

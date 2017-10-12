@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
+use PhpYacc\Exception\LexingException;
+
 class Token
 {
     const NAME        = 0x0200;
@@ -55,7 +57,7 @@ class Token
     public function __construct($token, string $value, int $lineNumber, string $filename)
     {
         if (!isset(self::TOKEN_MAP[$token]) && !is_string($token)) {
-            throw new \RuntimeException("Unknown token found: $token");
+            throw new LexingException("Unknown token found: $token");
         }
         $this->t = $token;
         $this->v = $value;
@@ -63,11 +65,16 @@ class Token
         $this->fn = $filename;
     }
 
+    public static function decode($tag): string
+    {
+        if (!isset(self::TOKEN_MAP[$tag])) {
+            return "$tag";
+        }
+        return "Token::" . self::TOKEN_MAP[$tag];
+    }
+
     public function __toString(): string
     {
-        if (!isset(self::TOKEN_MAP[$this->t])) {
-            return "[{$this->fn}:{$this->ln}] {$this->t} ({$this->v})";
-        }
-        return "[{$this->fn}:{$this->ln}] Token::" . self::TOKEN_MAP[$this->t] . " ({$this->v})";
+        return "[{$this->fn}:{$this->ln}] " . self::decode($this->t) . " ({$this->v})";
     }
 }

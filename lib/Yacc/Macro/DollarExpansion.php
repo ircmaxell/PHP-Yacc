@@ -2,6 +2,7 @@
 
 namespace PhpYacc\Yacc\Macro;
 
+use PhpYacc\Exception\ParseException;
 use PhpYacc\Yacc\MacroAbstract;
 use Iterator;
 use Generator;
@@ -31,7 +32,7 @@ class DollarExpansion extends MacroAbstract
                             if ($v < 0) {
                                 $v = $i;
                             } else {
-                                throw new RuntimeException("Ambiguous semantic value reference for $t");
+                                throw new ParseException("Ambiguous semantic value reference for $t");
                             }
                         }
                     }
@@ -58,11 +59,12 @@ class DollarExpansion extends MacroAbstract
                     if ($t->t === '<') {
                         $t = self::next($tokens);
                         if ($t->t !== Token::NAME) {
-                            throw new RuntimeException("type expected");
+                            throw ParseException::unexpected($t, Token::NAME);
                         }
                         $type = $ctx->intern($t->v);
-                        if (self::next($tokens)->t !== '>') {
-                            throw new RuntimeException("Missing >");
+                        $dump = self::next($tokens);
+                        if ($dump->t !== '>') {
+                            throw ParseException::unexpected($dump, '>');
                         }
                         $t = self::next($tokens);
                     }
@@ -72,7 +74,7 @@ class DollarExpansion extends MacroAbstract
                     } elseif ($t->t === '-') {
                         $t = self::next($tokens);
                         if ($t->t !== Token::NUMBER) {
-                            throw new RuntimeException("Number expected");
+                            throw ParseException::unexpected($t, Token::NUMBER);
                         }
                         $v = -1 * ((int) $t->v);
                     } else {
@@ -89,7 +91,7 @@ semval:
                         $type = $symbols[$v]->type;
                     }
                     if ($type === null /** && $ctx->unioned */ && false) {
-                        throw new RuntimeException("Type not defined for " . $symbols[$v]->name);
+                        throw new ParseException("Type not defined for " . $symbols[$v]->name);
                     }
                     foreach ($this->parseDollar($ctx, $t, $v, $n, $type ? $type->name : null) as $t) {
                         yield $t;

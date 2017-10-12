@@ -3,6 +3,8 @@
 namespace PhpYacc\Yacc;
 
 use Iterator;
+use PhpYacc\Exception\LogicException;
+use PhpYacc\Exception\ParseException;
 use function PhpYacc\is_sym_character;
 use PhpYacc\Macro;
 use RuntimeException;
@@ -34,7 +36,7 @@ abstract class MacroAbstract implements Macro
     {
         $it->next();
         if (!$it->valid()) {
-            throw new RuntimeException("Syntax error, expected more tokens");
+            throw new LogicException("Unexpected end of action stream: this should never happen");
         }
         return $it->current();
     }

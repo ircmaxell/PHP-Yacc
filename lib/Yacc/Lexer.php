@@ -5,7 +5,8 @@ namespace PhpYacc\Yacc;
 
 use function PhpYacc\is_sym_character;
 use function PhpYacc\is_white;
-use RuntimeException;
+use PhpYacc\Exception\LexingException;
+use PhpYacc\Exception\ParseException;
 
 const EOF = "EOF";
 const MAXTOKEN = 50000;
@@ -67,7 +68,7 @@ class Lexer
     public function unget()
     {
         if ($this->backToken) {
-            throw new RuntimeException("Too many ungetToken calls");
+            throw new LexingException("Too many ungetToken calls");
         }
         $this->backToken = $this->token;
     }
@@ -105,7 +106,7 @@ class Lexer
                         $this->ungetc($c);
                     }
                     if ($c === EOF) {
-                        throw new RuntimeException("Missing */");
+                        throw ParseException::unexpected($this->token(EOF, ''), "*/");
                     }
                     $p .= $c;
                 }
@@ -169,8 +170,11 @@ class Lexer
         } elseif ($c === '\'' || $c === '"') {
             $p .= $c;
             while (($c = $this->getc()) !== $tag) {
-                if ($c === EOF || $c === "\n") {
-                    throw new RuntimeException("Missing '");
+                if ($c === EOF) {
+                    throw ParseException::unexpected($this->token("EOF", ''), $tag);
+                }
+                if ($c === "\n") {
+                    throw ParseException::unexpected($this->token(Token::NEWLINE, "\n"), $tag);
                 }
                 $p .= $c;
                 if ($c === '\\') {
@@ -236,7 +240,7 @@ class Lexer
             return;
         }
         if ($this->backChar !== null) {
-            throw new RuntimeException("To many unget calls");
+            throw new LexingException("To many unget calls");
         }
         $this->backChar = $c;
     }

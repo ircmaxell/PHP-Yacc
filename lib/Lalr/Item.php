@@ -5,6 +5,7 @@ namespace PhpYacc\Lalr;
 
 use IteratorAggregate;
 use ArrayAccess;
+use PhpYacc\Exception\LogicException;
 use PhpYacc\Yacc\Production;
 
 class Item implements ArrayAccess, IteratorAggregate
@@ -40,19 +41,19 @@ class Item implements ArrayAccess, IteratorAggregate
     public function offsetGet($index)
     {
         if (!$this->offsetExists($index)) {
-            throw new \Exception("Offset $index does not exist");
+            throw new LogicException("Offset $index does not exist");
         }
         return $this->production->body[$index + $this->pos];
     }
 
     public function offsetSet($index, $value)
     {
-        throw new \Exception("Not supported");
+        throw new LogicException("Not supported");
     }
 
     public function offsetUnset($index)
     {
-        throw new \Exception("Not supported");
+        throw new LogicException("Not supported");
     }
 
     public function isHeadItem()

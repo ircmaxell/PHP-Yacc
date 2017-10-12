@@ -48,7 +48,8 @@ class ArrayBitset implements Bitset
         return $changed;
     }
 
-    public function getIterator() {
+    public function getIterator()
+    {
         $numElems = count($this->array);
         for ($n = 0; $n < $numElems; $n++) {
             $elem = $this->array[$n];

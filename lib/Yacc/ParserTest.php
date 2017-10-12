@@ -6,10 +6,8 @@ namespace PhpYacc\Yacc;
 use PHPUnit\Framework\TestCase;
 use PhpYacc\Grammar\Context;
 
-
 class ParserTest extends TestCase
 {
-
     public static function provideParserDebugCases(): array
     {
         return [
@@ -104,7 +102,7 @@ expr:
     T_NUMBER       { $$ = $1; }
   | expr '+' expr  { $$ = $1 + $3; }
   | expr '-' expr  { $$ = $1 - $3; }
-  | '(' expr ')'   { $$ = ($2); }
+  | '(' expr ')'   { { $$ = ($2); } }
 ;
 %%
 CODE
@@ -147,7 +145,7 @@ CODE
                             "body" => [8, 8, 3, 8],
                         ],
                         [
-                            "action" => " m2(0,3) = (m4(2,3)); ",
+                            "action" => " { m2(0,3) = (m4(2,3)); } ",
                             "empty" => false,
                             "body" => [8, 4, 8, 5],
                         ]
@@ -200,8 +198,5 @@ CODE
                 $this->assertEquals($v, $gram->body[$k]->code, "gram[$key]->body[$k]");
             }
         }
-
     }
-
-
 }

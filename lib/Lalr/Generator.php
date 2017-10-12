@@ -2,6 +2,7 @@
 
 namespace PhpYacc\Lalr;
 
+use PhpYacc\Exception\LogicException;
 use PhpYacc\Lalr\Conflict\ReduceReduce;
 use PhpYacc\Lalr\Conflict\ShiftReduce;
 use PhpYacc\Grammar\Context;
@@ -414,7 +415,7 @@ class Generator
             case Symbol::NON:
                 return self::NON_ASSOC;
         }
-        throw new \Exception('Cannot happen');
+        throw new LogicException('Gram has associativity other than LEFT/RIGHT/NON. This should never happen');
     }
 
     protected function computeFollow(State $st)

@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class ProductionTest extends Testcase
 {
-
     public function testSetAssociativity()
     {
         $prod = new Production("", 1);
