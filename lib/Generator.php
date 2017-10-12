@@ -24,7 +24,7 @@ class Generator
         $this->compressor = $compressor ?: new Compress;
     }
 
-    public function generate(string $grammar, string $grammarFileName, string $template, string $logfile = null): string
+    public function generate(string $grammar, string $grammarFileName, string $template, string $resultFile, string $logfile = null)
     {
         $context = new Context($grammarFileName, is_null($logfile) ? null : fopen($logfile, 'w'));
 
@@ -36,7 +36,6 @@ class Generator
 
         $result = $this->compressor->compress($context);
 
-
-        return $template->render($result);
+        $template->render($result, fopen($resultFile, 'w'));
     }
 }

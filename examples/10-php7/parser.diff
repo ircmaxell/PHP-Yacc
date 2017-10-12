@@ -1,16 +1,4 @@
-185c185
-<         "'$'"
----
->         "'\$'"
 809c809
 <         "start : start",
 ---
 >         "\$start : start",
-1266,1268c1266,1268
-<         "simple_variable : '$' '{' expr '}'",
-<         "simple_variable : '$' simple_variable",
-<         "simple_variable : '$' error",
----
->         "simple_variable : '\$' '{' expr '}'",
->         "simple_variable : '\$' simple_variable",
->         "simple_variable : '\$' error",

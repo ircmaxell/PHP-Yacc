@@ -182,7 +182,7 @@ class Parser extends \PhpParser\ParserAbstract
         "'`'",
         "']'",
         "'\"'",
-        "'\$'"
+        "'$'"
     );
 
     protected $tokenToSymbol = array(
@@ -1263,9 +1263,9 @@ class Parser extends \PhpParser\ParserAbstract
         "variable : static_member",
         "variable : dereferencable T_OBJECT_OPERATOR property_name",
         "simple_variable : T_VARIABLE",
-        "simple_variable : '\$' '{' expr '}'",
-        "simple_variable : '\$' simple_variable",
-        "simple_variable : '\$' error",
+        "simple_variable : '$' '{' expr '}'",
+        "simple_variable : '$' simple_variable",
+        "simple_variable : '$' error",
         "static_member : class_name_or_var T_PAAMAYIM_NEKUDOTAYIM simple_variable",
         "new_variable : simple_variable",
         "new_variable : new_variable '[' optional_expr ']'",

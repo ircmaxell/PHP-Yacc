@@ -10,7 +10,18 @@ namespace PhpYacc\CodeGen;
 
 interface Language
 {
-    public function comment(string $text): string;
 
-    public function case_block(int $num, string $value);
+    public function begin($file, $headerFile);
+
+    public function commit();
+
+    public function write(string $text, bool $includeHeader = false);
+
+    public function writeQuoted(string $text);
+
+    public function comment(string $text);
+
+    public function inline_comment(string $text);
+
+    public function case_block(string $indent, int $num, string $value);
 }

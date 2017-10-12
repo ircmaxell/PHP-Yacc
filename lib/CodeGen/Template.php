@@ -8,9 +8,8 @@ use PhpYacc\Exception\TemplateException;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Compress\Compress;
 use PhpYacc\Compress\CompressResult;
+use function PhpYacc\is_white;
 use PhpYacc\Yacc\Macro\DollarExpansion;
-use RuntimeException;
-use PhpYacc\Yacc\Production;
 
 class Template
 {
@@ -19,8 +18,6 @@ class Template
     protected $lineno = 0;
     protected $copy_header = false;
 
-    protected $fp;
-    protected $hp;
     /**
      * @var Context
      */
@@ -41,15 +38,11 @@ class Template
         $this->parseTemplate($template);
     }
 
-    public function getHeader(): string
+    public function render(CompressResult $result, $resultFile, $headerFile = null)
     {
-        //todo
-    }
+        $headerFile = $headerFile ?: fopen('php://memory', 'rw');
 
-    public function render(CompressResult $result)
-    {
-        $this->fp = fopen('php://memory', 'rw');
-        $this->hp = fopen('php://memory', 'rw');
+        $this->language->begin($resultFile, $headerFile);
 
         $this->compress = $result;
         $result = '';
@@ -67,11 +60,11 @@ class Template
             "mac" => [],
         ];
         $buffer = '';
-        $this->print_line($this->lineno, $this->context->filename);
+        $this->print_line();
         foreach ($this->template as $line) {
             $line .= "\n";
             if ($tailcode) {
-                fprintf($this->fp, "%s%s", $buffer, $line);
+                $this->language->write($buffer . $line);
                 continue;
             }
             if ($skipmode) {
@@ -159,7 +152,7 @@ class Template
                     throw new TemplateException("Non-blank character before \$-keyword");
                 }
                 if ($this->metamatch($p, 'header')) {
-                    // Skip
+                    $this->copy_header = true;
                 } elseif ($this->metamatch($p, 'endheader')) {
                     $this->copy_header = false;
                 } elseif ($this->metamatch($p, 'tailcode')) {
@@ -186,23 +179,25 @@ class Template
                     for ($i = 0; $i < $this->context->nterminals; $i++) {
                         if ($this->context->ctermindex[$i] >= 0) {
                             $symbol = $this->context->symbol($i);
-                            fprintf($this->fp, "%s%s\n", $buffer, $this->language->case_block($symbol->value, $symbol->name));
+                            $this->language->case_block($buffer, $symbol->value, $symbol->name);
                         }
                     }
                 } elseif ($this->metamatch($p, 'production-strings')) {
                     foreach ($this->context->grams as $gram) {
                         $info = array_slice($gram->body, 0);
-                        fprintf($this->fp, "%s\"%s :", $buffer, addcslashes($info[0]->name, '$"'));
+                        $this->language->write($buffer . "\"");
+                        $this->language->writeQuoted($info[0]->name);
+                        $this->language->writeQuoted(' :');
                         if (count($info) === 1) {
-                            fprintf($this->fp, " /* empty */");
+                            $this->language->writeQuoted(" /* empty */");
                         }
                         for ($i = 1; $i < count($info); $i++) {
-                            fprintf($this->fp, " %s", addcslashes($info[$i]->name, '$"'));
+                            $this->language->writeQuoted(' ' . $info[$i]->name);
                         }
                         if ($gram->num + 1 === $this->context->ngrams) {
-                            fwrite($this->fp, "\"\n");
+                            $this->language->write("\"\n");
                         } else {
-                            fwrite($this->fp, "\",\n");
+                            $this->language->write("\",\n");
                         }
                     }
                 } elseif ($this->metamatch($p, 'listvar')) {
@@ -223,15 +218,11 @@ class Template
                     $this->print_line();
                     $linechanged = false;
                 }
-                fwrite($this->fp, $buffer);
-                if ($this->copy_header) {
-                    fwrite($this->hp, $buffer);
-                }
+                $this->language->write($buffer, $this->copy_header);
             }
         }
 
-        fseek($this->fp, 0);
-        return stream_get_contents($this->fp);
+        $this->language->commit();
     }
 
     protected function skipif($spec): bool
@@ -281,10 +272,7 @@ class Template
                 $result .= $p;
             }
         }
-        fwrite($this->fp, $result);
-        if ($this->copy_header) {
-            fwrite($this->hp, $result);
-        }
+        $this->language->write($result, $this->copy_header);
     }
 
     protected function gen_list_var(string $indent, string $var)
@@ -307,22 +295,22 @@ class Template
             $nl = 0;
             foreach ($this->context->terminals as $term) {
                 if ($this->context->ctermindex[$term->code] >= 0) {
-                    if ($nl++) {
-                        fprintf($this->fp, ",\n");
-                    }
-                    fprintf($this->fp, "%s\"%s\"", $indent, addcslashes($term->name, '$"'));
+                    $prefix = $nl++ ? ",\n" : "";
+                    $this->language->write($prefix . $indent . "\"");
+                    $this->language->writeQuoted($term->name);
+                    $this->language->write("\"");
                 }
             }
-            fprintf($this->fp, "\n");
+            $this->language->write("\n");
         } elseif ($var === 'nonterminals') {
             $nl = 0;
             foreach ($this->context->nonterminals as $nonterm) {
-                if ($nl++) {
-                    fprintf($this->fp, ",\n");
-                }
-                fprintf($this->fp, "%s\"%s\"", $indent, addcslashes($nonterm->name, '$"'));
+                $prefix = $nl++ ? ",\n" : "";
+                $this->language->write($prefix . $indent . "\"");
+                $this->language->writeQuoted($nonterm->name);
+                $this->language->write("\"");
             }
-            fprintf($this->fp, "\n");
+            $this->language->write("\n");
         } else {
             throw new TemplateException("\$listvar: unknown variable $var");
         }
@@ -333,16 +321,16 @@ class Template
         $col = 0;
         for ($i = 0; $i < $limit; $i++) {
             if ($col === 0) {
-                fwrite($this->fp, $indent);
+                $this->language->write($indent);
             }
-            fprintf($this->fp, $i + 1 === $limit ? "%5d" : "%5d,", $array[$i]);
+            $this->language->write(sprintf($i + 1 === $limit ? "%5d" : "%5d,", $array[$i]));
             if (++$col === 10) {
-                fwrite($this->fp, "\n");
+                $this->language->write("\n");
                 $col = 0;
             }
         }
         if ($col !== 0) {
-            fwrite($this->fp, "\n");
+            $this->language->write("\n");
         }
     }
 
@@ -392,15 +380,14 @@ class Template
                 $this->template[] = $line;
                 continue;
             }
-            while (strlen($p) > 0 && isWhite($p[0])) {
+            while (strlen($p) > 0 && is_white($p[0])) {
                 $p = substr($p, 1);
             }
             $this->lineno++;
             if ($this->metamatch($p, "include")) {
                 $skip = true;
             } elseif ($this->metamatch($p, "meta")) {
-                if (!isset($p[6]) || isWhite(($p[6]))) {
-                    var_dump($p);
+                if (!isset($p[6]) || is_white(($p[6]))) {
                     throw new TemplateException("\$meta: missing character in definition: $p");
                 }
                 $this->metachar = $p[6];
@@ -440,11 +427,6 @@ class Template
         if ($filename === null) {
             $filename = $this->context->filename;
         }
-        //fprintf($this->fp, $this->language->comment("line %d \"%s\""), $line, $filename);
+        //$this->language->inline_comment("{$filename}:$line");
     }
-}
-
-function isWhite(string $c): bool
-{
-    return $c === ' ' || $c === "\t" || $c === "\r" || $c === "\x0b" || $c === "\x0c";
 }

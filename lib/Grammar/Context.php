@@ -74,6 +74,7 @@ class Context
     public $nclasses = 0;
     public $naux = 0;
 
+    protected $debug = false;
     protected $debugFile;
 
     public function __construct(string $filename = 'YY', $debugFile = null)
