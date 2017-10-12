@@ -49,7 +49,7 @@ class StringBitset implements Bitset
         $this->str[$offset] = $char;
     }
 
-    public function or(StringBitset $other): bool
+    public function or(Bitset $other): bool
     {
         assert($this->numBits === $other->numBits);
 

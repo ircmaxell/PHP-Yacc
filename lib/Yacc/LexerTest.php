@@ -16,7 +16,7 @@ class LexerTest extends Testcase
             ["// Foo", Token::COMMENT],
             ["%%", Token::MARK],
             ["%token", Token::TOKEN],
-            ["'foo'", "'"],
+            ["'f'", "'"],
         ];
     }
     
@@ -34,11 +34,8 @@ class LexerTest extends Testcase
 
     protected function boot(string $source): Lexer
     {
-        $f = fopen("php://memory", "w");
-        fwrite($f, $source);
-        fseek($f, 0);
-        $tok = new Lexer();
-        $tok->init($f);
-        return $tok;
+        $lexer = new Lexer();
+        $lexer->startLexing($source, "xxx");
+        return $lexer;
     }
 }

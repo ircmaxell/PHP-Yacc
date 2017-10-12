@@ -23,14 +23,9 @@ function eq_row(array $a, array $b, int $length): bool
     return true;
 }
 
-function is_vacant(int $x): bool
-{
-    return $x === Compress::VACANT;
-}
-
 function printact(int $act): string
 {
-    if (is_vacant($act)) {
+    if (Compress::VACANT === $act) {
         return '  . ';
     }
     return sprintf("%4d", $act);

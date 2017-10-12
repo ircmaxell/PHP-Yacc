@@ -61,4 +61,15 @@ class Lr1
     {
         return $this->_item->isHeadItem();
     }
+
+    public function dump(): string
+    {
+        $result = '';
+        $lr1 = $this;
+        while ($lr1 !== null) {
+            $result .= $lr1->item . "\n";
+            $lr1 = $lr1->next;
+        }
+        return $result . "\n";
+    }
 }

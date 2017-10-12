@@ -26,7 +26,7 @@ class Generator
 
     public function generate(string $grammar, string $grammarFileName, string $template, string $logfile = null): string
     {
-        $context = new Context($grammarFileName, $logfile);
+        $context = new Context($grammarFileName, is_null($logfile) ? null : fopen($logfile, 'w'));
 
         $template = new Template(new PHP, $template, $context);
 

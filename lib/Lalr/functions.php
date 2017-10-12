@@ -40,13 +40,3 @@ function dumpSet(Context $ctx, Bitset $set): string
     }
     return $result;
 }
-
-function dumpLr1(Lr1 $lr1 = null): string
-{
-    $result = '';
-    while ($lr1 !== null) {
-        $result .= $lr1->item . "\n";
-        $lr1 = $lr1->next;
-    }
-    return $result . "\n";
-}

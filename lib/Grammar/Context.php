@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
-use function PhpYacc\Yacc\charval;
+use function PhpYacc\character_value;
 use PhpYacc\Yacc\Production;
 use PhpYacc\Yacc\Macro\DollarExpansion;
 use Generator;
@@ -75,10 +75,10 @@ class Context
 
     protected $debugFile;
 
-    public function __construct(string $filename = 'YY', string $file = null)
+    public function __construct(string $filename = 'YY', $debugFile = null)
     {
         $this->filename = $filename;
-        $this->debugFile = $file ? fopen($file, 'w') : null;
+        $this->debugFile = $debugFile;
     }
 
     public function debug(string $data)
@@ -181,7 +181,7 @@ class Context
         }
         if ($isTerm || $s[0] === "'") {
             if ($s[0] === "'") {
-                $p->value = charval(substr($s, 1, 1));
+                $p->value = character_value(substr($s, 1, 1));
             } else {
                 $p->value = -1;
             }

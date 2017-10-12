@@ -18,76 +18,28 @@ class Production
 {
     const EMPTY = 0x10;
 
-    protected $_link;
-    protected $_associativity;
-    protected $_precedence;
-    protected $_position;
-    protected $_action;
-    protected $_body;
-    protected $_num = -1;
+    public $link;
+    public $associativity;
+    public $precedence;
+    public $position;
+    public $action;
+    public $body;
+    public $num = -1;
 
     public function __construct(string $action = null, int $position)
     {
-        $this->_action = $action;
-        $this->_position = $position;
-        $this->_body = [];
-    }
-
-    public function __get($name)
-    {
-        return $this->{'_'.$name};
-    }
-
-    public function __set($name, $value)
-    {
-        $this->{'set' . $name}($value);
-    }
-
-    public function setBody(array $new)
-    {
-        foreach ($new as $symbol) {
-            assert($symbol instanceof Symbol);
-        }
-        $this->_body = $new;
+        $this->action = $action;
+        $this->position = $position;
+        $this->body = [];
     }
 
     public function setAssociativityFlag(int $flag)
     {
-        $this->_associativity |= $flag;
-    }
-
-    public function setLink(Production $link = null)
-    {
-        $this->_link = $link;
-    }
-
-    public function setAssociativity(int $associativity)
-    {
-        $this->_associativity = $associativity;
-    }
-
-    public function setPrecedence(int $precedence)
-    {
-        $this->_precedence = $precedence;
-    }
-
-    public function setAction(string $action)
-    {
-        $this->_action = $action;
-    }
-
-    public function setNum(int $num)
-    {
-        $this->_num = $num;
-    }
-
-    public function appendToBody(Symbol $symbol)
-    {
-        $this->_body[] = $symbol;
+        $this->associativity |= $flag;
     }
 
     public function isEmpty(): bool
     {
-        return count($this->_body) === 1;
+        return count($this->body) <= 1;
     }
 }

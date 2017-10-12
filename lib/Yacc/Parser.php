@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
+use function PhpYacc\character_value;
 use RuntimeException;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
@@ -69,7 +70,7 @@ class Parser
             if (($t = $this->lexer->get())->v === ',') {
                 continue;
             }
-            if (!isGsym($t)) {
+            if ($t->t !== Token::NAME && $t->t !== "'") {
                 break;
             }
             $p = $this->context->internSymbol($t->v, false);
@@ -147,7 +148,7 @@ class Parser
                 } elseif ($t->t === Token::NAME && $this->lexer->peek()->t === '@') {
                     $attribute[$i] = $t->v;
                     $this->lexer->get();
-                } elseif (isGsym($t)) {
+                } elseif ($t->t === Token::NAME || $t->t === "'") {
                     if ($action) {
                         $g = $this->context->genNonTerminal();
                         $r = new Production($action, $pos);
@@ -183,7 +184,7 @@ class Parser
                 $t = $this->lexer->get();
             }
         }
-        $this->context->gram(0)->appendToBody($this->context->startSymbol);
+        $this->context->gram(0)->body[] = $this->context->startSymbol;
         $this->startPrime->value = null;
         foreach ($this->context->nonterminals as $key => $symbol) {
             if ($symbol === $this->startPrime) {
@@ -223,7 +224,7 @@ class Parser
                     break;
                 case Token::UNION:
                     $this->doUnion();
-                    $this->result->unioned = true;
+                    $this->context->unioned = true;
                     break;
                 case Token::TYPE:
                     $this->doType();
@@ -269,10 +270,10 @@ class Parser
         $type = $this->getType();
         $t = $this->lexer->get();
 
-        while (isGsym($t)) {
+        while ($t->t === Token::NAME || $t->t === "'") {
             $p = $this->context->internSymbol($t->v, true);
             if ($p->name[0] === "'") {
-                $p->value = charval(substr($p->name, 1, -1));
+                $p->value = character_value(substr($p->name, 1, -1));
             }
                 
             if ($type) {
@@ -338,7 +339,7 @@ class Parser
             $p .= $t->v;
             $t = $this->lexer->rawGet();
         }
-        $this->unioned = true;
+        $this->context->unioned = true;
         return $this->context->intern($p);
     }
 }

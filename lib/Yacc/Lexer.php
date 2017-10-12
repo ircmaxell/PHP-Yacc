@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
+use function PhpYacc\is_sym_character;
+use function PhpYacc\is_white;
 use RuntimeException;
-
-require_once __DIR__ . '/functions.php';
 
 const EOF = "EOF";
 const MAXTOKEN = 50000;
@@ -81,8 +81,8 @@ class Lexer
         }
         $c = $this->getc();
         $p = '';
-        if (isWhite($c)) {
-            while (isWhite($c)) {
+        if (is_white($c)) {
+            while (is_white($c)) {
                 $p .= $c;
                 $c = $this->getc();
             }
@@ -130,7 +130,7 @@ class Lexer
         $tag = $c;
         if ($c === '%') {
             $c = $this->getc();
-            if ($c === '%' || $c === '{' | $c === '}' || isSymCh($c)) {
+            if ($c === '%' || $c === '{' | $c === '}' || is_sym_character($c)) {
                 $p .= "%";
             } else {
                 $this->ungetc($c);
@@ -145,11 +145,11 @@ class Lexer
                 if ($c === '$') {
                     $this->ungetc($c);
                     $this->prevIsDollar = true;
-                } elseif (!ctype_digit($c) && isSymCh($c)) {
+                } elseif (!ctype_digit($c) && is_sym_character($c)) {
                     do {
                         $p .= $c;
                         $c = $this->getc();
-                    } while (isSymCh($c));
+                    } while (is_sym_character($c));
                     $this->ungetc($c);
                     $tag = Token::NAME;
                 } else {
@@ -159,11 +159,11 @@ class Lexer
                 $p .= '$';
                 $this->prevIsDollar = false;
             }
-        } elseif (isSymCh($c)) {
+        } elseif (is_sym_character($c)) {
             do {
                 $p .= $c;
                 $c = $this->getc();
-            } while ($c !== EOF && isSymCh($c));
+            } while ($c !== EOF && is_sym_character($c));
             $this->ungetc($c);
             $tag = ctype_digit($p) ? Token::NUMBER : Token::NAME;
         } elseif ($c === '\'' || $c === '"') {

@@ -7,6 +7,7 @@ class Token
 {
     const NAME        = 0x0200;
     const NUMBER      = 0x0201;
+    const COLON       = ':';
     const SPACE       = ' ';
     const NEWLINE     = '\n';
     const MARK        = 0x0100;
@@ -25,12 +26,37 @@ class Token
     const EXPECT      = 0x010c;
     const PURE_PARSER = 0x010d;
 
+    const TOKEN_MAP = [
+        self::NAME        => "NAME",
+        self::NUMBER      => "NUMBER",
+        self::COLON       => 'COLON',
+        self::SPACE       => 'SPACE',
+        self::NEWLINE     => 'NEWLINE',
+        self::MARK        => 'MARK',
+        self::BEGININC    => 'BEGININC',
+        self::ENDINC      => 'ENDINC',
+        self::TOKEN       => 'TOKEN',
+        self::LEFT        => 'LEFT',
+        self::RIGHT       => 'RIGHT',
+        self::NONASSOC    => 'NONASSOC',
+        self::PRECTOK     => 'PRECTOK',
+        self::TYPE        => 'TYPE',
+        self::UNION       => 'UNION',
+        self::START       => 'START',
+        self::COMMENT     => 'COMMENT',
+        self::EXPECT      => 'EXPECT',
+        self::PURE_PARSER => 'PURE_PARSER',
+    ];
+
     public $t;
     public $v;
     public $ln;
     public $fn;
     public function __construct($token, string $value, int $lineNumber, string $filename)
     {
+        if (!isset(self::TOKEN_MAP[$token]) && !is_string($token)) {
+            throw new \RuntimeException("Unknown token found: $token");
+        }
         $this->t = $token;
         $this->v = $value;
         $this->ln = $lineNumber;
@@ -39,6 +65,9 @@ class Token
 
     public function __toString(): string
     {
-        return "[{$this->fn}:{$this->ln}] {$this->t} ({$this->v})";
+        if (!isset(self::TOKEN_MAP[$this->t])) {
+            return "[{$this->fn}:{$this->ln}] {$this->t} ({$this->v})";
+        }
+        return "[{$this->fn}:{$this->ln}] Token::" . self::TOKEN_MAP[$this->t] . " ({$this->v})";
     }
 }

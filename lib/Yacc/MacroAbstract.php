@@ -3,6 +3,7 @@
 namespace PhpYacc\Yacc;
 
 use Iterator;
+use function PhpYacc\is_sym_character;
 use PhpYacc\Macro;
 use RuntimeException;
 
@@ -15,10 +16,10 @@ abstract class MacroAbstract implements Macro
         $buffer = '';
         $tokens = [];
         while ($i < $length) {
-            if (isSymCh($string[$i])) {
+            if (is_sym_character($string[$i])) {
                 do {
                     $buffer .= $string[$i++];
-                } while ($i < $length && isSymCh($string[$i]));
+                } while ($i < $length && is_sym_character($string[$i]));
                 $type = ctype_digit($buffer) ? Token::NUMBER : Token::NAME;
                 $tokens[] = new Token($type, $buffer, $lineNumber, $filename);
                 $buffer = '';
