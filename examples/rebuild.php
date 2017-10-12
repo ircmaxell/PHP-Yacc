@@ -4,7 +4,7 @@ require __DIR__ . "/../vendor/autoload.php";
 
 use PhpYacc\Grammar\Context;
 
-const DEBUG = 0;
+const DEBUG = 1;
 
 $generator = new PhpYacc\Generator;
 
