@@ -281,7 +281,7 @@ class Generator
                     }
                 }
 
-                foreach (forEachMember($this->context, $alook) as $e) {
+                foreach ($alook as $e) {
                     $sym = $this->context->symbols[$e];
                     $tmpr[] = new Reduce($sym, $gram->num);
                 }

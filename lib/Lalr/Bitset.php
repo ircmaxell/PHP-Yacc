@@ -8,7 +8,7 @@
 
 namespace PhpYacc\Lalr;
 
-interface Bitset
+interface Bitset extends \IteratorAggregate
 {
     public function testBit(int $i): bool;
 

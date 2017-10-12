@@ -5,16 +5,6 @@ namespace PhpYacc\Lalr;
 
 use PhpYacc\Grammar\Context;
 
-function forEachMember(Context $ctx, Bitset $set)
-{
-    for ($v = 0; $v < $ctx->nsymbols; $v++) {
-        if ($set->testBit($v)) {
-            yield $v;
-        }
-    }
-}
-
-
 function isSameSet(Lr1 $left = null, Lr1 $right = null): bool
 {
     $p = $left;
@@ -33,10 +23,9 @@ function isSameSet(Lr1 $left = null, Lr1 $right = null): bool
 function dumpSet(Context $ctx, Bitset $set): string
 {
     $result = '';
-    foreach ($ctx->symbols() as $symbol) {
-        if ($set->testBit($symbol->code)) {
-            $result .= "{$symbol->name} ";
-        }
+    foreach ($set as $code) {
+        $symbol = $ctx->symbols[$code];
+        $result .= "{$symbol->name} ";
     }
     return $result;
 }
