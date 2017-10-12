@@ -610,11 +610,6 @@ class Compress
         return $code < 0 ? self::YYUNEXPECTED : $code;
     }
 
-    public function convert_symbol(Symbol $symbol): int
-    {
-        return $symbol->isterminal ? $this->context->ctermindex[$symbol->code] : $symbol->code;
-    }
-
     public function resetFrequency()
     {
         $this->context->frequency = array_fill(0, $this->context->nstates, 0);

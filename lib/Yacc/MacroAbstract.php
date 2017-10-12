@@ -4,6 +4,7 @@ namespace PhpYacc\Yacc;
 
 use Iterator;
 use PhpYacc\Macro;
+use RuntimeException;
 
 abstract class MacroAbstract implements Macro
 {

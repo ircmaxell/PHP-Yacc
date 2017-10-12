@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Lalr;
 
-class ArrayBitset extends Bitset
+class ArrayBitset implements Bitset
 {
     private $nbits = 31;
     private $numBits;

@@ -134,7 +134,7 @@ class Context
     public function nilSymbol(): Symbol
     {
         if ($this->_nilsymbol === null) {
-            $this->_nilsymbol = $this->intern("@nil", false);
+            $this->_nilsymbol = $this->intern("@nil");
         }
         return $this->_nilsymbol;
     }
@@ -168,7 +168,7 @@ class Context
 
     public function genNonTerminal(): Symbol
     {
-        $buffer = sprintf("@%d", $this->nonTerminalCounter++);
+        $buffer = sprintf("@%d", $this->nnonterminals);
         return $this->internSymbol($buffer, false);
     }
 
