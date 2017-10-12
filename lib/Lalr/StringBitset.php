@@ -63,4 +63,12 @@ class StringBitset implements Bitset
         }
         return $changed;
     }
+
+    public function getIterator() {
+        for ($i = 0; $i < $this->numBits; $i++) {
+            if ($this->testBit($i)) {
+                yield $i;
+            }
+        }
+    }
 }

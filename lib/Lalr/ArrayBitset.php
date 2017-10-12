@@ -5,16 +5,15 @@ namespace PhpYacc\Lalr;
 
 class ArrayBitset implements Bitset
 {
-    private $nbits = 31;
+    const NBITS = \PHP_INT_SIZE * 8;
+
     private $numBits;
     private $array;
 
     public function __construct(int $numBits)
     {
-        // Will be 63 on 64 bit machines, 31 on 32 bit machines
-        $this->nbits = (int) (log(PHP_INT_MAX) / log(2));
         $this->numBits = $numBits;
-        $this->array = array_fill(0, intdiv($numBits + $this->nbits - 1, $this->nbits), 0);
+        $this->array = array_fill(0, intdiv($numBits + self::NBITS - 1, self::NBITS), 0);
     }
 
     public function __clone()
@@ -24,17 +23,17 @@ class ArrayBitset implements Bitset
 
     public function testBit(int $i): bool
     {
-        return ($this->array[$i / $this->nbits] & (1 << ($i % $this->nbits))) !== 0;
+        return ($this->array[$i / self::NBITS] & (1 << ($i % self::NBITS))) !== 0;
     }
 
     public function setBit(int $i)
     {
-        $this->array[$i / $this->nbits] |= (1 << ($i % $this->nbits));
+        $this->array[$i / self::NBITS] |= (1 << ($i % self::NBITS));
     }
 
     public function clearBit(int $i)
     {
-        $this->array[$i / $this->nbits] &= ~(1 << ($i % $this->nbits));
+        $this->array[$i / self::NBITS] &= ~(1 << ($i % self::NBITS));
     }
 
     public function or(Bitset $other): bool
@@ -47,5 +46,19 @@ class ArrayBitset implements Bitset
             $changed = $changed || $value !== $this->array[$key];
         }
         return $changed;
+    }
+
+    public function getIterator() {
+        $numElems = count($this->array);
+        for ($n = 0; $n < $numElems; $n++) {
+            $elem = $this->array[$n];
+            if ($elem !== 0) {
+                for ($i = 0; $i < self::NBITS; $i++) {
+                    if ($elem & (1 << $i)) {
+                        yield $n * self::NBITS + $i;
+                    }
+                }
+            }
+        }
     }
 }

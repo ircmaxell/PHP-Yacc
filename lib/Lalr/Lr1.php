@@ -5,61 +5,32 @@ namespace PhpYacc\Lalr;
 
 use PhpYacc\Grammar\Symbol;
 
-use PhpYacc\Lalr\Item;
-
-/**
- * @property Lr1|null $next
- * @property Symbol|null $left
- * @property Item $item
- * @property Bitset|null $look
- */
 class Lr1
 {
-    protected $_next;
-    protected $_left;
-    protected $_item;
-    protected $_look;
+    /** @var Lr1|null $next */
+    public $next;
+    /** @var Symbol|null $left */
+    public $left;
+    /** @var Item $item */
+    public $item;
+    /** @var Bitset|null $look */
+    public $look;
 
     public function __construct(Symbol $left = null, Bitset $look, Item $item)
     {
-        $this->_left = $left;
-        $this->_look = $look;
-        $this->_item = $item;
-    }
-
-    public function __get($name)
-    {
-        return $this->{'_'.$name};
-    }
-
-    public function __set($name, $value)
-    {
-        $this->{'set' . $name}($value);
-    }
-
-    public function setNext(Lr1 $next = null)
-    {
-        $this->_next = $next;
-    }
-
-    public function setItem(Item $item)
-    {
-        $this->_item = $item;
-    }
-
-    public function setLook(Bitset $look = null)
-    {
-        $this->_look = $look;
+        $this->left = $left;
+        $this->look = $look;
+        $this->item = $item;
     }
 
     public function isTailItem(): bool
     {
-        return $this->_item->isTailItem();
+        return $this->item->isTailItem();
     }
 
     public function isHeadItem(): bool
     {
-        return $this->_item->isHeadItem();
+        return $this->item->isHeadItem();
     }
 
     public function dump(): string
