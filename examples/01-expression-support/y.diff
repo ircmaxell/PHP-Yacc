@@ -19,11 +19,42 @@
 ---
 > 	(0) $start : expr .
 58c58
-< Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/parser.kmyacc.phpy:
+< Statistics for D:\htdocs\PHP-Yacc\examples\01-expression-support/parser.kmyacc.phpy:
 ---
 > Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/grammar.y:
-65d64
+62a63
+> 	3 non leaf states
+64d64
 < 	8 items
-68,69d66
-< 	1920 bytes used
-< 
+67c67,95
+< 	1352 bytes used
+---
+> State=>class:
+> 
+>   0=>0     1=>1     2=>0   
+> 
+> Terminal action:
+>      T\S   0   1
+>      EOF  .    0
+>      '+'  .    2
+>      '1'   3  . 
+> 
+> Nonterminal GOTO table:
+>      T\S   0   1   2
+>     expr   1  .    4
+> 
+> Nonterminal GOTO table:
+>      T\S default   0   1   2
+>     expr       1  =   .    4
+> 
+> Number of prims: 3
+> 
+> Candidates of aux table:
+> Used aux table:
+> state 0 (class 0)
+> state 1 (class 1)
+> state 2 (class 0)
+> Order:
+> 1,0,
+> Order:
+> 1,0,

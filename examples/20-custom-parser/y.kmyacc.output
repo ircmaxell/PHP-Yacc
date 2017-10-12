@@ -350,72 +350,13 @@ state 19
 	.		reduce (11)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/20-custom-parser/parser.kmyacc.phpy:
+Statistics for D:\htdocs\PHP-Yacc\examples\20-custom-parser/parser.kmyacc.phpy:
 	11 terminal symbols
 	4 nonterminal symbols
 	12 productions
 	20 states
-	16 non leaf states
 	0 shift/reduce, 0 reduce/reduce conflicts
 	66 items
 	29 lookahead sets used
 	82+21=103 action entries
-	7544 bytes used
-
-State=>class:
-
-  0=>4     1=>3     2=>2     3=>4     4=>4     5=>4     6=>4     7=>4     8=>4     9=>4   
- 10=>1    11=>1    12=>5    13=>0    14=>0    15=>0   
-
-Terminal action:
-     T\S   0   1   2   3   4   5
-     EOF  .   .   .   .   .    0
-  NUMBER  .   .   .   .   16  . 
-     '+'  .   .    5   5  .   . 
-     '-'  .   .    6   6   3  . 
-     '*'  .    7   7   7  .   . 
-     '/'  .    8   8   8  .   . 
-     '^'   9   9   9   9  .   . 
-     '('  .   .   .   .    4  . 
-     ')'  .   .   .   19  .   . 
-
-Nonterminal GOTO table:
-     T\S   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
-statemen  12  .   .   .   .   .   .   .   .   .   .   .   .   .   .   . 
-expressi   2  .   .   18   1  10  11  13  14  15  .   .   .   .   .   . 
-  factor  17  .   .   17  17  17  17  17  17  17  .   .   .   .   .   . 
-
-Nonterminal GOTO table:
-     T\S default   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
-statemen      12  =   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . 
-expressi       2  =   .   .   18   1  10  11  13  14  15  .   .   .   .   .   . 
-  factor      17  =   .   .   =   =   =   =   =   =   =   .   .   .   .   .   . 
-
-Number of prims: 6
-
-Candidates of aux table:
-Aux = (5) 7,8,9 * 0,1,2,3
-Aux = (6) 7,8,9 * 1,2,3
-Aux = (5) 5,6,7,8,9 * 2,3
-Used aux table:
-Selected aux[1]: (6) 7,8,9 * 1,2,3
-state 0 (class 4)
-state 1 (class 3): aux[1]
-state 2 (class 2): aux[1]
-state 3 (class 4)
-state 4 (class 4)
-state 5 (class 4)
-state 6 (class 4)
-state 7 (class 4)
-state 8 (class 4)
-state 9 (class 4)
-state 10 (class 1)
-state 11 (class 1)
-state 12 (class 5)
-state 13 (class 0)
-state 14 (class 0)
-state 15 (class 0)
-Order:
-4,3,1,2,5,0,
-Order:
-2,0,1,3,
+	4760 bytes used
