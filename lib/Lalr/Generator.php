@@ -47,7 +47,7 @@ class Generator
         $nSymbols = $this->context->nsymbols;
         $this->nullable = array_fill(0, $nSymbols, false);
 
-        $this->blank = new Bitset($nSymbols);
+        $this->blank = new ArrayBitset($nSymbols);
         $this->states = [];
         $this->nlooks = $this->nstates = $this->nacts = $this->nacts2 = 0;
         $this->nnonleafstates = 0;
