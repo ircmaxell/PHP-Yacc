@@ -15,7 +15,8 @@ use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 #include;
 
-/* This is an automatically GENERATED file, which should not be manually edited.
+/**
+ * This is an automatically GENERATED file, which should not be manually edited.
  */
 class Parser extends \PhpParser\ParserAbstract
 {

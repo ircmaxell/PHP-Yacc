@@ -7,6 +7,7 @@ class Preimage
 {
     public $index = 0;
     public $classes = [];
+    public $length = 0;
 
     public function __construct(int $index)
     {
@@ -15,8 +16,8 @@ class Preimage
 
     public static function compare(Preimage $x, Preimage $y): int
     {
-        if (count($x->classes) !== count($y->classes)) {
-            return count($x->classes) - count($y->classes);
+        if ($x->length !== $y->length) {
+            return $x->length - $y->length;
         }
         foreach ($x->classes as $key => $value) {
             if ($value !== $y->classes[$key]) {

@@ -9,7 +9,8 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 
-/* This is an automatically GENERATED file, which should not be manually edited.
+/**
+ * This is an automatically GENERATED file, which should not be manually edited.
  */
 class Parser extends \PhpParser\ParserAbstract
 {

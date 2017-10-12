@@ -5,7 +5,6 @@ namespace PhpYacc\Lalr;
 
 class ArrayBitset extends Bitset
 {
-
     private $nbits = 31;
     private $numBits;
     private $array;

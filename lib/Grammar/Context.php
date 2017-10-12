@@ -13,9 +13,6 @@ use Generator;
  * @property Symbol $nilsymbol
  * @property Symbol[] $terminals
  * @property Symbol[] $nonterminals
- * @property int $nsymbols
- * @property int $nterminals
- * @property int $nnonterminals
  * @property Production[] $grams
  * @property int $ngrams
  * @property int $nstates
@@ -31,17 +28,18 @@ class Context
         DollarExpansion::SEMVAL_RHS_UNTYPED => '',
     ];
 
-    protected $_nsymbols = 0;
+    public $nsymbols = 0;
+    public $nterminals = 0;
+    public $nnonterminals = 0;
+
     protected $symbolHash = [];
     protected $_symbols = [];
     protected $_nilsymbol = null;
     protected $finished = false;
-    protected $_nterminals;
-    protected $_nnonterminals;
 
     protected $_states;
-    protected $_nstates = 0;
-    protected $_nnonleafstates = 0;
+    public $nstates = 0;
+    public $nnonleafstates = 0;
 
     public $aflag = false;
     public $tflag = false;
@@ -56,7 +54,7 @@ class Context
     public $errorToken = null;
     public $startPrime = null;
     protected $_grams = [];
-    protected $_ngrams = 0;
+    public $ngrams = 0;
 
     public $default_act = [];
     public $default_goto = [];
@@ -141,21 +139,6 @@ class Context
         return $this->_nilsymbol;
     }
 
-    public function nSymbols(): int
-    {
-        return $this->_nsymbols;
-    }
-
-    public function nTerminals(): int
-    {
-        return $this->_nterminals;
-    }
-
-    public function nNonTerminals(): int
-    {
-        return $this->_nnonterminals;
-    }
-
     public function terminals(): Generator
     {
         foreach ($this->_symbols as $symbol) {
@@ -218,7 +201,7 @@ class Context
         if (isset($this->symbolHash[$s])) {
             return $this->symbolHash[$s];
         }
-        $p = new Symbol($this->_nsymbols++, $s);
+        $p = new Symbol($this->nsymbols++, $s);
         return $this->addSymbol($p);
     }
 
@@ -227,13 +210,13 @@ class Context
         $this->finished = false;
         $this->_symbols[] = $symbol;
         $this->symbolHash[$symbol->name] = $symbol;
-        $this->_nterminals = 0;
-        $this->_nnonterminals = 0;
+        $this->nterminals = 0;
+        $this->nnonterminals = 0;
         foreach ($this->_symbols as $symbol) {
             if ($symbol->isTerminal()) {
-                $this->_nterminals++;
+                $this->nterminals++;
             } elseif ($symbol->isNonTerminal()) {
-                $this->_nnonterminals++;
+                $this->nnonterminals++;
             }
         }
         return $symbol;
@@ -255,14 +238,14 @@ class Context
 
     public function addGram(Production $p)
     {
-        $p->num = $this->_ngrams++;
+        $p->num = $this->ngrams++;
         $this->_grams[] = $p;
         return $p;
     }
 
     public function gram(int $i): Production
     {
-        assert($i < $this->_ngrams);
+        assert($i < $this->ngrams);
         return $this->_grams[$i];
     }
 
@@ -272,11 +255,11 @@ class Context
             assert($state instanceof State);
         }
         $this->_states = $states;
-        $this->_nstates = count($states);
+        $this->nstates = count($states);
     }
 
     public function setNNonLeafStates(int $n)
     {
-        $this->_nnonleafstates = $n;
+        $this->nnonleafstates = $n;
     }
 }

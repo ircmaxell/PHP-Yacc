@@ -7,8 +7,7 @@ use PhpYacc\Grammar\Context;
 
 function forEachMember(Context $ctx, Bitset $set)
 {
-    $nSymbols = $ctx->nSymbols();
-    for ($v = 0; $v < $nSymbols; $v++) {
+    for ($v = 0; $v < $ctx->nsymbols; $v++) {
         if ($set->testBit($v)) {
             yield $v;
         }

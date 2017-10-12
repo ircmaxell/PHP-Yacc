@@ -45,7 +45,7 @@ class Compress
             for ($j = 0; $j < $this->context->nterminals; $j++) {
                 $s = $this->context->class_action[$i][$j];
                 if ($s > 0) {
-                    $primv[$s]->classes[] = $i;
+                    $primv[$s]->classes[$primv[$s]->length++] = $i;
                 }
             }
         }
@@ -181,7 +181,7 @@ class Compress
         $this->context->debug("\n");
         for ($j = 0; $j < $this->context->nterminals; $j++) {
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-                if (!is_vacant($this->context->term_action[$i][$j])) {
+                if (self::VACANT !== $this->context->term_action[$i][$j]) {
                     break;
                 }
             }
@@ -251,7 +251,7 @@ class Compress
 
         for ($i = 0; $i < $this->context->nprims; $i++) {
             $prim = $this->context->prims[$i];
-            if (count($prim->classes) < 2) {
+            if ($prim->length < 2) {
                 continue;
             }
             $p = new Auxiliary;
@@ -272,12 +272,12 @@ class Compress
                 $this->context->debug(sprintf("Aux = (%d) ", $p->gain));
                 $f = 0;
                 for ($j = 0; $j < $this->context->nterminals; $j++) {
-                    if (!is_vacant($p->table[$j])) {
+                    if (self::VACANT !== $p->table[$j]) {
                         $this->context->debug(sprintf($f++ ? ",%d" : "%d", $p->table[$j]));
                     }
                 }
                 $this->context->debug(" * ");
-                for ($j = 0; $j < count($p->preimage->classes); $j++) {
+                for ($j = 0; $j < $p->preimage->length; $j++) {
                     $this->context->debug(sprintf($j ? ",%d" : "%d", $p->preimage->classes[$j]));
                 }
                 $this->context->debug("\n");
@@ -311,7 +311,7 @@ class Compress
 
             $maxaux->index = $this->context->naux;
 
-            for ($j = 0; $j < count($maxaux->preimage->classes); $j++) {
+            for ($j = 0; $j < $maxaux->preimage->length; $j++) {
                 $cl = $maxaux->preimage->classes[$j];
                 if (eq_row($this->context->class_action[$cl], $maxaux->table, $this->context->nterminals)) {
                     $maxaux->index = $cl;
@@ -322,7 +322,7 @@ class Compress
                 $this->context->class_action[$this->context->naux++] = $maxaux->table;
             }
 
-            for ($j = 0; $j < count($maxaux->preimage->classes); $j++) {
+            for ($j = 0; $j < $maxaux->preimage->length; $j++) {
                 $cl = $maxaux->preimage->classes[$j];
                 if ($this->context->class2nd[$cl] < 0) {
                     $this->context->class2nd[$cl] = $maxaux->index;
@@ -333,13 +333,13 @@ class Compress
                 $this->context->debug(sprintf("Selected aux[%d]: (%d) ", $maxaux->index, $maxaux->gain));
                 $f = 0;
                 for ($j = 0; $j < $this->context->nterminals; $j++) {
-                    if (!is_vacant($maxaux->table[$j])) {
+                    if (self::VACANT !== $maxaux->table[$j]) {
                         $this->context->debug(sprintf($f++ ? ",%d" : "%d", $maxaux->table[$j]));
                     }
                 }
                 $this->context->debug(" * ");
                 $f = 0;
-                for ($j = 0; $j < count($maxaux->preimage->classes); $j++) {
+                for ($j = 0; $j < $maxaux->preimage->length; $j++) {
                     $cl = $maxaux->preimage->classes[$j];
                     if ($this->context->class2nd[$cl] === $maxaux->index) {
                         $this->context->debug(sprintf($f++ ? ",%d" : "%d", $cl));
@@ -371,13 +371,13 @@ class Compress
             $max = 0;
             $maxAction = -1;
             $nvacant = 0;
-            for ($j = 0; $j < count($prim->classes); $j++) {
+            for ($j = 0; $j < $prim->length; $j++) {
                 if ($this->context->class2nd[$prim->classes[$j]] < 0) {
                     $c = $this->context->class_action[$prim->classes[$j]][$i];
                     if ($c > 0 && ++$this->context->frequency[$c] > $max) {
                         $maxAction = $c;
                         $max = $this->context->frequency[$c];
-                    } elseif (is_vacant($c)) {
+                    } elseif (self::VACANT === $c) {
                         $nvacant++;
                     }
                 }
@@ -428,7 +428,7 @@ class Compress
             if ($this->context->class2nd[$i] >= 0 && $this->context->class2nd[$i] != $i) {
                 $table = $this->context->class_action[$this->context->class2nd[$i]];
                 for ($j = 0; $j < $ncterms; $j++) {
-                    if (!is_vacant($table[$this->context->otermindex[$j]])) {
+                    if (self::VACANT !== $table[$this->context->otermindex[$j]]) {
                         if ($cterm_action[$i][$j] === $table[$this->context->otermindex[$j]]) {
                             $cterm_action[$i][$j] = self::VACANT;
                         } elseif ($cterm_action[$i][$j] === self::VACANT) {
@@ -516,7 +516,7 @@ class Compress
         for ($i = 0; $i < $nrows; $i++) {
             $trow[] = $p = new TRow($i);
             for ($j = 0; $j < $ncols; $j++) {
-                if (!is_vacant($transit[$i][$j])) {
+                if (self::VACANT !== $transit[$i][$j]) {
                     if ($p->mini < 0) {
                         $p->mini = $j;
                     }
@@ -572,7 +572,7 @@ class Compress
                 }
 
                 for ($k = $trow[$ii]->mini; $k < $trow[$ii]->maxi; $k++) {
-                    if (!is_vacant($transit[$i][$k])) {
+                    if (self::VACANT !== $transit[$i][$k]) {
                         if ($jj >= $poolsize) {
                             die("Can't happen");
                         }
@@ -587,7 +587,7 @@ class Compress
             }
             $jj = $j;
             for ($k = $trow[$ii]->mini; $k < $trow[$ii]->maxi; $k++) {
-                if (!is_vacant($transit[$i][$k])) {
+                if (self::VACANT !== $transit[$i][$k]) {
                     $actpool[$jj] = $transit[$i][$k];
                     $check[$jj] = $checkrow ? $i : $k;
                 }

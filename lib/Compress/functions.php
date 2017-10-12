@@ -6,7 +6,7 @@ namespace PhpYacc\Compress;
 function vacant_row(array $array, int $length): bool
 {
     for ($i = 0; $i < $length; $i++) {
-        if (!is_vacant(($array[$i]))) {
+        if ($array[$i] !== Compress::VACANT) {
             return false;
         }
     }
