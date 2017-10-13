@@ -7,7 +7,6 @@ use PhpYacc\Exception\LogicException;
 use PhpYacc\Yacc\Production;
 
 /**
- * @property int $code
  * @property Symbol|null $type
  * @property mixed $value
  * @property int $precedence
@@ -26,14 +25,14 @@ class Symbol
     const TERMINAL = 0x100;
     const NONTERMINAL = 0x200;
 
-    protected $_code;
+    /** @var int */
+    public $code;
     protected $_type;
 
     protected $_value;
     protected $_precedence;
     protected $_associativity;
     protected $_name;
-    protected $_nb = 0;
 
     public $isterminal = false;
     public $isnonterminal = false;
@@ -42,7 +41,7 @@ class Symbol
 
     public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
     {
-        $this->_code = $code;
+        $this->code = $code;
         $this->_name = $name;
         $this->_value = $value;
         $this->setTerminal($terminal);
@@ -58,23 +57,12 @@ class Symbol
 
     public function __get($name)
     {
-        if ($name === 'nb') {
-            if ($this->_nb > $this->_code) {
-                die("Should never happen: {$this->_nb} > {$this->_code}");
-            }
-            return $this->_code - $this->_nb;
-        }
         return $this->{'_'.$name};
     }
 
     public function __set($name, $value)
     {
         $this->{'set' . $name}($value);
-    }
-
-    public function setNb(int $nb)
-    {
-        $this->_nb = $nb;
     }
 
     public function setTerminal(int $terminal)
@@ -121,13 +109,5 @@ class Symbol
     public function setAssociativityFlag(int $flag)
     {
         $this->_associativity |= $flag;
-    }
-
-    public function setCode(int $code)
-    {
-        $this->_code = $code;
-        if ($code < $this->_nb) {
-            throw new LogicException("Should never happen, code being less than nb");
-        }
     }
 }

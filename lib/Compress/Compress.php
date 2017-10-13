@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace PhpYacc\Compress;
 
 use PhpYacc\Grammar\Context;
+use PhpYacc\Grammar\Symbol;
 use function PhpYacc\stable_sort;
 
 require_once __DIR__ . "/functions.php";
@@ -95,7 +96,7 @@ class Compress
                 if ($shift->through->isterminal) {
                     $this->context->term_action[$i][$shift->through->code] = $shift->number;
                 } else {
-                    $this->context->nonterm_goto[$i][$shift->through->nb] = $shift->number;
+                    $this->context->nonterm_goto[$i][$this->nb($shift->through)] = $shift->number;
                 }
             }
             foreach ($this->context->states[$i]->reduce as $reduce) {
@@ -202,14 +203,14 @@ class Compress
         $this->context->debug("\n");
         foreach ($this->context->nonterminals as $symbol) {
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-                if ($this->context->nonterm_goto[$i][$symbol->nb] > 0) {
+                if ($this->context->nonterm_goto[$i][$this->nb($symbol)] > 0) {
                     break;
                 }
             }
             if ($i < $this->context->nnonleafstates) {
                 $this->context->debug(sprintf("%8.8s", $symbol->name));
                 for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-                    $this->context->debug(printact($this->context->nonterm_goto[$i][$symbol->nb]));
+                    $this->context->debug(printact($this->context->nonterm_goto[$i][$this->nb($symbol)]));
                 }
                 $this->context->debug("\n");
             }
@@ -222,19 +223,20 @@ class Compress
         }
         $this->context->debug("\n");
         foreach ($this->context->nonterminals as $symbol) {
+            $nb = $this->nb($symbol);
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-                if ($this->context->nonterm_goto[$i][$symbol->nb] > 0) {
+                if ($this->context->nonterm_goto[$i][$nb] > 0) {
                     break;
                 }
             }
             if ($i < $this->context->nnonleafstates) {
                 $this->context->debug(sprintf("%8.8s", $symbol->name));
-                $this->context->debug(sprintf("%8d", $this->context->default_goto[$symbol->nb]));
+                $this->context->debug(sprintf("%8d", $this->context->default_goto[$nb]));
                 for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
-                    if ($this->context->nonterm_goto[$i][$symbol->nb] === $this->context->default_goto[$symbol->nb]) {
+                    if ($this->context->nonterm_goto[$i][$nb] === $this->context->default_goto[$nb]) {
                         $this->context->debug("  = ");
                     } else {
-                        $this->context->debug(printact($this->context->nonterm_goto[$i][$symbol->nb]));
+                        $this->context->debug(printact($this->context->nonterm_goto[$i][$nb]));
                     }
                 }
                 $this->context->debug("\n");
@@ -481,7 +483,7 @@ class Compress
         $this->result->yylhs = [];
         $this->result->yylen = [];
         foreach ($this->context->grams as $gram) {
-            $this->result->yylhs[] = $gram->body[0]->nb;
+            $this->result->yylhs[] = $this->nb($gram->body[0]);
             $this->result->yylen[] = count($gram->body) - 1;
         }
 
@@ -623,5 +625,13 @@ class Compress
             }
         }
         return 0;
+    }
+
+    private function nb(Symbol $symbol) {
+        if ($symbol->isterminal) {
+            return $symbol->code;
+        } else {
+            return $symbol->code - $this->context->nterminals;
+        }
     }
 }
