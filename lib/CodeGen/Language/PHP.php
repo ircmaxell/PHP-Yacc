@@ -12,7 +12,6 @@ use PhpYacc\CodeGen\Language;
 
 class PHP implements Language
 {
-
     protected $fp;
     protected $hp;
 

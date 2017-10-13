@@ -10,7 +10,6 @@ namespace PhpYacc\CodeGen;
 
 interface Language
 {
-
     public function begin($file, $headerFile);
 
     public function commit();

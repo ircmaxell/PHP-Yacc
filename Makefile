@@ -7,3 +7,6 @@ test:
 
 build-examples:
 		php examples/rebuild.php
+
+analyze:
+		vendor/bin/phpstan analyze lib

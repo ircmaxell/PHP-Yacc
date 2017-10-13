@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace PhpYacc\Yacc;
 
 use PHPUnit\Framework\TestCase;
-use PhpYacc\Exception\ParseException;
+use PhpYacc\Exception\LexingException;
 
 class TokenTest extends Testcase
 {
@@ -21,7 +21,7 @@ class TokenTest extends Testcase
     }
 
     /**
-     * @expectedException ParseException
+     * @expectedException PhpYacc\Exception\LexingException
      * @expectedExceptionMessage Unknown token found: -2
      */
     public function testUnknownToken()
