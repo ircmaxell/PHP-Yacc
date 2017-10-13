@@ -447,7 +447,7 @@ class Compress
             }
         }
         $base = [];
-        $this->pack_table($cterm_action, $this->context->naux, $ncterms, false, false, $this->result->yyaction, $this->result->yycheck, $base);
+        $this->pack_table($cterm_action, $this->context->naux, $ncterms, false, $this->result->yyaction, $this->result->yycheck, $base);
         $this->result->yydefault = $this->context->default_act;
 
         $this->result->yybase = array_fill(0, $this->context->nnonleafstates * 2, 0);
@@ -476,7 +476,7 @@ class Compress
             }
         }
 
-        $this->pack_table($nonterm_transposed, $this->context->nnonterminals, $this->context->nnonleafstates, false, true, $this->result->yygoto, $this->result->yygcheck, $this->result->yygbase);
+        $this->pack_table($nonterm_transposed, $this->context->nnonterminals, $this->context->nnonleafstates, true, $this->result->yygoto, $this->result->yygcheck, $this->result->yygbase);
 
         $this->result->yygdefault = $this->context->default_goto;
 
@@ -512,7 +512,7 @@ class Compress
         $this->result->yygdefault = $this->encode_shift_reduce($this->result->yygdefault, $this->context->nnonterminals);
     }
 
-    protected function pack_table(array $transit, int $nrows, int $ncols, bool $dontcare, bool $checkrow, array &$outtable, array &$outcheck, array &$outbase)
+    protected function pack_table(array $transit, int $nrows, int $ncols, bool $checkrow, array &$outtable, array &$outcheck, array &$outbase)
     {
         $trow = [];
         for ($i = 0; $i < $nrows; $i++) {
@@ -563,13 +563,11 @@ class Compress
             for ($j = 0; $j < $poolsize; $j++) {
                 $jj = $j;
                 $base[$i] = $j - $trow[$ii]->mini;
-                if (!$dontcare) {
-                    if ($base[$i] === 0) {
-                        continue;
-                    }
-                    if (isset($handledBases[$base[$i]])) {
-                        continue;
-                    }
+                if ($base[$i] === 0) {
+                    continue;
+                }
+                if (isset($handledBases[$base[$i]])) {
+                    continue;
                 }
 
                 for ($k = $trow[$ii]->mini; $k < $trow[$ii]->maxi; $k++) {
@@ -577,7 +575,7 @@ class Compress
                         if ($jj >= $poolsize) {
                             die("Can't happen");
                         }
-                        if ($check[$jj] >= 0 && !($dontcare && $actpool[$jj] === $transit[$i][$k])) {
+                        if ($check[$jj] >= 0) {
                             goto next;
                         }
                     }
