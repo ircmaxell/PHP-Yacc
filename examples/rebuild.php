@@ -5,6 +5,7 @@ require __DIR__ . "/../vendor/autoload.php";
 use PhpYacc\Grammar\Context;
 
 const DEBUG = 0;
+const RUN_KMYACC = 0;
 
 $generator = new PhpYacc\Generator;
 
@@ -37,9 +38,10 @@ function buildFolder(string $dir) {
     $skeleton = "$dir/parser.template.php";
     copy($grammar, $tmpGrammar);
 
-    $output = trim(shell_exec("cd $dir && kmyacc -x -t -v -l -m $skeleton -p Parser $tmpGrammar 2>&1"));
-
-    rename("$dir/y.output", "$dir/y.kmyacc.output");
+    if (RUN_KMYACC) {
+        $output = trim(shell_exec("cd $dir && kmyacc -x -t -v -l -m $skeleton -p Parser $tmpGrammar 2>&1"));
+        rename("$dir/y.output", "$dir/y.kmyacc.output");
+    }
 
     unlink($tmpGrammar);
 
