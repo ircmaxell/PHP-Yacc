@@ -44,9 +44,9 @@ function buildFolder(string $dir) {
     unlink($tmpGrammar);
 
     if (DEBUG) {
-        $generator->generate(file_get_contents($grammar), $grammar, file_get_contents($skeleton), "$dir/parser.phpyacc.php", "$dir/y.phpyacc.output");
+        $generator->generate(new Context($grammar, fopen("$dir/y.phpyacc.output", 'w')), file_get_contents($grammar), file_get_contents($skeleton), "$dir/parser.phpyacc.php");
     } else {
-        $generator->generate(file_get_contents($grammar), $grammar, file_get_contents($skeleton), "$dir/parser.phpyacc.php");
+        $generator->generate(new Context($grammar), file_get_contents($grammar), file_get_contents($skeleton), "$dir/parser.phpyacc.php");
     }
 
     shell_exec("cd $dir && diff -w parser.kmyacc.php parser.phpyacc.php > parser.diff");

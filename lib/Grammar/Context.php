@@ -45,6 +45,7 @@ class Context
     public $aflag = false;
     public $tflag = false;
     public $pspref = '';
+    public $debug = false;
 
     public $filename = 'YY';
     public $pureFlag = false;
@@ -74,8 +75,7 @@ class Context
     public $nclasses = 0;
     public $naux = 0;
 
-    protected $debug = false;
-    protected $debugFile;
+    public $debugFile;
 
     public function __construct(string $filename = 'YY', $debugFile = null)
     {

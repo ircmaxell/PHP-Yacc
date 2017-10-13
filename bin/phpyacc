@@ -1,0 +1,104 @@
+#!/usr/bin/php
+<?php
+namespace PhpYacc;
+
+use PhpYacc\Grammar\Context;
+
+foreach (array(__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php') as $file) {
+    if (file_exists($file)) {
+        define('PHPUNIT_COMPOSER_INSTALL', $file);
+
+        break;
+    }
+}
+
+unset($file);
+
+if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+    fwrite(
+        STDERR,
+        'You need to set up the project dependencies using Composer:' . PHP_EOL . PHP_EOL .
+        '    composer install' . PHP_EOL . PHP_EOL .
+        'You can learn all about Composer on https://getcomposer.org/.' . PHP_EOL
+    );
+
+    die(1);
+}
+
+require PHPUNIT_COMPOSER_INSTALL;
+
+$grammarFile = end($argv);
+
+$resultFile = substr($grammarFile, 0, -1);
+
+if ($grammarFile === '-') {
+    $grammarFile = 'php://stdin';
+    $resultFile = 'php://stdout';
+}
+
+if ($argc < 2 || !file_exists($grammarFile)) {
+    help();
+    exit(4);
+}
+
+$context = new Context($grammarFile);
+
+$skeleton = '';
+
+for ($i = 1; $i < $argc - 1; $i++) {
+    switch ($argv[$i]) {
+        case '-p':
+            if ($i === $argc - 2) {
+                error("Class name required for option -p");
+            }
+            $context->pspref = $argv[++$i];
+            break;
+        case '-x':
+            $context->debugFile = fopen(getcwd() . "/y.output", 'w' );
+        case '-v':
+            $context->debug = true;
+            break;
+        case '-t':
+            $context->tflag = true;
+            break;
+        case '-a':
+            $context->aflag = true;
+            break;
+        case '-m':
+            if ($i === $argc - 2) {
+                error("Class name required for option -p");
+            }
+            $skeleton = file_get_contents($argv[++$i]);
+            break;
+        default:
+            error("Unexpected argument/flag {$argv[$i]}");
+
+    }
+}
+
+(new Generator)->generate($context, file_get_contents($grammarFile), $skeleton, $resultFile);
+
+
+function help()
+{
+    echo <<<EOH
+PHP-Yacc by Anthony Ferrara, Nikita Popov, and others
+
+Usage: phpyacc [options] grammar.y
+
+Options:
+  -p <name>     The name of the class to generate
+  -x            Enable debug mode
+  -t            Set the T flag for templates
+  -a            Set the A flag for templates
+
+
+EOH;
+}
+
+function error(string $message)
+{
+    echo $message . "\n";
+    help();
+    exit(2);
+}

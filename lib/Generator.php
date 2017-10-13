@@ -24,10 +24,8 @@ class Generator
         $this->compressor = $compressor ?: new Compress;
     }
 
-    public function generate(string $grammar, string $grammarFileName, string $template, string $resultFile, string $logfile = null)
+    public function generate(Context $context, string $grammar, string $template, string $resultFile)
     {
-        $context = new Context($grammarFileName, is_null($logfile) ? null : fopen($logfile, 'w'));
-
         $template = new Template(new PHP, $template, $context);
 
         $this->parser->parse($grammar, $context);

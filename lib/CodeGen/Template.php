@@ -362,7 +362,7 @@ class Template
                 return sprintf("%d", $this->compress->yybasesize - $this->context->nnonleafstates);
             case 'CLASSNAME':
             case '-p':
-
+                return $this->context->pspref ?: 'yy';
             default:
                 throw new TemplateException("Unknown variable: \$($var)");
         }
