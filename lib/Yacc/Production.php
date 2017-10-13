@@ -5,25 +5,23 @@ namespace PhpYacc\Yacc;
 
 use PhpYacc\Grammar\Symbol;
 
-/**
- * @property Production|null $link
- * @property int $associativity
- * @property int $precedence
- * @property int $position
- * @property string $action
- * @property Symbol[] $body
- * @property int $num
- */
 class Production
 {
     const EMPTY = 0x10;
 
+    /** @var Production|null */
     public $link;
+    /** @var int */
     public $associativity;
+    /** @var int */
     public $precedence;
+    /** @var int */
     public $position;
+    /** @var string */
     public $action;
+    /** @var Symbol[] */
     public $body;
+    /** @var int */
     public $num = -1;
 
     public function __construct(string $action = null, int $position)

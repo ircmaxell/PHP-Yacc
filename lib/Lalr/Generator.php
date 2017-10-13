@@ -124,8 +124,8 @@ class Generator
             }
 
             $tmpList = $this->sortList($tmpList, function (Lr1 $x, Lr1 $y) {
-                $gx = isset($x->item[-1]) ? $x->item[-1]->code : 0;
-                $gy = isset($y->item[-1]) ? $y->item[-1]->code : 0;
+                $gx = $x->item[-1]->code;
+                $gy = $y->item[-1]->code;
                 if ($gx !== $gy) {
                     return $gx - $gy;
                 }
