@@ -179,7 +179,7 @@ class Context
         }
         if ($isTerm || $s[0] === "'") {
             if ($s[0] === "'") {
-                $p->value = character_value(substr($s, 1, 1));
+                $p->value = character_value(substr($s, 1, -1));
             } else {
                 $p->value = -1;
             }
