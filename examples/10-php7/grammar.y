@@ -119,18 +119,18 @@
 %%
 
 start:
-    top_statement_list                                      { $$ = $this->handleNamespaces($1); }
+    top_statement_list                                      { $$ = $this->handleNamespaces($this->semStack[$1]); }
 ;
 
 top_statement_list_ex:
-      top_statement_list_ex top_statement                   { pushNormalizing($1, $2); }
-    | /* empty */                                           { init(); }
+      top_statement_list_ex top_statement                   { if (is_array($this->semStack[$2])) { $$ = array_merge($this->semStack[$1], $this->semStack[$2]); } else { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }; }
+    | /* empty */                                           { $$ = array(); }
 ;
 
 top_statement_list:
       top_statement_list_ex
-          { makeNop($nop, $this->lookaheadStartAttributes);
-            if ($nop !== null) { $1[] = $nop; } $$ = $1; }
+          { $startAttributes = $this->lookaheadStartAttributes; if (isset($startAttributes['comments'])) { $nop = new Stmt\Nop(['comments' => $startAttributes['comments']]); } else { $nop = null; };
+            if ($nop !== null) { $this->semStack[$1][] = $nop; } $$ = $this->semStack[$1]; }
 ;
 
 reserved_non_modifiers:
@@ -149,17 +149,17 @@ semi_reserved:
 ;
 
 identifier:
-      T_STRING                                              { $$ = $1; }
-    | semi_reserved                                         { $$ = $1; }
+      T_STRING                                              { $$ = $this->semStack[$1]; }
+    | semi_reserved                                         { $$ = $this->semStack[$1]; }
 ;
 
 namespace_name_parts:
-      T_STRING                                              { init($1); }
-    | namespace_name_parts T_NS_SEPARATOR T_STRING          { push($1, $3); }
+      T_STRING                                              { $$ = array($this->semStack[$1]); }
+    | namespace_name_parts T_NS_SEPARATOR T_STRING          { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 namespace_name:
-      namespace_name_parts                                  { $$ = Name[$1]; }
+      namespace_name_parts                                  { $$ = new Name($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 semi:
@@ -169,7 +169,7 @@ semi:
 
 no_comma:
       /* empty */ { /* nothing */ }
-    | ',' { $this->emitError(new Error('A trailing comma is not allowed here', attributes())); }
+    | ',' { $this->emitError(new Error('A trailing comma is not allowed here', $this->startAttributeStack[$1] + $this->endAttributes)); }
 ;
 
 optional_comma:
@@ -177,21 +177,27 @@ optional_comma:
     | ','
 
 top_statement:
-      statement                                             { $$ = $1; }
-    | function_declaration_statement                        { $$ = $1; }
-    | class_declaration_statement                           { $$ = $1; }
+      statement                                             { $$ = $this->semStack[$1]; }
+    | function_declaration_statement                        { $$ = $this->semStack[$1]; }
+    | class_declaration_statement                           { $$ = $this->semStack[$1]; }
     | T_HALT_COMPILER
-          { $$ = Stmt\HaltCompiler[$this->lexer->handleHaltCompiler()]; }
+          { $$ = new Stmt\HaltCompiler($this->lexer->handleHaltCompiler(), $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_NAMESPACE namespace_name semi
-          { $$ = Stmt\Namespace_[$2, null]; $this->checkNamespace($$); }
+          { $$ = new Stmt\Namespace_($this->semStack[$2], null, $this->startAttributeStack[$1] + $this->endAttributes);
+            $$->setAttribute('kind', Stmt\Namespace_::KIND_SEMICOLON);
+            $this->checkNamespace($$); }
     | T_NAMESPACE namespace_name '{' top_statement_list '}'
-          { $$ = Stmt\Namespace_[$2, $4]; $this->checkNamespace($$); }
+          { $$ = new Stmt\Namespace_($this->semStack[$2], $this->semStack[$4], $this->startAttributeStack[$1] + $this->endAttributes);
+            $$->setAttribute('kind', Stmt\Namespace_::KIND_BRACED);
+            $this->checkNamespace($$); }
     | T_NAMESPACE '{' top_statement_list '}'
-          { $$ = Stmt\Namespace_[null, $3]; $this->checkNamespace($$); }
-    | T_USE use_declarations semi                           { $$ = Stmt\Use_[$2, Stmt\Use_::TYPE_NORMAL]; }
-    | T_USE use_type use_declarations semi                  { $$ = Stmt\Use_[$3, $2]; }
-    | group_use_declaration semi                            { $$ = $1; }
-    | T_CONST constant_declaration_list semi                { $$ = Stmt\Const_[$2]; }
+          { $$ = new Stmt\Namespace_(null, $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes);
+            $$->setAttribute('kind', Stmt\Namespace_::KIND_BRACED);
+            $this->checkNamespace($$); }
+    | T_USE use_declarations semi                           { $$ = new Stmt\Use_($this->semStack[$2], Stmt\Use_::TYPE_NORMAL, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_USE use_type use_declarations semi                  { $$ = new Stmt\Use_($this->semStack[$3], $this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | group_use_declaration semi                            { $$ = $this->semStack[$1]; }
+    | T_CONST constant_declaration_list semi                { $$ = new Stmt\Const_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 use_type:
@@ -202,174 +208,182 @@ use_type:
 /* Using namespace_name_parts here to avoid s/r conflict on T_NS_SEPARATOR */
 group_use_declaration:
       T_USE use_type namespace_name_parts T_NS_SEPARATOR '{' unprefixed_use_declarations '}'
-          { $$ = Stmt\GroupUse[new Name($3, stackAttributes(#3)), $6, $2]; }
+          { $$ = new Stmt\GroupUse(new Name($this->semStack[$3], $this->startAttributeStack[$3] + $this->endAttributeStack[$3]), $this->semStack[$6], $this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_USE use_type T_NS_SEPARATOR namespace_name_parts T_NS_SEPARATOR '{' unprefixed_use_declarations '}'
-          { $$ = Stmt\GroupUse[new Name($4, stackAttributes(#4)), $7, $2]; }
+          { $$ = new Stmt\GroupUse(new Name($this->semStack[$4], $this->startAttributeStack[$4] + $this->endAttributeStack[$4]), $this->semStack[$7], $this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_USE namespace_name_parts T_NS_SEPARATOR '{' inline_use_declarations '}'
-          { $$ = Stmt\GroupUse[new Name($2, stackAttributes(#2)), $5, Stmt\Use_::TYPE_UNKNOWN]; }
+          { $$ = new Stmt\GroupUse(new Name($this->semStack[$2], $this->startAttributeStack[$2] + $this->endAttributeStack[$2]), $this->semStack[$5], Stmt\Use_::TYPE_UNKNOWN, $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_USE T_NS_SEPARATOR namespace_name_parts T_NS_SEPARATOR '{' inline_use_declarations '}'
-          { $$ = Stmt\GroupUse[new Name($3, stackAttributes(#3)), $6, Stmt\Use_::TYPE_UNKNOWN]; }
+          { $$ = new Stmt\GroupUse(new Name($this->semStack[$3], $this->startAttributeStack[$3] + $this->endAttributeStack[$3]), $this->semStack[$6], Stmt\Use_::TYPE_UNKNOWN, $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 unprefixed_use_declarations:
-      non_empty_unprefixed_use_declarations optional_comma  { $$ = $1; }
+      non_empty_unprefixed_use_declarations optional_comma  { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_unprefixed_use_declarations:
       non_empty_unprefixed_use_declarations ',' unprefixed_use_declaration
-          { push($1, $3); }
-    | unprefixed_use_declaration                            { init($1); }
+          { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | unprefixed_use_declaration                            { $$ = array($this->semStack[$1]); }
 ;
 
 use_declarations:
-      non_empty_use_declarations no_comma                   { $$ = $1; }
+      non_empty_use_declarations no_comma                   { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_use_declarations:
-      non_empty_use_declarations ',' use_declaration        { push($1, $3); }
-    | use_declaration                                       { init($1); }
+      non_empty_use_declarations ',' use_declaration        { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | use_declaration                                       { $$ = array($this->semStack[$1]); }
 ;
 
 inline_use_declarations:
-      non_empty_inline_use_declarations optional_comma      { $$ = $1; }
+      non_empty_inline_use_declarations optional_comma      { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_inline_use_declarations:
       non_empty_inline_use_declarations ',' inline_use_declaration
-          { push($1, $3); }
-    | inline_use_declaration                                { init($1); }
+          { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | inline_use_declaration                                { $$ = array($this->semStack[$1]); }
 ;
 
 unprefixed_use_declaration:
       namespace_name
-          { $$ = Stmt\UseUse[$1, null, Stmt\Use_::TYPE_UNKNOWN]; $this->checkUseUse($$, #1); }
+          { $$ = new Stmt\UseUse($this->semStack[$1], null, Stmt\Use_::TYPE_UNKNOWN, $this->startAttributeStack[$1] + $this->endAttributes); $this->checkUseUse($$, $1); }
     | namespace_name T_AS T_STRING
-          { $$ = Stmt\UseUse[$1, $3, Stmt\Use_::TYPE_UNKNOWN]; $this->checkUseUse($$, #3); }
+          { $$ = new Stmt\UseUse($this->semStack[$1], $this->semStack[$3], Stmt\Use_::TYPE_UNKNOWN, $this->startAttributeStack[$1] + $this->endAttributes); $this->checkUseUse($$, $3); }
 ;
 
 use_declaration:
-      unprefixed_use_declaration                            { $$ = $1; }
-    | T_NS_SEPARATOR unprefixed_use_declaration             { $$ = $2; }
+      unprefixed_use_declaration                            { $$ = $this->semStack[$1]; }
+    | T_NS_SEPARATOR unprefixed_use_declaration             { $$ = $this->semStack[$2]; }
 ;
 
 inline_use_declaration:
-      unprefixed_use_declaration                            { $$ = $1; $$->type = Stmt\Use_::TYPE_NORMAL; }
-    | use_type unprefixed_use_declaration                   { $$ = $2; $$->type = $1; }
+      unprefixed_use_declaration                            { $$ = $this->semStack[$1]; $$->type = Stmt\Use_::TYPE_NORMAL; }
+    | use_type unprefixed_use_declaration                   { $$ = $this->semStack[$2]; $$->type = $this->semStack[$1]; }
 ;
 
 constant_declaration_list:
-      non_empty_constant_declaration_list no_comma          { $$ = $1; }
+      non_empty_constant_declaration_list no_comma          { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_constant_declaration_list:
       non_empty_constant_declaration_list ',' constant_declaration
-          { push($1, $3); }
-    | constant_declaration                                  { init($1); }
+          { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | constant_declaration                                  { $$ = array($this->semStack[$1]); }
 ;
 
 constant_declaration:
-    T_STRING '=' expr                                       { $$ = Node\Const_[$1, $3]; }
+    T_STRING '=' expr                                       { $$ = new Node\Const_($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 class_const_list:
-      non_empty_class_const_list no_comma                   { $$ = $1; }
+      non_empty_class_const_list no_comma                   { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_class_const_list:
-      non_empty_class_const_list ',' class_const            { push($1, $3); }
-    | class_const                                           { init($1); }
+      non_empty_class_const_list ',' class_const            { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | class_const                                           { $$ = array($this->semStack[$1]); }
 ;
 
 class_const:
-    identifier '=' expr                                     { $$ = Node\Const_[$1, $3]; }
+    identifier '=' expr                                     { $$ = new Node\Const_($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 inner_statement_list_ex:
-      inner_statement_list_ex inner_statement               { pushNormalizing($1, $2); }
-    | /* empty */                                           { init(); }
+      inner_statement_list_ex inner_statement               { if (is_array($this->semStack[$2])) { $$ = array_merge($this->semStack[$1], $this->semStack[$2]); } else { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }; }
+    | /* empty */                                           { $$ = array(); }
 ;
 
 inner_statement_list:
       inner_statement_list_ex
-          { makeNop($nop, $this->lookaheadStartAttributes);
-            if ($nop !== null) { $1[] = $nop; } $$ = $1; }
+          { $startAttributes = $this->lookaheadStartAttributes; if (isset($startAttributes['comments'])) { $nop = new Stmt\Nop(['comments' => $startAttributes['comments']]); } else { $nop = null; };
+            if ($nop !== null) { $this->semStack[$1][] = $nop; } $$ = $this->semStack[$1]; }
 ;
 
 inner_statement:
-      statement                                             { $$ = $1; }
-    | function_declaration_statement                        { $$ = $1; }
-    | class_declaration_statement                           { $$ = $1; }
+      statement                                             { $$ = $this->semStack[$1]; }
+    | function_declaration_statement                        { $$ = $this->semStack[$1]; }
+    | class_declaration_statement                           { $$ = $this->semStack[$1]; }
     | T_HALT_COMPILER
-          { throw new Error('__HALT_COMPILER() can only be used from the outermost scope', attributes()); }
+          { throw new Error('__HALT_COMPILER() can only be used from the outermost scope', $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 non_empty_statement:
-      '{' inner_statement_list '}'                          { $$ = $2; prependLeadingComments($$); }
+      '{' inner_statement_list '}'
+    {
+        if ($this->semStack[$2]) {
+            $$ = $this->semStack[$2]; $attrs = $this->startAttributeStack[$1]; $stmts = $$; if (!empty($attrs['comments'])) {$stmts[0]->setAttribute('comments', array_merge($attrs['comments'], $stmts[0]->getAttribute('comments', []))); };
+        } else {
+            $startAttributes = $this->startAttributeStack[$1]; if (isset($startAttributes['comments'])) { $$ = new Stmt\Nop(['comments' => $startAttributes['comments']]); } else { $$ = null; };
+            if (null === $$) { $$ = array(); }
+        }
+    }
     | T_IF '(' expr ')' statement elseif_list else_single
-          { $$ = Stmt\If_[$3, ['stmts' => toArray($5), 'elseifs' => $6, 'else' => $7]]; }
+          { $$ = new Stmt\If_($this->semStack[$3], ['stmts' => is_array($this->semStack[$5]) ? $this->semStack[$5] : array($this->semStack[$5]), 'elseifs' => $this->semStack[$6], 'else' => $this->semStack[$7]], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_IF '(' expr ')' ':' inner_statement_list new_elseif_list new_else_single T_ENDIF ';'
-          { $$ = Stmt\If_[$3, ['stmts' => $6, 'elseifs' => $7, 'else' => $8]]; }
-    | T_WHILE '(' expr ')' while_statement                  { $$ = Stmt\While_[$3, $5]; }
-    | T_DO statement T_WHILE '(' expr ')' ';'               { $$ = Stmt\Do_   [$5, toArray($2)]; }
+          { $$ = new Stmt\If_($this->semStack[$3], ['stmts' => $this->semStack[$6], 'elseifs' => $this->semStack[$7], 'else' => $this->semStack[$8]], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_WHILE '(' expr ')' while_statement                  { $$ = new Stmt\While_($this->semStack[$3], $this->semStack[$5], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DO statement T_WHILE '(' expr ')' ';'               { $$ = new Stmt\Do_($this->semStack[$5], is_array($this->semStack[$2]) ? $this->semStack[$2] : array($this->semStack[$2]), $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_FOR '(' for_expr ';'  for_expr ';' for_expr ')' for_statement
-          { $$ = Stmt\For_[['init' => $3, 'cond' => $5, 'loop' => $7, 'stmts' => $9]]; }
-    | T_SWITCH '(' expr ')' switch_case_list                { $$ = Stmt\Switch_[$3, $5]; }
-    | T_BREAK optional_expr semi                            { $$ = Stmt\Break_[$2]; }
-    | T_CONTINUE optional_expr semi                         { $$ = Stmt\Continue_[$2]; }
-    | T_RETURN optional_expr semi                           { $$ = Stmt\Return_[$2]; }
-    | T_GLOBAL global_var_list semi                         { $$ = Stmt\Global_[$2]; }
-    | T_STATIC static_var_list semi                         { $$ = Stmt\Static_[$2]; }
-    | T_ECHO expr_list semi                                 { $$ = Stmt\Echo_[$2]; }
-    | T_INLINE_HTML                                         { $$ = Stmt\InlineHTML[$1]; }
-    | expr semi                                             { $$ = $1; }
-    | T_UNSET '(' variables_list ')' semi                   { $$ = Stmt\Unset_[$3]; }
+          { $$ = new Stmt\For_(['init' => $this->semStack[$3], 'cond' => $this->semStack[$5], 'loop' => $this->semStack[$7], 'stmts' => $this->semStack[$9]], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_SWITCH '(' expr ')' switch_case_list                { $$ = new Stmt\Switch_($this->semStack[$3], $this->semStack[$5], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_BREAK optional_expr semi                            { $$ = new Stmt\Break_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_CONTINUE optional_expr semi                         { $$ = new Stmt\Continue_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_RETURN optional_expr semi                           { $$ = new Stmt\Return_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_GLOBAL global_var_list semi                         { $$ = new Stmt\Global_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_STATIC static_var_list semi                         { $$ = new Stmt\Static_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_ECHO expr_list semi                                 { $$ = new Stmt\Echo_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_INLINE_HTML                                         { $$ = new Stmt\InlineHTML($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr semi                                             { $$ = $this->semStack[$1]; }
+    | T_UNSET '(' variables_list ')' semi                   { $$ = new Stmt\Unset_($this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_FOREACH '(' expr T_AS foreach_variable ')' foreach_statement
-          { $$ = Stmt\Foreach_[$3, $5[0], ['keyVar' => null, 'byRef' => $5[1], 'stmts' => $7]]; }
+          { $$ = new Stmt\Foreach_($this->semStack[$3], $this->semStack[$5][0], ['keyVar' => null, 'byRef' => $this->semStack[$5][1], 'stmts' => $this->semStack[$7]], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_FOREACH '(' expr T_AS variable T_DOUBLE_ARROW foreach_variable ')' foreach_statement
-          { $$ = Stmt\Foreach_[$3, $7[0], ['keyVar' => $5, 'byRef' => $7[1], 'stmts' => $9]]; }
-    | T_DECLARE '(' declare_list ')' declare_statement      { $$ = Stmt\Declare_[$3, $5]; }
+          { $$ = new Stmt\Foreach_($this->semStack[$3], $this->semStack[$7][0], ['keyVar' => $this->semStack[$5], 'byRef' => $this->semStack[$7][1], 'stmts' => $this->semStack[$9]], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DECLARE '(' declare_list ')' declare_statement      { $$ = new Stmt\Declare_($this->semStack[$3], $this->semStack[$5], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_TRY '{' inner_statement_list '}' catches optional_finally
-          { $$ = Stmt\TryCatch[$3, $5, $6]; $this->checkTryCatch($$); }
-    | T_THROW expr semi                                     { $$ = Stmt\Throw_[$2]; }
-    | T_GOTO T_STRING semi                                  { $$ = Stmt\Goto_[$2]; }
-    | T_STRING ':'                                          { $$ = Stmt\Label[$1]; }
+          { $$ = new Stmt\TryCatch($this->semStack[$3], $this->semStack[$5], $this->semStack[$6], $this->startAttributeStack[$1] + $this->endAttributes); $this->checkTryCatch($$); }
+    | T_THROW expr semi                                     { $$ = new Stmt\Throw_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_GOTO T_STRING semi                                  { $$ = new Stmt\Goto_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_STRING ':'                                          { $$ = new Stmt\Label($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
     | error                                                 { $$ = array(); /* means: no statement */ }
 ;
 
 statement:
-      non_empty_statement                                   { $$ = $1; }
+      non_empty_statement                                   { $$ = $this->semStack[$1]; }
     | ';'
-          { makeNop($$, $this->startAttributeStack[#1]);
+          { $startAttributes = $this->startAttributeStack[$1]; if (isset($startAttributes['comments'])) { $$ = new Stmt\Nop(['comments' => $startAttributes['comments']]); } else { $$ = null; };
             if ($$ === null) $$ = array(); /* means: no statement */ }
 ;
 
 catches:
-      /* empty */                                           { init(); }
-    | catches catch                                         { push($1, $2); }
+      /* empty */                                           { $$ = array(); }
+    | catches catch                                         { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }
 ;
 
 name_union:
-      name                                                  { init($1); }
-    | name_union '|' name                                   { push($1, $3); }
+      name                                                  { $$ = array($this->semStack[$1]); }
+    | name_union '|' name                                   { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 catch:
     T_CATCH '(' name_union T_VARIABLE ')' '{' inner_statement_list '}'
-        { $$ = Stmt\Catch_[$3, parseVar($4), $7]; }
+        { $$ = new Stmt\Catch_($this->semStack[$3], substr($this->semStack[$4], 1), $this->semStack[$7], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 optional_finally:
       /* empty */                                           { $$ = null; }
-    | T_FINALLY '{' inner_statement_list '}'                { $$ = Stmt\Finally_[$3]; }
+    | T_FINALLY '{' inner_statement_list '}'                { $$ = new Stmt\Finally_($this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 variables_list:
-      non_empty_variables_list no_comma                     { $$ = $1; }
+      non_empty_variables_list no_comma                     { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_variables_list:
-      variable                                              { init($1); }
-    | non_empty_variables_list ',' variable                 { push($1, $3); }
+      variable                                              { $$ = array($this->semStack[$1]); }
+    | non_empty_variables_list ',' variable                 { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 optional_ref:
@@ -384,18 +398,18 @@ optional_ellipsis:
 
 function_declaration_statement:
     T_FUNCTION optional_ref T_STRING '(' parameter_list ')' optional_return_type '{' inner_statement_list '}'
-        { $$ = Stmt\Function_[$3, ['byRef' => $2, 'params' => $5, 'returnType' => $7, 'stmts' => $9]]; }
+        { $$ = new Stmt\Function_($this->semStack[$3], ['byRef' => $this->semStack[$2], 'params' => $this->semStack[$5], 'returnType' => $this->semStack[$7], 'stmts' => $this->semStack[$9]], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 class_declaration_statement:
       class_entry_type T_STRING extends_from implements_list '{' class_statement_list '}'
-          { $$ = Stmt\Class_[$2, ['type' => $1, 'extends' => $3, 'implements' => $4, 'stmts' => $6]];
-            $this->checkClass($$, #2); }
+          { $$ = new Stmt\Class_($this->semStack[$2], ['type' => $this->semStack[$1], 'extends' => $this->semStack[$3], 'implements' => $this->semStack[$4], 'stmts' => $this->semStack[$6]], $this->startAttributeStack[$1] + $this->endAttributes);
+            $this->checkClass($$, $2); }
     | T_INTERFACE T_STRING interface_extends_list '{' class_statement_list '}'
-          { $$ = Stmt\Interface_[$2, ['extends' => $3, 'stmts' => $5]];
-            $this->checkInterface($$, #2); }
+          { $$ = new Stmt\Interface_($this->semStack[$2], ['extends' => $this->semStack[$3], 'stmts' => $this->semStack[$5]], $this->startAttributeStack[$1] + $this->endAttributes);
+            $this->checkInterface($$, $2); }
     | T_TRAIT T_STRING '{' class_statement_list '}'
-          { $$ = Stmt\Trait_[$2, ['stmts' => $4]]; }
+          { $$ = new Stmt\Trait_($this->semStack[$2], ['stmts' => $this->semStack[$4]], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 class_entry_type:
@@ -406,72 +420,72 @@ class_entry_type:
 
 extends_from:
       /* empty */                                           { $$ = null; }
-    | T_EXTENDS class_name                                  { $$ = $2; }
+    | T_EXTENDS class_name                                  { $$ = $this->semStack[$2]; }
 ;
 
 interface_extends_list:
       /* empty */                                           { $$ = array(); }
-    | T_EXTENDS class_name_list                             { $$ = $2; }
+    | T_EXTENDS class_name_list                             { $$ = $this->semStack[$2]; }
 ;
 
 implements_list:
       /* empty */                                           { $$ = array(); }
-    | T_IMPLEMENTS class_name_list                          { $$ = $2; }
+    | T_IMPLEMENTS class_name_list                          { $$ = $this->semStack[$2]; }
 ;
 
 class_name_list:
-      non_empty_class_name_list no_comma                    { $$ = $1; }
+      non_empty_class_name_list no_comma                    { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_class_name_list:
-      class_name                                            { init($1); }
-    | non_empty_class_name_list ',' class_name              { push($1, $3); }
+      class_name                                            { $$ = array($this->semStack[$1]); }
+    | non_empty_class_name_list ',' class_name              { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 for_statement:
-      statement                                             { $$ = toArray($1); }
-    | ':' inner_statement_list T_ENDFOR ';'                 { $$ = $2; }
+      statement                                             { $$ = is_array($this->semStack[$1]) ? $this->semStack[$1] : array($this->semStack[$1]); }
+    | ':' inner_statement_list T_ENDFOR ';'                 { $$ = $this->semStack[$2]; }
 ;
 
 foreach_statement:
-      statement                                             { $$ = toArray($1); }
-    | ':' inner_statement_list T_ENDFOREACH ';'             { $$ = $2; }
+      statement                                             { $$ = is_array($this->semStack[$1]) ? $this->semStack[$1] : array($this->semStack[$1]); }
+    | ':' inner_statement_list T_ENDFOREACH ';'             { $$ = $this->semStack[$2]; }
 ;
 
 declare_statement:
-      non_empty_statement                                   { $$ = toArray($1); }
+      non_empty_statement                                   { $$ = is_array($this->semStack[$1]) ? $this->semStack[$1] : array($this->semStack[$1]); }
     | ';'                                                   { $$ = null; }
-    | ':' inner_statement_list T_ENDDECLARE ';'             { $$ = $2; }
+    | ':' inner_statement_list T_ENDDECLARE ';'             { $$ = $this->semStack[$2]; }
 ;
 
 declare_list:
-      non_empty_declare_list no_comma                       { $$ = $1; }
+      non_empty_declare_list no_comma                       { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_declare_list:
-      declare_list_element                                  { init($1); }
-    | non_empty_declare_list ',' declare_list_element       { push($1, $3); }
+      declare_list_element                                  { $$ = array($this->semStack[$1]); }
+    | non_empty_declare_list ',' declare_list_element       { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 declare_list_element:
-      T_STRING '=' expr                                     { $$ = Stmt\DeclareDeclare[$1, $3]; }
+      T_STRING '=' expr                                     { $$ = new Stmt\DeclareDeclare($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 switch_case_list:
-      '{' case_list '}'                                     { $$ = $2; }
-    | '{' ';' case_list '}'                                 { $$ = $3; }
-    | ':' case_list T_ENDSWITCH ';'                         { $$ = $2; }
-    | ':' ';' case_list T_ENDSWITCH ';'                     { $$ = $3; }
+      '{' case_list '}'                                     { $$ = $this->semStack[$2]; }
+    | '{' ';' case_list '}'                                 { $$ = $this->semStack[$3]; }
+    | ':' case_list T_ENDSWITCH ';'                         { $$ = $this->semStack[$2]; }
+    | ':' ';' case_list T_ENDSWITCH ';'                     { $$ = $this->semStack[$3]; }
 ;
 
 case_list:
-      /* empty */                                           { init(); }
-    | case_list case                                        { push($1, $2); }
+      /* empty */                                           { $$ = array(); }
+    | case_list case                                        { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }
 ;
 
 case:
-      T_CASE expr case_separator inner_statement_list       { $$ = Stmt\Case_[$2, $4]; }
-    | T_DEFAULT case_separator inner_statement_list         { $$ = Stmt\Case_[null, $3]; }
+      T_CASE expr case_separator inner_statement_list       { $$ = new Stmt\Case_($this->semStack[$2], $this->semStack[$4], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DEFAULT case_separator inner_statement_list         { $$ = new Stmt\Case_(null, $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 case_separator:
@@ -480,191 +494,191 @@ case_separator:
 ;
 
 while_statement:
-      statement                                             { $$ = toArray($1); }
-    | ':' inner_statement_list T_ENDWHILE ';'               { $$ = $2; }
+      statement                                             { $$ = is_array($this->semStack[$1]) ? $this->semStack[$1] : array($this->semStack[$1]); }
+    | ':' inner_statement_list T_ENDWHILE ';'               { $$ = $this->semStack[$2]; }
 ;
 
 elseif_list:
-      /* empty */                                           { init(); }
-    | elseif_list elseif                                    { push($1, $2); }
+      /* empty */                                           { $$ = array(); }
+    | elseif_list elseif                                    { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }
 ;
 
 elseif:
-      T_ELSEIF '(' expr ')' statement                       { $$ = Stmt\ElseIf_[$3, toArray($5)]; }
+      T_ELSEIF '(' expr ')' statement                       { $$ = new Stmt\ElseIf_($this->semStack[$3], is_array($this->semStack[$5]) ? $this->semStack[$5] : array($this->semStack[$5]), $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 new_elseif_list:
-      /* empty */                                           { init(); }
-    | new_elseif_list new_elseif                            { push($1, $2); }
+      /* empty */                                           { $$ = array(); }
+    | new_elseif_list new_elseif                            { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }
 ;
 
 new_elseif:
-     T_ELSEIF '(' expr ')' ':' inner_statement_list         { $$ = Stmt\ElseIf_[$3, $6]; }
+     T_ELSEIF '(' expr ')' ':' inner_statement_list         { $$ = new Stmt\ElseIf_($this->semStack[$3], $this->semStack[$6], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 else_single:
       /* empty */                                           { $$ = null; }
-    | T_ELSE statement                                      { $$ = Stmt\Else_[toArray($2)]; }
+    | T_ELSE statement                                      { $$ = new Stmt\Else_(is_array($this->semStack[$2]) ? $this->semStack[$2] : array($this->semStack[$2]), $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 new_else_single:
       /* empty */                                           { $$ = null; }
-    | T_ELSE ':' inner_statement_list                       { $$ = Stmt\Else_[$3]; }
+    | T_ELSE ':' inner_statement_list                       { $$ = new Stmt\Else_($this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 foreach_variable:
-      variable                                              { $$ = array($1, false); }
-    | '&' variable                                          { $$ = array($2, true); }
-    | list_expr                                             { $$ = array($1, false); }
-    | array_short_syntax                                    { $$ = array($1, false); }
+      variable                                              { $$ = array($this->semStack[$1], false); }
+    | '&' variable                                          { $$ = array($this->semStack[$2], true); }
+    | list_expr                                             { $$ = array($this->semStack[$1], false); }
+    | array_short_syntax                                    { $$ = array($this->semStack[$1], false); }
 ;
 
 parameter_list:
-      non_empty_parameter_list no_comma                     { $$ = $1; }
+      non_empty_parameter_list no_comma                     { $$ = $this->semStack[$1]; }
     | /* empty */                                           { $$ = array(); }
 ;
 
 non_empty_parameter_list:
-      parameter                                             { init($1); }
-    | non_empty_parameter_list ',' parameter                { push($1, $3); }
+      parameter                                             { $$ = array($this->semStack[$1]); }
+    | non_empty_parameter_list ',' parameter                { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 parameter:
       optional_param_type optional_ref optional_ellipsis T_VARIABLE
-          { $$ = Node\Param[parseVar($4), null, $1, $2, $3]; $this->checkParam($$); }
+          { $$ = new Node\Param(substr($this->semStack[$4], 1), null, $this->semStack[$1], $this->semStack[$2], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); $this->checkParam($$); }
     | optional_param_type optional_ref optional_ellipsis T_VARIABLE '=' expr
-          { $$ = Node\Param[parseVar($4), $6, $1, $2, $3]; $this->checkParam($$); }
+          { $$ = new Node\Param(substr($this->semStack[$4], 1), $this->semStack[$6], $this->semStack[$1], $this->semStack[$2], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); $this->checkParam($$); }
 ;
 
 type_expr:
-      type                                                  { $$ = $1; }
-    | '?' type                                              { $$ = Node\NullableType[$2]; }
+      type                                                  { $$ = $this->semStack[$1]; }
+    | '?' type                                              { $$ = new Node\NullableType($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 type:
-      name                                                  { $$ = $this->handleBuiltinTypes($1); }
+      name                                                  { $$ = $this->handleBuiltinTypes($this->semStack[$1]); }
     | T_ARRAY                                               { $$ = 'array'; }
     | T_CALLABLE                                            { $$ = 'callable'; }
 ;
 
 optional_param_type:
       /* empty */                                           { $$ = null; }
-    | type_expr                                             { $$ = $1; }
+    | type_expr                                             { $$ = $this->semStack[$1]; }
 ;
 
 optional_return_type:
       /* empty */                                           { $$ = null; }
-    | ':' type_expr                                         { $$ = $2; }
+    | ':' type_expr                                         { $$ = $this->semStack[$2]; }
 ;
 
 argument_list:
       '(' ')'                                               { $$ = array(); }
-    | '(' non_empty_argument_list no_comma ')'              { $$ = $2; }
+    | '(' non_empty_argument_list no_comma ')'              { $$ = $this->semStack[$2]; }
 ;
 
 non_empty_argument_list:
-      argument                                              { init($1); }
-    | non_empty_argument_list ',' argument                  { push($1, $3); }
+      argument                                              { $$ = array($this->semStack[$1]); }
+    | non_empty_argument_list ',' argument                  { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 argument:
-      expr                                                  { $$ = Node\Arg[$1, false, false]; }
-    | '&' variable                                          { $$ = Node\Arg[$2, true, false]; }
-    | T_ELLIPSIS expr                                       { $$ = Node\Arg[$2, false, true]; }
+      expr                                                  { $$ = new Node\Arg($this->semStack[$1], false, false, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '&' variable                                          { $$ = new Node\Arg($this->semStack[$2], true, false, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_ELLIPSIS expr                                       { $$ = new Node\Arg($this->semStack[$2], false, true, $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 global_var_list:
-      non_empty_global_var_list no_comma                    { $$ = $1; }
+      non_empty_global_var_list no_comma                    { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_global_var_list:
-      non_empty_global_var_list ',' global_var              { push($1, $3); }
-    | global_var                                            { init($1); }
+      non_empty_global_var_list ',' global_var              { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | global_var                                            { $$ = array($this->semStack[$1]); }
 ;
 
 global_var:
-      simple_variable                                       { $$ = Expr\Variable[$1]; }
+      simple_variable                                       { $$ = new Expr\Variable($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 static_var_list:
-      non_empty_static_var_list no_comma                    { $$ = $1; }
+      non_empty_static_var_list no_comma                    { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_static_var_list:
-      non_empty_static_var_list ',' static_var              { push($1, $3); }
-    | static_var                                            { init($1); }
+      non_empty_static_var_list ',' static_var              { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | static_var                                            { $$ = array($this->semStack[$1]); }
 ;
 
 static_var:
-      T_VARIABLE                                            { $$ = Stmt\StaticVar[parseVar($1), null]; }
-    | T_VARIABLE '=' expr                                   { $$ = Stmt\StaticVar[parseVar($1), $3]; }
+      T_VARIABLE                                            { $$ = new Stmt\StaticVar(substr($this->semStack[$1], 1), null, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_VARIABLE '=' expr                                   { $$ = new Stmt\StaticVar(substr($this->semStack[$1], 1), $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 class_statement_list:
-      class_statement_list class_statement                  { push($1, $2); }
-    | /* empty */                                           { init(); }
+      class_statement_list class_statement                  { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }
+    | /* empty */                                           { $$ = array(); }
 ;
 
 class_statement:
       variable_modifiers property_declaration_list ';'
-          { $$ = Stmt\Property[$1, $2]; $this->checkProperty($$, #1); }
+          { $$ = new Stmt\Property($this->semStack[$1], $this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); $this->checkProperty($$, $1); }
     | method_modifiers T_CONST class_const_list ';'
-          { $$ = Stmt\ClassConst[$3, $1]; $this->checkClassConst($$, #1); }
+          { $$ = new Stmt\ClassConst($this->semStack[$3], $this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); $this->checkClassConst($$, $1); }
     | method_modifiers T_FUNCTION optional_ref identifier '(' parameter_list ')' optional_return_type method_body
-          { $$ = Stmt\ClassMethod[$4, ['type' => $1, 'byRef' => $3, 'params' => $6, 'returnType' => $8, 'stmts' => $9]];
-            $this->checkClassMethod($$, #1); }
-    | T_USE class_name_list trait_adaptations               { $$ = Stmt\TraitUse[$2, $3]; }
+          { $$ = new Stmt\ClassMethod($this->semStack[$4], ['type' => $this->semStack[$1], 'byRef' => $this->semStack[$3], 'params' => $this->semStack[$6], 'returnType' => $this->semStack[$8], 'stmts' => $this->semStack[$9]], $this->startAttributeStack[$1] + $this->endAttributes);
+            $this->checkClassMethod($$, $1); }
+    | T_USE class_name_list trait_adaptations               { $$ = new Stmt\TraitUse($this->semStack[$2], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 trait_adaptations:
       ';'                                                   { $$ = array(); }
-    | '{' trait_adaptation_list '}'                         { $$ = $2; }
+    | '{' trait_adaptation_list '}'                         { $$ = $this->semStack[$2]; }
 ;
 
 trait_adaptation_list:
-      /* empty */                                           { init(); }
-    | trait_adaptation_list trait_adaptation                { push($1, $2); }
+      /* empty */                                           { $$ = array(); }
+    | trait_adaptation_list trait_adaptation                { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }
 ;
 
 trait_adaptation:
       trait_method_reference_fully_qualified T_INSTEADOF class_name_list ';'
-          { $$ = Stmt\TraitUseAdaptation\Precedence[$1[0], $1[1], $3]; }
+          { $$ = new Stmt\TraitUseAdaptation\Precedence($this->semStack[$1][0], $this->semStack[$1][1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
     | trait_method_reference T_AS member_modifier identifier ';'
-          { $$ = Stmt\TraitUseAdaptation\Alias[$1[0], $1[1], $3, $4]; }
+          { $$ = new Stmt\TraitUseAdaptation\Alias($this->semStack[$1][0], $this->semStack[$1][1], $this->semStack[$3], $this->semStack[$4], $this->startAttributeStack[$1] + $this->endAttributes); }
     | trait_method_reference T_AS member_modifier ';'
-          { $$ = Stmt\TraitUseAdaptation\Alias[$1[0], $1[1], $3, null]; }
+          { $$ = new Stmt\TraitUseAdaptation\Alias($this->semStack[$1][0], $this->semStack[$1][1], $this->semStack[$3], null, $this->startAttributeStack[$1] + $this->endAttributes); }
     | trait_method_reference T_AS T_STRING ';'
-          { $$ = Stmt\TraitUseAdaptation\Alias[$1[0], $1[1], null, $3]; }
+          { $$ = new Stmt\TraitUseAdaptation\Alias($this->semStack[$1][0], $this->semStack[$1][1], null, $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
     | trait_method_reference T_AS reserved_non_modifiers ';'
-          { $$ = Stmt\TraitUseAdaptation\Alias[$1[0], $1[1], null, $3]; }
+          { $$ = new Stmt\TraitUseAdaptation\Alias($this->semStack[$1][0], $this->semStack[$1][1], null, $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 trait_method_reference_fully_qualified:
-      name T_PAAMAYIM_NEKUDOTAYIM identifier                { $$ = array($1, $3); }
+      name T_PAAMAYIM_NEKUDOTAYIM identifier                { $$ = array($this->semStack[$1], $this->semStack[$3]); }
 ;
 trait_method_reference:
-      trait_method_reference_fully_qualified                { $$ = $1; }
-    | identifier                                            { $$ = array(null, $1); }
+      trait_method_reference_fully_qualified                { $$ = $this->semStack[$1]; }
+    | identifier                                            { $$ = array(null, $this->semStack[$1]); }
 ;
 
 method_body:
       ';' /* abstract method */                             { $$ = null; }
-    | '{' inner_statement_list '}'                          { $$ = $2; }
+    | '{' inner_statement_list '}'                          { $$ = $this->semStack[$2]; }
 ;
 
 variable_modifiers:
-      non_empty_member_modifiers                            { $$ = $1; }
+      non_empty_member_modifiers                            { $$ = $this->semStack[$1]; }
     | T_VAR                                                 { $$ = 0; }
 ;
 
 method_modifiers:
       /* empty */                                           { $$ = 0; }
-    | non_empty_member_modifiers                            { $$ = $1; }
+    | non_empty_member_modifiers                            { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_member_modifiers:
-      member_modifier                                       { $$ = $1; }
-    | non_empty_member_modifiers member_modifier            { $this->checkModifier($1, $2, #2); $$ = $1 | $2; }
+      member_modifier                                       { $$ = $this->semStack[$1]; }
+    | non_empty_member_modifiers member_modifier            { $this->checkModifier($this->semStack[$1], $this->semStack[$2], $2); $$ = $this->semStack[$1] | $this->semStack[$2]; }
 ;
 
 member_modifier:
@@ -677,388 +691,388 @@ member_modifier:
 ;
 
 property_declaration_list:
-      non_empty_property_declaration_list no_comma          { $$ = $1; }
+      non_empty_property_declaration_list no_comma          { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_property_declaration_list:
-      property_declaration                                  { init($1); }
+      property_declaration                                  { $$ = array($this->semStack[$1]); }
     | non_empty_property_declaration_list ',' property_declaration
-          { push($1, $3); }
+          { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 property_declaration:
-      T_VARIABLE                                            { $$ = Stmt\PropertyProperty[parseVar($1), null]; }
-    | T_VARIABLE '=' expr                                   { $$ = Stmt\PropertyProperty[parseVar($1), $3]; }
+      T_VARIABLE                                            { $$ = new Stmt\PropertyProperty(substr($this->semStack[$1], 1), null, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_VARIABLE '=' expr                                   { $$ = new Stmt\PropertyProperty(substr($this->semStack[$1], 1), $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 expr_list:
-      non_empty_expr_list no_comma                          { $$ = $1; }
+      non_empty_expr_list no_comma                          { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_expr_list:
-      non_empty_expr_list ',' expr                          { push($1, $3); }
-    | expr                                                  { init($1); }
+      non_empty_expr_list ',' expr                          { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | expr                                                  { $$ = array($this->semStack[$1]); }
 ;
 
 for_expr:
       /* empty */                                           { $$ = array(); }
-    | expr_list                                             { $$ = $1; }
+    | expr_list                                             { $$ = $this->semStack[$1]; }
 ;
 
 expr:
-      variable                                              { $$ = $1; }
-    | list_expr '=' expr                                    { $$ = Expr\Assign[$1, $3]; }
-    | array_short_syntax '=' expr                           { $$ = Expr\Assign[$1, $3]; }
-    | variable '=' expr                                     { $$ = Expr\Assign[$1, $3]; }
-    | variable '=' '&' variable                             { $$ = Expr\AssignRef[$1, $4]; }
-    | new_expr                                              { $$ = $1; }
-    | T_CLONE expr                                          { $$ = Expr\Clone_[$2]; }
-    | variable T_PLUS_EQUAL expr                            { $$ = Expr\AssignOp\Plus      [$1, $3]; }
-    | variable T_MINUS_EQUAL expr                           { $$ = Expr\AssignOp\Minus     [$1, $3]; }
-    | variable T_MUL_EQUAL expr                             { $$ = Expr\AssignOp\Mul       [$1, $3]; }
-    | variable T_DIV_EQUAL expr                             { $$ = Expr\AssignOp\Div       [$1, $3]; }
-    | variable T_CONCAT_EQUAL expr                          { $$ = Expr\AssignOp\Concat    [$1, $3]; }
-    | variable T_MOD_EQUAL expr                             { $$ = Expr\AssignOp\Mod       [$1, $3]; }
-    | variable T_AND_EQUAL expr                             { $$ = Expr\AssignOp\BitwiseAnd[$1, $3]; }
-    | variable T_OR_EQUAL expr                              { $$ = Expr\AssignOp\BitwiseOr [$1, $3]; }
-    | variable T_XOR_EQUAL expr                             { $$ = Expr\AssignOp\BitwiseXor[$1, $3]; }
-    | variable T_SL_EQUAL expr                              { $$ = Expr\AssignOp\ShiftLeft [$1, $3]; }
-    | variable T_SR_EQUAL expr                              { $$ = Expr\AssignOp\ShiftRight[$1, $3]; }
-    | variable T_POW_EQUAL expr                             { $$ = Expr\AssignOp\Pow       [$1, $3]; }
-    | variable T_INC                                        { $$ = Expr\PostInc[$1]; }
-    | T_INC variable                                        { $$ = Expr\PreInc [$2]; }
-    | variable T_DEC                                        { $$ = Expr\PostDec[$1]; }
-    | T_DEC variable                                        { $$ = Expr\PreDec [$2]; }
-    | expr T_BOOLEAN_OR expr                                { $$ = Expr\BinaryOp\BooleanOr [$1, $3]; }
-    | expr T_BOOLEAN_AND expr                               { $$ = Expr\BinaryOp\BooleanAnd[$1, $3]; }
-    | expr T_LOGICAL_OR expr                                { $$ = Expr\BinaryOp\LogicalOr [$1, $3]; }
-    | expr T_LOGICAL_AND expr                               { $$ = Expr\BinaryOp\LogicalAnd[$1, $3]; }
-    | expr T_LOGICAL_XOR expr                               { $$ = Expr\BinaryOp\LogicalXor[$1, $3]; }
-    | expr '|' expr                                         { $$ = Expr\BinaryOp\BitwiseOr [$1, $3]; }
-    | expr '&' expr                                         { $$ = Expr\BinaryOp\BitwiseAnd[$1, $3]; }
-    | expr '^' expr                                         { $$ = Expr\BinaryOp\BitwiseXor[$1, $3]; }
-    | expr '.' expr                                         { $$ = Expr\BinaryOp\Concat    [$1, $3]; }
-    | expr '+' expr                                         { $$ = Expr\BinaryOp\Plus      [$1, $3]; }
-    | expr '-' expr                                         { $$ = Expr\BinaryOp\Minus     [$1, $3]; }
-    | expr '*' expr                                         { $$ = Expr\BinaryOp\Mul       [$1, $3]; }
-    | expr '/' expr                                         { $$ = Expr\BinaryOp\Div       [$1, $3]; }
-    | expr '%' expr                                         { $$ = Expr\BinaryOp\Mod       [$1, $3]; }
-    | expr T_SL expr                                        { $$ = Expr\BinaryOp\ShiftLeft [$1, $3]; }
-    | expr T_SR expr                                        { $$ = Expr\BinaryOp\ShiftRight[$1, $3]; }
-    | expr T_POW expr                                       { $$ = Expr\BinaryOp\Pow       [$1, $3]; }
-    | '+' expr %prec T_INC                                  { $$ = Expr\UnaryPlus [$2]; }
-    | '-' expr %prec T_INC                                  { $$ = Expr\UnaryMinus[$2]; }
-    | '!' expr                                              { $$ = Expr\BooleanNot[$2]; }
-    | '~' expr                                              { $$ = Expr\BitwiseNot[$2]; }
-    | expr T_IS_IDENTICAL expr                              { $$ = Expr\BinaryOp\Identical     [$1, $3]; }
-    | expr T_IS_NOT_IDENTICAL expr                          { $$ = Expr\BinaryOp\NotIdentical  [$1, $3]; }
-    | expr T_IS_EQUAL expr                                  { $$ = Expr\BinaryOp\Equal         [$1, $3]; }
-    | expr T_IS_NOT_EQUAL expr                              { $$ = Expr\BinaryOp\NotEqual      [$1, $3]; }
-    | expr T_SPACESHIP expr                                 { $$ = Expr\BinaryOp\Spaceship     [$1, $3]; }
-    | expr '<' expr                                         { $$ = Expr\BinaryOp\Smaller       [$1, $3]; }
-    | expr T_IS_SMALLER_OR_EQUAL expr                       { $$ = Expr\BinaryOp\SmallerOrEqual[$1, $3]; }
-    | expr '>' expr                                         { $$ = Expr\BinaryOp\Greater       [$1, $3]; }
-    | expr T_IS_GREATER_OR_EQUAL expr                       { $$ = Expr\BinaryOp\GreaterOrEqual[$1, $3]; }
-    | expr T_INSTANCEOF class_name_reference                { $$ = Expr\Instanceof_[$1, $3]; }
-    | '(' expr ')'                                          { $$ = $2; }
-    | expr '?' expr ':' expr                                { $$ = Expr\Ternary[$1, $3,   $5]; }
-    | expr '?' ':' expr                                     { $$ = Expr\Ternary[$1, null, $4]; }
-    | expr T_COALESCE expr                                  { $$ = Expr\BinaryOp\Coalesce[$1, $3]; }
-    | T_ISSET '(' variables_list ')'                        { $$ = Expr\Isset_[$3]; }
-    | T_EMPTY '(' expr ')'                                  { $$ = Expr\Empty_[$3]; }
-    | T_INCLUDE expr                                        { $$ = Expr\Include_[$2, Expr\Include_::TYPE_INCLUDE]; }
-    | T_INCLUDE_ONCE expr                                   { $$ = Expr\Include_[$2, Expr\Include_::TYPE_INCLUDE_ONCE]; }
-    | T_EVAL '(' expr ')'                                   { $$ = Expr\Eval_[$3]; }
-    | T_REQUIRE expr                                        { $$ = Expr\Include_[$2, Expr\Include_::TYPE_REQUIRE]; }
-    | T_REQUIRE_ONCE expr                                   { $$ = Expr\Include_[$2, Expr\Include_::TYPE_REQUIRE_ONCE]; }
-    | T_INT_CAST expr                                       { $$ = Expr\Cast\Int_    [$2]; }
-    | T_DOUBLE_CAST expr                                    { $$ = Expr\Cast\Double  [$2]; }
-    | T_STRING_CAST expr                                    { $$ = Expr\Cast\String_ [$2]; }
-    | T_ARRAY_CAST expr                                     { $$ = Expr\Cast\Array_  [$2]; }
-    | T_OBJECT_CAST expr                                    { $$ = Expr\Cast\Object_ [$2]; }
-    | T_BOOL_CAST expr                                      { $$ = Expr\Cast\Bool_   [$2]; }
-    | T_UNSET_CAST expr                                     { $$ = Expr\Cast\Unset_  [$2]; }
+      variable                                              { $$ = $this->semStack[$1]; }
+    | list_expr '=' expr                                    { $$ = new Expr\Assign($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | array_short_syntax '=' expr                           { $$ = new Expr\Assign($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable '=' expr                                     { $$ = new Expr\Assign($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable '=' '&' variable                             { $$ = new Expr\AssignRef($this->semStack[$1], $this->semStack[$4], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | new_expr                                              { $$ = $this->semStack[$1]; }
+    | T_CLONE expr                                          { $$ = new Expr\Clone_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_PLUS_EQUAL expr                            { $$ = new Expr\AssignOp\Plus($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_MINUS_EQUAL expr                           { $$ = new Expr\AssignOp\Minus($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_MUL_EQUAL expr                             { $$ = new Expr\AssignOp\Mul($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_DIV_EQUAL expr                             { $$ = new Expr\AssignOp\Div($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_CONCAT_EQUAL expr                          { $$ = new Expr\AssignOp\Concat($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_MOD_EQUAL expr                             { $$ = new Expr\AssignOp\Mod($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_AND_EQUAL expr                             { $$ = new Expr\AssignOp\BitwiseAnd($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_OR_EQUAL expr                              { $$ = new Expr\AssignOp\BitwiseOr($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_XOR_EQUAL expr                             { $$ = new Expr\AssignOp\BitwiseXor($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_SL_EQUAL expr                              { $$ = new Expr\AssignOp\ShiftLeft($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_SR_EQUAL expr                              { $$ = new Expr\AssignOp\ShiftRight($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_POW_EQUAL expr                             { $$ = new Expr\AssignOp\Pow($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_INC                                        { $$ = new Expr\PostInc($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_INC variable                                        { $$ = new Expr\PreInc($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | variable T_DEC                                        { $$ = new Expr\PostDec($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DEC variable                                        { $$ = new Expr\PreDec($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_BOOLEAN_OR expr                                { $$ = new Expr\BinaryOp\BooleanOr($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_BOOLEAN_AND expr                               { $$ = new Expr\BinaryOp\BooleanAnd($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_LOGICAL_OR expr                                { $$ = new Expr\BinaryOp\LogicalOr($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_LOGICAL_AND expr                               { $$ = new Expr\BinaryOp\LogicalAnd($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_LOGICAL_XOR expr                               { $$ = new Expr\BinaryOp\LogicalXor($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '|' expr                                         { $$ = new Expr\BinaryOp\BitwiseOr($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '&' expr                                         { $$ = new Expr\BinaryOp\BitwiseAnd($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '^' expr                                         { $$ = new Expr\BinaryOp\BitwiseXor($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '.' expr                                         { $$ = new Expr\BinaryOp\Concat($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '+' expr                                         { $$ = new Expr\BinaryOp\Plus($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '-' expr                                         { $$ = new Expr\BinaryOp\Minus($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '*' expr                                         { $$ = new Expr\BinaryOp\Mul($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '/' expr                                         { $$ = new Expr\BinaryOp\Div($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '%' expr                                         { $$ = new Expr\BinaryOp\Mod($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_SL expr                                        { $$ = new Expr\BinaryOp\ShiftLeft($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_SR expr                                        { $$ = new Expr\BinaryOp\ShiftRight($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_POW expr                                       { $$ = new Expr\BinaryOp\Pow($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '+' expr %prec T_INC                                  { $$ = new Expr\UnaryPlus($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '-' expr %prec T_INC                                  { $$ = new Expr\UnaryMinus($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '!' expr                                              { $$ = new Expr\BooleanNot($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '~' expr                                              { $$ = new Expr\BitwiseNot($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_IS_IDENTICAL expr                              { $$ = new Expr\BinaryOp\Identical($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_IS_NOT_IDENTICAL expr                          { $$ = new Expr\BinaryOp\NotIdentical($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_IS_EQUAL expr                                  { $$ = new Expr\BinaryOp\Equal($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_IS_NOT_EQUAL expr                              { $$ = new Expr\BinaryOp\NotEqual($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_SPACESHIP expr                                 { $$ = new Expr\BinaryOp\Spaceship($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '<' expr                                         { $$ = new Expr\BinaryOp\Smaller($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_IS_SMALLER_OR_EQUAL expr                       { $$ = new Expr\BinaryOp\SmallerOrEqual($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '>' expr                                         { $$ = new Expr\BinaryOp\Greater($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_IS_GREATER_OR_EQUAL expr                       { $$ = new Expr\BinaryOp\GreaterOrEqual($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_INSTANCEOF class_name_reference                { $$ = new Expr\Instanceof_($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '(' expr ')'                                          { $$ = $this->semStack[$2]; }
+    | expr '?' expr ':' expr                                { $$ = new Expr\Ternary($this->semStack[$1], $this->semStack[$3], $this->semStack[$5], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr '?' ':' expr                                     { $$ = new Expr\Ternary($this->semStack[$1], null, $this->semStack[$4], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_COALESCE expr                                  { $$ = new Expr\BinaryOp\Coalesce($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_ISSET '(' variables_list ')'                        { $$ = new Expr\Isset_($this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_EMPTY '(' expr ')'                                  { $$ = new Expr\Empty_($this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_INCLUDE expr                                        { $$ = new Expr\Include_($this->semStack[$2], Expr\Include_::TYPE_INCLUDE, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_INCLUDE_ONCE expr                                   { $$ = new Expr\Include_($this->semStack[$2], Expr\Include_::TYPE_INCLUDE_ONCE, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_EVAL '(' expr ')'                                   { $$ = new Expr\Eval_($this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_REQUIRE expr                                        { $$ = new Expr\Include_($this->semStack[$2], Expr\Include_::TYPE_REQUIRE, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_REQUIRE_ONCE expr                                   { $$ = new Expr\Include_($this->semStack[$2], Expr\Include_::TYPE_REQUIRE_ONCE, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_INT_CAST expr                                       { $$ = new Expr\Cast\Int_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DOUBLE_CAST expr                                    { $$ = new Expr\Cast\Double($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_STRING_CAST expr                                    { $$ = new Expr\Cast\String_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_ARRAY_CAST expr                                     { $$ = new Expr\Cast\Array_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_OBJECT_CAST expr                                    { $$ = new Expr\Cast\Object_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_BOOL_CAST expr                                      { $$ = new Expr\Cast\Bool_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_UNSET_CAST expr                                     { $$ = new Expr\Cast\Unset_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_EXIT exit_expr
-          { $attrs = attributes();
-            $attrs['kind'] = strtolower($1) === 'exit' ? Expr\Exit_::KIND_EXIT : Expr\Exit_::KIND_DIE;
-            $$ = new Expr\Exit_($2, $attrs); }
-    | '@' expr                                              { $$ = Expr\ErrorSuppress[$2]; }
-    | scalar                                                { $$ = $1; }
-    | '`' backticks_expr '`'                                { $$ = Expr\ShellExec[$2]; }
-    | T_PRINT expr                                          { $$ = Expr\Print_[$2]; }
-    | T_YIELD                                               { $$ = Expr\Yield_[null, null]; }
-    | T_YIELD expr                                          { $$ = Expr\Yield_[$2, null]; }
-    | T_YIELD expr T_DOUBLE_ARROW expr                      { $$ = Expr\Yield_[$4, $2]; }
-    | T_YIELD_FROM expr                                     { $$ = Expr\YieldFrom[$2]; }
+          { $attrs = $this->startAttributeStack[$1] + $this->endAttributes;
+            $attrs['kind'] = strtolower($this->semStack[$1]) === 'exit' ? Expr\Exit_::KIND_EXIT : Expr\Exit_::KIND_DIE;
+            $$ = new Expr\Exit_($this->semStack[$2], $attrs); }
+    | '@' expr                                              { $$ = new Expr\ErrorSuppress($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | scalar                                                { $$ = $this->semStack[$1]; }
+    | '`' backticks_expr '`'                                { $$ = new Expr\ShellExec($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_PRINT expr                                          { $$ = new Expr\Print_($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_YIELD                                               { $$ = new Expr\Yield_(null, null, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_YIELD expr                                          { $$ = new Expr\Yield_($this->semStack[$2], null, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_YIELD expr T_DOUBLE_ARROW expr                      { $$ = new Expr\Yield_($this->semStack[$4], $this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_YIELD_FROM expr                                     { $$ = new Expr\YieldFrom($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_FUNCTION optional_ref '(' parameter_list ')' lexical_vars optional_return_type
       '{' inner_statement_list '}'
-          { $$ = Expr\Closure[['static' => false, 'byRef' => $2, 'params' => $4, 'uses' => $6, 'returnType' => $7, 'stmts' => $9]]; }
+          { $$ = new Expr\Closure(['static' => false, 'byRef' => $this->semStack[$2], 'params' => $this->semStack[$4], 'uses' => $this->semStack[$6], 'returnType' => $this->semStack[$7], 'stmts' => $this->semStack[$9]], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_STATIC T_FUNCTION optional_ref '(' parameter_list ')' lexical_vars optional_return_type
       '{' inner_statement_list '}'
-          { $$ = Expr\Closure[['static' => true, 'byRef' => $3, 'params' => $5, 'uses' => $7, 'returnType' => $8, 'stmts' => $10]]; }
+          { $$ = new Expr\Closure(['static' => true, 'byRef' => $this->semStack[$3], 'params' => $this->semStack[$5], 'uses' => $this->semStack[$7], 'returnType' => $this->semStack[$8], 'stmts' => $this->semStack[$10]], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 anonymous_class:
       T_CLASS ctor_arguments extends_from implements_list '{' class_statement_list '}'
-          { $$ = array(Stmt\Class_[null, ['type' => 0, 'extends' => $3, 'implements' => $4, 'stmts' => $6]], $2);
+          { $$ = array(new Stmt\Class_(null, ['type' => 0, 'extends' => $this->semStack[$3], 'implements' => $this->semStack[$4], 'stmts' => $this->semStack[$6]], $this->startAttributeStack[$1] + $this->endAttributes), $this->semStack[$2]);
             $this->checkClass($$[0], -1); }
 
 new_expr:
-      T_NEW class_name_reference ctor_arguments             { $$ = Expr\New_[$2, $3]; }
+      T_NEW class_name_reference ctor_arguments             { $$ = new Expr\New_($this->semStack[$2], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_NEW anonymous_class
-          { list($class, $ctorArgs) = $2; $$ = Expr\New_[$class, $ctorArgs]; }
+          { list($class, $ctorArgs) = $this->semStack[$2]; $$ = new Expr\New_($class, $ctorArgs, $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 lexical_vars:
       /* empty */                                           { $$ = array(); }
-    | T_USE '(' lexical_var_list ')'                        { $$ = $3; }
+    | T_USE '(' lexical_var_list ')'                        { $$ = $this->semStack[$3]; }
 ;
 
 lexical_var_list:
-      non_empty_lexical_var_list no_comma                   { $$ = $1; }
+      non_empty_lexical_var_list no_comma                   { $$ = $this->semStack[$1]; }
 ;
 
 non_empty_lexical_var_list:
-      lexical_var                                           { init($1); }
-    | non_empty_lexical_var_list ',' lexical_var            { push($1, $3); }
+      lexical_var                                           { $$ = array($this->semStack[$1]); }
+    | non_empty_lexical_var_list ',' lexical_var            { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
 ;
 
 lexical_var:
-      optional_ref T_VARIABLE                               { $$ = Expr\ClosureUse[parseVar($2), $1]; }
+      optional_ref T_VARIABLE                               { $$ = new Expr\ClosureUse(substr($this->semStack[$2], 1), $this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 function_call:
-      name argument_list                                    { $$ = Expr\FuncCall[$1, $2]; }
-    | callable_expr argument_list                           { $$ = Expr\FuncCall[$1, $2]; }
+      name argument_list                                    { $$ = new Expr\FuncCall($this->semStack[$1], $this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | callable_expr argument_list                           { $$ = new Expr\FuncCall($this->semStack[$1], $this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
     | class_name_or_var T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
-          { $$ = Expr\StaticCall[$1, $3, $4]; }
+          { $$ = new Expr\StaticCall($this->semStack[$1], $this->semStack[$3], $this->semStack[$4], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 class_name:
-      T_STATIC                                              { $$ = Name[$1]; }
-    | name                                                  { $$ = $1; }
+      T_STATIC                                              { $$ = new Name($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | name                                                  { $$ = $this->semStack[$1]; }
 ;
 
 name:
-      namespace_name_parts                                  { $$ = Name[$1]; }
-    | T_NS_SEPARATOR namespace_name_parts                   { $$ = Name\FullyQualified[$2]; }
-    | T_NAMESPACE T_NS_SEPARATOR namespace_name_parts       { $$ = Name\Relative[$3]; }
+      namespace_name_parts                                  { $$ = new Name($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_NS_SEPARATOR namespace_name_parts                   { $$ = new Name\FullyQualified($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_NAMESPACE T_NS_SEPARATOR namespace_name_parts       { $$ = new Name\Relative($this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 class_name_reference:
-      class_name                                            { $$ = $1; }
-    | new_variable                                          { $$ = $1; }
-    | error                                                 { $$ = Expr\Error[]; $this->errorState = 2; }
+      class_name                                            { $$ = $this->semStack[$1]; }
+    | new_variable                                          { $$ = $this->semStack[$1]; }
+    | error                                                 { $$ = new Expr\Error($this->startAttributeStack[$1] + $this->endAttributes); $this->errorState = 2; }
 ;
 
 class_name_or_var:
-      class_name                                            { $$ = $1; }
-    | dereferencable                                        { $$ = $1; }
+      class_name                                            { $$ = $this->semStack[$1]; }
+    | dereferencable                                        { $$ = $this->semStack[$1]; }
 ;
 
 exit_expr:
       /* empty */                                           { $$ = null; }
-    | '(' optional_expr ')'                                 { $$ = $2; }
+    | '(' optional_expr ')'                                 { $$ = $this->semStack[$2]; }
 ;
 
 backticks_expr:
       /* empty */                                           { $$ = array(); }
     | T_ENCAPSED_AND_WHITESPACE
-          { $$ = array(Scalar\EncapsedStringPart[Scalar\String_::parseEscapeSequences($1, '`')]); }
-    | encaps_list                                           { parseEncapsed($1, '`', true); $$ = $1; }
+          { $$ = array(new Scalar\EncapsedStringPart(Scalar\String_::parseEscapeSequences($this->semStack[$1], '`'), $this->startAttributeStack[$1] + $this->endAttributes)); }
+    | encaps_list                                           { foreach ($this->semStack[$1] as $s) { if ($s instanceof Node\Scalar\EncapsedStringPart) { $s->value = Node\Scalar\String_::parseEscapeSequences($s->value, '`', true); } }; $$ = $this->semStack[$1]; }
 ;
 
 ctor_arguments:
       /* empty */                                           { $$ = array(); }
-    | argument_list                                         { $$ = $1; }
+    | argument_list                                         { $$ = $this->semStack[$1]; }
 ;
 
 constant:
-      name                                                  { $$ = Expr\ConstFetch[$1]; }
+      name                                                  { $$ = new Expr\ConstFetch($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
     | class_name_or_var T_PAAMAYIM_NEKUDOTAYIM identifier
-          { $$ = Expr\ClassConstFetch[$1, $3]; }
+          { $$ = new Expr\ClassConstFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
     /* We interpret and isolated FOO:: as an unfinished class constant fetch. It could also be
        an unfinished static property fetch or unfinished scoped call. */
     | class_name_or_var T_PAAMAYIM_NEKUDOTAYIM error
-          { $$ = Expr\ClassConstFetch[$1, new Expr\Error(stackAttributes(#3))]; $this->errorState = 2; }
+          { $$ = new Expr\ClassConstFetch($this->semStack[$1], new Expr\Error($this->startAttributeStack[$3] + $this->endAttributeStack[$3]), $this->startAttributeStack[$1] + $this->endAttributes); $this->errorState = 2; }
 ;
 
 array_short_syntax:
       '[' array_pair_list ']'
-          { $attrs = attributes(); $attrs['kind'] = Expr\Array_::KIND_SHORT;
-            $$ = new Expr\Array_($2, $attrs); }
+          { $attrs = $this->startAttributeStack[$1] + $this->endAttributes; $attrs['kind'] = Expr\Array_::KIND_SHORT;
+            $$ = new Expr\Array_($this->semStack[$2], $attrs); }
 ;
 
 dereferencable_scalar:
       T_ARRAY '(' array_pair_list ')'
-          { $attrs = attributes(); $attrs['kind'] = Expr\Array_::KIND_LONG;
-            $$ = new Expr\Array_($3, $attrs); }
-    | array_short_syntax                                    { $$ = $1; }
+          { $attrs = $this->startAttributeStack[$1] + $this->endAttributes; $attrs['kind'] = Expr\Array_::KIND_LONG;
+            $$ = new Expr\Array_($this->semStack[$3], $attrs); }
+    | array_short_syntax                                    { $$ = $this->semStack[$1]; }
     | T_CONSTANT_ENCAPSED_STRING
-          { $attrs = attributes(); $attrs['kind'] = strKind($1);
-            $$ = new Scalar\String_(Scalar\String_::parse($1), $attrs); }
+          { $attrs = $this->startAttributeStack[$1] + $this->endAttributes; $attrs['kind'] = ($this->semStack[$1][0] === "'" || ($this->semStack[$1][1] === "'" && ($this->semStack[$1][0] === 'b' || $this->semStack[$1][0] === 'B')) ? Scalar\String_::KIND_SINGLE_QUOTED : Scalar\String_::KIND_DOUBLE_QUOTED);
+            $$ = new Scalar\String_(Scalar\String_::parse($this->semStack[$1]), $attrs); }
 ;
 
 scalar:
-      T_LNUMBER                                             { $$ = $this->parseLNumber($1, attributes()); }
-    | T_DNUMBER                                             { $$ = Scalar\DNumber[Scalar\DNumber::parse($1)]; }
-    | T_LINE                                                { $$ = Scalar\MagicConst\Line[]; }
-    | T_FILE                                                { $$ = Scalar\MagicConst\File[]; }
-    | T_DIR                                                 { $$ = Scalar\MagicConst\Dir[]; }
-    | T_CLASS_C                                             { $$ = Scalar\MagicConst\Class_[]; }
-    | T_TRAIT_C                                             { $$ = Scalar\MagicConst\Trait_[]; }
-    | T_METHOD_C                                            { $$ = Scalar\MagicConst\Method[]; }
-    | T_FUNC_C                                              { $$ = Scalar\MagicConst\Function_[]; }
-    | T_NS_C                                                { $$ = Scalar\MagicConst\Namespace_[]; }
-    | dereferencable_scalar                                 { $$ = $1; }
-    | constant                                              { $$ = $1; }
+      T_LNUMBER                                             { $$ = $this->parseLNumber($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DNUMBER                                             { $$ = new Scalar\DNumber(Scalar\DNumber::parse($this->semStack[$1]), $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_LINE                                                { $$ = new Scalar\MagicConst\Line($this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_FILE                                                { $$ = new Scalar\MagicConst\File($this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DIR                                                 { $$ = new Scalar\MagicConst\Dir($this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_CLASS_C                                             { $$ = new Scalar\MagicConst\Class_($this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_TRAIT_C                                             { $$ = new Scalar\MagicConst\Trait_($this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_METHOD_C                                            { $$ = new Scalar\MagicConst\Method($this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_FUNC_C                                              { $$ = new Scalar\MagicConst\Function_($this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_NS_C                                                { $$ = new Scalar\MagicConst\Namespace_($this->startAttributeStack[$1] + $this->endAttributes); }
+    | dereferencable_scalar                                 { $$ = $this->semStack[$1]; }
+    | constant                                              { $$ = $this->semStack[$1]; }
     | T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC
-          { $attrs = attributes(); setDocStringAttrs($attrs, $1);
-            $$ = new Scalar\String_(Scalar\String_::parseDocString($1, $2), $attrs); }
+          { $attrs = $this->startAttributeStack[$1] + $this->endAttributes; $attrs['kind'] = strpos($this->semStack[$1], "'") === false ? Scalar\String_::KIND_HEREDOC : Scalar\String_::KIND_NOWDOC; preg_match('/\A[bB]?<<<[ \t]*[\'"]?([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)[\'"]?(?:\r\n|\n|\r)\z/', $this->semStack[$1], $matches); $attrs['docLabel'] = $matches[1];;
+            $$ = new Scalar\String_(Scalar\String_::parseDocString($this->semStack[$1], $this->semStack[$2]), $attrs); }
     | T_START_HEREDOC T_END_HEREDOC
-          { $attrs = attributes(); setDocStringAttrs($attrs, $1);
+          { $attrs = $this->startAttributeStack[$1] + $this->endAttributes; $attrs['kind'] = strpos($this->semStack[$1], "'") === false ? Scalar\String_::KIND_HEREDOC : Scalar\String_::KIND_NOWDOC; preg_match('/\A[bB]?<<<[ \t]*[\'"]?([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)[\'"]?(?:\r\n|\n|\r)\z/', $this->semStack[$1], $matches); $attrs['docLabel'] = $matches[1];;
             $$ = new Scalar\String_('', $attrs); }
     | '"' encaps_list '"'
-          { $attrs = attributes(); $attrs['kind'] = Scalar\String_::KIND_DOUBLE_QUOTED;
-            parseEncapsed($2, '"', true); $$ = new Scalar\Encapsed($2, $attrs); }
+          { $attrs = $this->startAttributeStack[$1] + $this->endAttributes; $attrs['kind'] = Scalar\String_::KIND_DOUBLE_QUOTED;
+            foreach ($this->semStack[$2] as $s) { if ($s instanceof Node\Scalar\EncapsedStringPart) { $s->value = Node\Scalar\String_::parseEscapeSequences($s->value, '"', true); } }; $$ = new Scalar\Encapsed($this->semStack[$2], $attrs); }
     | T_START_HEREDOC encaps_list T_END_HEREDOC
-          { $attrs = attributes(); setDocStringAttrs($attrs, $1);
-            parseEncapsedDoc($2, true); $$ = new Scalar\Encapsed($2, $attrs); }
+          { $attrs = $this->startAttributeStack[$1] + $this->endAttributes; $attrs['kind'] = strpos($this->semStack[$1], "'") === false ? Scalar\String_::KIND_HEREDOC : Scalar\String_::KIND_NOWDOC; preg_match('/\A[bB]?<<<[ \t]*[\'"]?([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)[\'"]?(?:\r\n|\n|\r)\z/', $this->semStack[$1], $matches); $attrs['docLabel'] = $matches[1];;
+            foreach ($this->semStack[$2] as $s) { if ($s instanceof Node\Scalar\EncapsedStringPart) { $s->value = Node\Scalar\String_::parseEscapeSequences($s->value, null, true); } } $s->value = preg_replace('~(\r\n|\n|\r)\z~', '', $s->value); if ('' === $s->value) array_pop($this->semStack[$2]);; $$ = new Scalar\Encapsed($this->semStack[$2], $attrs); }
 ;
 
 optional_expr:
       /* empty */                                           { $$ = null; }
-    | expr                                                  { $$ = $1; }
+    | expr                                                  { $$ = $this->semStack[$1]; }
 ;
 
 dereferencable:
-      variable                                              { $$ = $1; }
-    | '(' expr ')'                                          { $$ = $2; }
-    | dereferencable_scalar                                 { $$ = $1; }
+      variable                                              { $$ = $this->semStack[$1]; }
+    | '(' expr ')'                                          { $$ = $this->semStack[$2]; }
+    | dereferencable_scalar                                 { $$ = $this->semStack[$1]; }
 ;
 
 callable_expr:
-      callable_variable                                     { $$ = $1; }
-    | '(' expr ')'                                          { $$ = $2; }
-    | dereferencable_scalar                                 { $$ = $1; }
+      callable_variable                                     { $$ = $this->semStack[$1]; }
+    | '(' expr ')'                                          { $$ = $this->semStack[$2]; }
+    | dereferencable_scalar                                 { $$ = $this->semStack[$1]; }
 ;
 
 callable_variable:
-      simple_variable                                       { $$ = Expr\Variable[$1]; }
-    | dereferencable '[' optional_expr ']'                  { $$ = Expr\ArrayDimFetch[$1, $3]; }
-    | constant '[' optional_expr ']'                        { $$ = Expr\ArrayDimFetch[$1, $3]; }
-    | dereferencable '{' expr '}'                           { $$ = Expr\ArrayDimFetch[$1, $3]; }
-    | function_call                                         { $$ = $1; }
+      simple_variable                                       { $$ = new Expr\Variable($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | dereferencable '[' optional_expr ']'                  { $$ = new Expr\ArrayDimFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | constant '[' optional_expr ']'                        { $$ = new Expr\ArrayDimFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | dereferencable '{' expr '}'                           { $$ = new Expr\ArrayDimFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | function_call                                         { $$ = $this->semStack[$1]; }
     | dereferencable T_OBJECT_OPERATOR property_name argument_list
-          { $$ = Expr\MethodCall[$1, $3, $4]; }
+          { $$ = new Expr\MethodCall($this->semStack[$1], $this->semStack[$3], $this->semStack[$4], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 variable:
-      callable_variable                                     { $$ = $1; }
-    | static_member                                         { $$ = $1; }
-    | dereferencable T_OBJECT_OPERATOR property_name        { $$ = Expr\PropertyFetch[$1, $3]; }
+      callable_variable                                     { $$ = $this->semStack[$1]; }
+    | static_member                                         { $$ = $this->semStack[$1]; }
+    | dereferencable T_OBJECT_OPERATOR property_name        { $$ = new Expr\PropertyFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 simple_variable:
-      T_VARIABLE                                            { $$ = parseVar($1); }
-    | '$' '{' expr '}'                                      { $$ = $3; }
-    | '$' simple_variable                                   { $$ = Expr\Variable[$2]; }
-    | '$' error                                             { $$ = Expr\Error[]; $this->errorState = 2; }
+      T_VARIABLE                                            { $$ = substr($this->semStack[$1], 1); }
+    | '$' '{' expr '}'                                      { $$ = $this->semStack[$3]; }
+    | '$' simple_variable                                   { $$ = new Expr\Variable($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '$' error                                             { $$ = new Expr\Error($this->startAttributeStack[$1] + $this->endAttributes); $this->errorState = 2; }
 ;
 
 static_member:
       class_name_or_var T_PAAMAYIM_NEKUDOTAYIM simple_variable
-          { $$ = Expr\StaticPropertyFetch[$1, $3]; }
+          { $$ = new Expr\StaticPropertyFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 new_variable:
-      simple_variable                                       { $$ = Expr\Variable[$1]; }
-    | new_variable '[' optional_expr ']'                    { $$ = Expr\ArrayDimFetch[$1, $3]; }
-    | new_variable '{' expr '}'                             { $$ = Expr\ArrayDimFetch[$1, $3]; }
-    | new_variable T_OBJECT_OPERATOR property_name          { $$ = Expr\PropertyFetch[$1, $3]; }
-    | class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable     { $$ = Expr\StaticPropertyFetch[$1, $3]; }
-    | new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable   { $$ = Expr\StaticPropertyFetch[$1, $3]; }
+      simple_variable                                       { $$ = new Expr\Variable($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | new_variable '[' optional_expr ']'                    { $$ = new Expr\ArrayDimFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | new_variable '{' expr '}'                             { $$ = new Expr\ArrayDimFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | new_variable T_OBJECT_OPERATOR property_name          { $$ = new Expr\PropertyFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable     { $$ = new Expr\StaticPropertyFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable   { $$ = new Expr\StaticPropertyFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 member_name:
-      identifier                                            { $$ = $1; }
-    | '{' expr '}'                                          { $$ = $2; }
-    | simple_variable                                     { $$ = Expr\Variable[$1]; }
+      identifier                                            { $$ = $this->semStack[$1]; }
+    | '{' expr '}'	                                        { $$ = $this->semStack[$2]; }
+    | simple_variable	                                    { $$ = new Expr\Variable($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 property_name:
-      T_STRING                                              { $$ = $1; }
-    | '{' expr '}'                                          { $$ = $2; }
-    | simple_variable                                     { $$ = Expr\Variable[$1]; }
-    | error                                                 { $$ = Expr\Error[]; $this->errorState = 2; }
+      T_STRING                                              { $$ = $this->semStack[$1]; }
+    | '{' expr '}'	                                        { $$ = $this->semStack[$2]; }
+    | simple_variable	                                    { $$ = new Expr\Variable($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | error                                                 { $$ = new Expr\Error($this->startAttributeStack[$1] + $this->endAttributes); $this->errorState = 2; }
 ;
 
 list_expr:
-      T_LIST '(' list_expr_elements ')'                     { $$ = Expr\List_[$3]; }
+      T_LIST '(' list_expr_elements ')'                     { $$ = new Expr\List_($this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 list_expr_elements:
-      list_expr_elements ',' list_expr_element              { push($1, $3); }
-    | list_expr_element                                     { init($1); }
+      list_expr_elements ',' list_expr_element              { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | list_expr_element                                     { $$ = array($this->semStack[$1]); }
 ;
 
 list_expr_element:
-      variable                                              { $$ = Expr\ArrayItem[$1, null, false]; }
-    | list_expr                                             { $$ = Expr\ArrayItem[$1, null, false]; }
-    | expr T_DOUBLE_ARROW variable                          { $$ = Expr\ArrayItem[$3, $1, false]; }
-    | expr T_DOUBLE_ARROW list_expr                         { $$ = Expr\ArrayItem[$3, $1, false]; }
+      variable                                              { $$ = new Expr\ArrayItem($this->semStack[$1], null, false, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | list_expr                                             { $$ = new Expr\ArrayItem($this->semStack[$1], null, false, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_DOUBLE_ARROW variable                          { $$ = new Expr\ArrayItem($this->semStack[$3], $this->semStack[$1], false, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_DOUBLE_ARROW list_expr                         { $$ = new Expr\ArrayItem($this->semStack[$3], $this->semStack[$1], false, $this->startAttributeStack[$1] + $this->endAttributes); }
     | /* empty */                                           { $$ = null; }
 ;
 
 array_pair_list:
       inner_array_pair_list
-          { $$ = $1; $end = count($$)-1; if ($$[$end] === null) unset($$[$end]); }
+          { $$ = $this->semStack[$1]; $end = count($$)-1; if ($$[$end] === null) unset($$[$end]); }
 ;
 
 inner_array_pair_list:
-      inner_array_pair_list ',' array_pair                  { push($1, $3); }
-    | array_pair                                            { init($1); }
+      inner_array_pair_list ',' array_pair                  { $this->semStack[$1][] = $this->semStack[$3]; $$ = $this->semStack[$1]; }
+    | array_pair                                            { $$ = array($this->semStack[$1]); }
 ;
 
 array_pair:
-      expr T_DOUBLE_ARROW expr                              { $$ = Expr\ArrayItem[$3, $1,   false]; }
-    | expr                                                  { $$ = Expr\ArrayItem[$1, null, false]; }
-    | expr T_DOUBLE_ARROW '&' variable                      { $$ = Expr\ArrayItem[$4, $1,   true]; }
-    | '&' variable                                          { $$ = Expr\ArrayItem[$2, null, true]; }
+      expr T_DOUBLE_ARROW expr                              { $$ = new Expr\ArrayItem($this->semStack[$3], $this->semStack[$1], false, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr                                                  { $$ = new Expr\ArrayItem($this->semStack[$1], null, false, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | expr T_DOUBLE_ARROW '&' variable                      { $$ = new Expr\ArrayItem($this->semStack[$4], $this->semStack[$1], true, $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '&' variable                                          { $$ = new Expr\ArrayItem($this->semStack[$2], null, true, $this->startAttributeStack[$1] + $this->endAttributes); }
     | /* empty */                                           { $$ = null; }
 ;
 
 encaps_list:
-      encaps_list encaps_var                                { push($1, $2); }
-    | encaps_list encaps_string_part                        { push($1, $2); }
-    | encaps_var                                            { init($1); }
-    | encaps_string_part encaps_var                         { init($1, $2); }
+      encaps_list encaps_var                                { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }
+    | encaps_list encaps_string_part                        { $this->semStack[$1][] = $this->semStack[$2]; $$ = $this->semStack[$1]; }
+    | encaps_var                                            { $$ = array($this->semStack[$1]); }
+    | encaps_string_part encaps_var                         { $$ = array($this->semStack[$1], $this->semStack[$2]); }
 ;
 
 encaps_string_part:
-      T_ENCAPSED_AND_WHITESPACE                             { $$ = Scalar\EncapsedStringPart[$1]; }
+      T_ENCAPSED_AND_WHITESPACE                             { $$ = new Scalar\EncapsedStringPart($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 encaps_base_var:
-      T_VARIABLE                                            { $$ = Expr\Variable[parseVar($1)]; }
+      T_VARIABLE                                            { $$ = new Expr\Variable(substr($this->semStack[$1], 1), $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 encaps_var:
-      encaps_base_var                                       { $$ = $1; }
-    | encaps_base_var '[' encaps_var_offset ']'             { $$ = Expr\ArrayDimFetch[$1, $3]; }
-    | encaps_base_var T_OBJECT_OPERATOR T_STRING            { $$ = Expr\PropertyFetch[$1, $3]; }
-    | T_DOLLAR_OPEN_CURLY_BRACES expr '}'                   { $$ = Expr\Variable[$2]; }
-    | T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'       { $$ = Expr\Variable[$2]; }
+      encaps_base_var                                       { $$ = $this->semStack[$1]; }
+    | encaps_base_var '[' encaps_var_offset ']'             { $$ = new Expr\ArrayDimFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | encaps_base_var T_OBJECT_OPERATOR T_STRING            { $$ = new Expr\PropertyFetch($this->semStack[$1], $this->semStack[$3], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DOLLAR_OPEN_CURLY_BRACES expr '}'                   { $$ = new Expr\Variable($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'       { $$ = new Expr\Variable($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
     | T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
-          { $$ = Expr\ArrayDimFetch[Expr\Variable[$2], $4]; }
-    | T_CURLY_OPEN variable '}'                             { $$ = $2; }
+          { $$ = new Expr\ArrayDimFetch(new Expr\Variable($this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes), $this->semStack[$4], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_CURLY_OPEN variable '}'                             { $$ = $this->semStack[$2]; }
 ;
 
 encaps_var_offset:
-      T_STRING                                              { $$ = Scalar\String_[$1]; }
-    | T_NUM_STRING                                          { $$ = $this->parseNumString($1, attributes()); }
-    | '-' T_NUM_STRING                                      { $$ = $this->parseNumString('-' . $2, attributes()); }
-    | T_VARIABLE                                            { $$ = Expr\Variable[parseVar($1)]; }
+      T_STRING                                              { $$ = new Scalar\String_($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_NUM_STRING                                          { $$ = $this->parseNumString($this->semStack[$1], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | '-' T_NUM_STRING                                      { $$ = $this->parseNumString('-' . $this->semStack[$2], $this->startAttributeStack[$1] + $this->endAttributes); }
+    | T_VARIABLE                                            { $$ = new Expr\Variable(substr($this->semStack[$1], 1), $this->startAttributeStack[$1] + $this->endAttributes); }
 ;
 
 %%
