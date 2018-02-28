@@ -18,10 +18,6 @@
 < 	(0) start : expr .
 ---
 > 	(0) $start : expr .
-82c82
-< Statistics for parser.kmyacc.phpy:
----
-> Statistics for grammar.y:
 88d87
 < 	12 items
 91,92d89

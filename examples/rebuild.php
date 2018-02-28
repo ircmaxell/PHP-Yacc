@@ -36,16 +36,13 @@ function buildFolder(CliOptions $options, Generator $generator, string $dir) {
     echo "Building $dir\n";
 
     $grammar = "grammar.y";
-    $tmpGrammar = "parser.kmyacc.phpy";
     $skeleton = "parser.template.php";
-    copy($grammar, $tmpGrammar);
 
     if ($options->runKmyacc) {
-        $output = trim(shell_exec("cd $dir && kmyacc -x -t -v -l -m $skeleton -p Parser $tmpGrammar 2>&1"));
+        $output = trim(shell_exec("cd $dir && kmyacc -x -t -v -L php -m $skeleton -p Parser $grammar 2>&1"));
         rename("$dir/y.output", "$dir/y.kmyacc.output");
+        rename("$dir/grammar.php", "$dir/parser.kmyacc.php");
     }
-
-    unlink($tmpGrammar);
 
     $debugFile = DEBUG ? fopen("$dir/y.phpyacc.output", 'w') : null;
     $generator->generate(

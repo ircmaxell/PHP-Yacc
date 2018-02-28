@@ -22,10 +22,6 @@
 < 	(0) start : statement .
 ---
 > 	(0) $start : statement .
-353c353
-< Statistics for parser.kmyacc.phpy:
----
-> Statistics for grammar.y:
 359d358
 < 	66 items
 362,363d360

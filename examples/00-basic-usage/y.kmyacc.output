@@ -30,7 +30,7 @@ state 2
 	.		reduce (1)
 
 
-Statistics for parser.kmyacc.phpy:
+Statistics for grammar.y:
 	3 terminal symbols
 	2 nonterminal symbols
 	2 productions

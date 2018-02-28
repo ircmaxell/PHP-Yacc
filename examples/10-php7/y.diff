@@ -24,10 +24,6 @@
 > 	(0) $start : start .
 30675a30676
 > grammar.y: there are  2 shift/reduce conflicts
-30677c30678
-< Statistics for parser.kmyacc.phpy:
----
-> Statistics for grammar.y:
 30683d30683
 < 	4416 items
 30686,30687d30685
