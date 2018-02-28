@@ -7,18 +7,18 @@ use PhpYacc\Grammar\Context;
 
 const DEBUG = true;
 const VERBOSE_DEBUG = true;
-const RUN_KMYACC = false;
 
+$options = CliOptions::fromArgv($argv);
 $generator = new Generator;
 
-if (isset($argv[1])) {
-    buildFolder($generator, realpath($argv[1]));
+if (isset($options->args[0])) {
+    buildFolder($options, $generator, realpath($options->args[0]));
 } else {
-    buildAll($generator, __DIR__);
+    buildAll($options, $generator, __DIR__);
 }
 
 
-function buildAll(Generator $generator, string $dir)
+function buildAll(CliOptions $options, Generator $generator, string $dir)
 {
     $it = new DirectoryIterator($dir);
     foreach ($it as $file) {
@@ -26,12 +26,12 @@ function buildAll(Generator $generator, string $dir)
             continue;
         }
         $dir = $file->getPathname();
-        buildFolder($generator, $dir);
+        buildFolder($options, $generator, $dir);
     }
 }
 
 
-function buildFolder(Generator $generator, string $dir) {
+function buildFolder(CliOptions $options, Generator $generator, string $dir) {
     chdir($dir);
     echo "Building $dir\n";
 
@@ -40,7 +40,7 @@ function buildFolder(Generator $generator, string $dir) {
     $skeleton = "parser.template.php";
     copy($grammar, $tmpGrammar);
 
-    if (RUN_KMYACC) {
+    if ($options->runKmyacc) {
         $output = trim(shell_exec("cd $dir && kmyacc -x -t -v -l -m $skeleton -p Parser $tmpGrammar 2>&1"));
         rename("$dir/y.output", "$dir/y.kmyacc.output");
     }
@@ -59,4 +59,21 @@ function buildFolder(Generator $generator, string $dir) {
 
     shell_exec("cd $dir && diff -w y.kmyacc.output y.phpyacc.output > y.diff");
 
+}
+
+class CliOptions {
+    public $runKmyacc = false;
+    public $args = [];
+
+    public function fromArgv(array $argv) {
+        $options = new self;
+        foreach (array_slice($argv, 1) as $arg) {
+            if ($arg === '-k') {
+                $options->runKmyacc = true;
+            } else {
+                $options->args[] = $arg;
+            }
+        }
+        return $options;
+    }
 }
