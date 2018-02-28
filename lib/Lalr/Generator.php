@@ -737,7 +737,6 @@ class Generator
         $this->context->debug("\t$nnonts nonterminal symbols\n");
         $this->context->debug("\t$nprods productions\n");
         $this->context->debug("\t$this->nstates states\n");
-        $this->context->debug("\t$this->nnonleafstates non leaf states\n");
         $this->context->debug("\t$this->nsrerr shift/reduce, $this->nrrerr reduce/reduce conflicts\n");
         // items?
         $this->context->debug("\t$this->nlooks lookahead sets used\n");

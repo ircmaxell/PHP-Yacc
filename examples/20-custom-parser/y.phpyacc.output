@@ -350,12 +350,11 @@ state 19
 	.		reduce (11)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/20-custom-parser/grammar.y:
+Statistics for grammar.y:
 	11 terminal symbols
 	4 nonterminal symbols
 	12 productions
 	20 states
-	16 non leaf states
 	0 shift/reduce, 0 reduce/reduce conflicts
 	29 lookahead sets used
 	82+21=103 action entries
@@ -387,8 +386,6 @@ Nonterminal GOTO table:
 statemen      12  =   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . 
 expressi       2  =   .   .   18   1  10  11  13  14  15  .   .   .   .   .   . 
   factor      17  =   .   .   =   =   =   =   =   =   =   .   .   .   .   .   . 
-
-Number of prims: 6
 
 Candidates of aux table:
 Aux = (5) 7,8,9 * 0,1,2,3

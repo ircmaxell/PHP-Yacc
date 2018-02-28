@@ -23,11 +23,11 @@
 ---
 > 	(0) $start : statement .
 353c353
-< Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/20-custom-parser/parser.kmyacc.phpy:
+< Statistics for parser.kmyacc.phpy:
 ---
-> Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/20-custom-parser/grammar.y:
-360d359
+> Statistics for grammar.y:
+359d358
 < 	66 items
-363,364d361
+362,363d360
 < 	7544 bytes used
 < 

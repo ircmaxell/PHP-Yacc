@@ -30,12 +30,11 @@ state 2
 	.		reduce (1)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/00-basic-usage/parser.kmyacc.phpy:
+Statistics for parser.kmyacc.phpy:
 	3 terminal symbols
 	2 nonterminal symbols
 	2 productions
 	3 states
-	2 non leaf states
 	0 shift/reduce, 0 reduce/reduce conflicts
 	3 items
 	3 lookahead sets used
@@ -58,8 +57,6 @@ Nonterminal GOTO table:
 Nonterminal GOTO table:
      T\S default   0   1
     expr       1  =   . 
-
-Number of prims: 2
 
 Candidates of aux table:
 Used aux table:

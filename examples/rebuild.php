@@ -32,11 +32,12 @@ function buildAll(Generator $generator, string $dir)
 
 
 function buildFolder(Generator $generator, string $dir) {
+    chdir($dir);
     echo "Building $dir\n";
 
-    $grammar = "$dir/grammar.y";
-    $tmpGrammar = "$dir/parser.kmyacc.phpy";
-    $skeleton = "$dir/parser.template.php";
+    $grammar = "grammar.y";
+    $tmpGrammar = "parser.kmyacc.phpy";
+    $skeleton = "parser.template.php";
     copy($grammar, $tmpGrammar);
 
     if (RUN_KMYACC) {

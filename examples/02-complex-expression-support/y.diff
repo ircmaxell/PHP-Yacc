@@ -19,11 +19,11 @@
 ---
 > 	(0) $start : expr .
 82c82
-< Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-complex-expression-support/parser.kmyacc.phpy:
+< Statistics for parser.kmyacc.phpy:
 ---
-> Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/02-complex-expression-support/grammar.y:
-89d88
+> Statistics for grammar.y:
+88d87
 < 	12 items
-92,93d90
+91,92d89
 < 	2432 bytes used
 < 

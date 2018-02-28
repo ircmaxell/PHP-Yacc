@@ -23,13 +23,13 @@
 ---
 > 	(0) $start : start .
 30675a30676
-> /home/ircmaxell/Workspace/PhpYacc/examples/10-php7/grammar.y: there are  2 shift/reduce conflicts
+> grammar.y: there are  2 shift/reduce conflicts
 30677c30678
-< Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/10-php7/parser.kmyacc.phpy:
+< Statistics for parser.kmyacc.phpy:
 ---
-> Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/10-php7/grammar.y:
-30684d30684
+> Statistics for grammar.y:
+30683d30683
 < 	4416 items
-30687,30688d30686
+30686,30687d30685
 < 	440128 bytes used
 < 

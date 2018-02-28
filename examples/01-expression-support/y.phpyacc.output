@@ -55,12 +55,11 @@ state 4
 	.		reduce (1)
 
 
-Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/grammar.y:
+Statistics for grammar.y:
 	4 terminal symbols
 	2 nonterminal symbols
 	3 productions
 	5 states
-	3 non leaf states
 	0 shift/reduce, 0 reduce/reduce conflicts
 	7 lookahead sets used
 	6+6=12 action entries
@@ -81,8 +80,6 @@ Nonterminal GOTO table:
 Nonterminal GOTO table:
      T\S default   0   1   2
     expr       1  =   .    4
-
-Number of prims: 3
 
 Candidates of aux table:
 Used aux table:

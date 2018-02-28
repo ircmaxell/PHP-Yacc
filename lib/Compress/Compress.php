@@ -268,7 +268,6 @@ class Compress
         }
 
         if ($this->context->verboseDebug) {
-            $this->context->debug("\nNumber of prims: {$this->context->nprims}\n");
             $this->context->debug("\nCandidates of aux table:\n");
             for ($p = $alist; $p !== null; $p = $p->next) {
                 $this->context->debug(sprintf("Aux = (%d) ", $p->gain));

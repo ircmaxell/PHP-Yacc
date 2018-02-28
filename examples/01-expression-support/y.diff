@@ -19,11 +19,11 @@
 ---
 > 	(0) $start : expr .
 58c58
-< Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/parser.kmyacc.phpy:
+< Statistics for parser.kmyacc.phpy:
 ---
-> Statistics for /home/ircmaxell/Workspace/PhpYacc/examples/01-expression-support/grammar.y:
-65d64
+> Statistics for grammar.y:
+64d63
 < 	8 items
-68,69d66
+67,68d65
 < 	1920 bytes used
 < 
