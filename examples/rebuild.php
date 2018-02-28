@@ -2,22 +2,23 @@
 
 require __DIR__ . "/../vendor/autoload.php";
 
+use PhpYacc\Generator;
 use PhpYacc\Grammar\Context;
 
 const DEBUG = true;
 const VERBOSE_DEBUG = true;
 const RUN_KMYACC = false;
 
-$generator = new PhpYacc\Generator;
+$generator = new Generator;
 
 if (isset($argv[1])) {
-    buildFolder(realpath($argv[1]));
+    buildFolder($generator, realpath($argv[1]));
 } else {
-    buildAll(__DIR__);
+    buildAll($generator, __DIR__);
 }
 
 
-function buildAll(string $dir)
+function buildAll(Generator $generator, string $dir)
 {
     $it = new DirectoryIterator($dir);
     foreach ($it as $file) {
@@ -25,13 +26,12 @@ function buildAll(string $dir)
             continue;
         }
         $dir = $file->getPathname();
-        buildFolder($dir);
+        buildFolder($generator, $dir);
     }
 }
 
 
-function buildFolder(string $dir) {
-    global $generator;
+function buildFolder(Generator $generator, string $dir) {
     echo "Building $dir\n";
 
     $grammar = "$dir/grammar.y";
