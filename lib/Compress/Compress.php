@@ -150,7 +150,7 @@ class Compress
         }
         $this->context->nclasses = $j;
 
-        if ($this->context->debug) {
+        if ($this->context->verboseDebug) {
             $this->context->debug("State=>class:\n");
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($i % 10 === 0) {
@@ -163,7 +163,7 @@ class Compress
 
         $this->compute_preimages();
 
-        if ($this->context->debug) {
+        if ($this->context->verboseDebug) {
             $this->print_table();
         }
 
@@ -267,7 +267,7 @@ class Compress
             $n++;
         }
 
-        if ($this->context->debug) {
+        if ($this->context->verboseDebug) {
             $this->context->debug("\nNumber of prims: {$this->context->nprims}\n");
             $this->context->debug("\nCandidates of aux table:\n");
             for ($p = $alist; $p !== null; $p = $p->next) {
@@ -331,7 +331,7 @@ class Compress
                 }
             }
 
-            if ($this->context->debug) {
+            if ($this->context->verboseDebug) {
                 $this->context->debug(sprintf("Selected aux[%d]: (%d) ", $maxaux->index, $maxaux->gain));
                 $f = 0;
                 for ($j = 0; $j < $this->context->nterminals; $j++) {
@@ -354,7 +354,7 @@ class Compress
                 $this->best_covering($p, $p->preimage);
             }
         }
-        if ($this->context->debug) {
+        if ($this->context->verboseDebug) {
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->context->class2nd[$this->context->class_of[$i]] >= 0 && $this->context->class2nd[$this->context->class_of[$i]] !== $this->context->class_of[$i]) {
                     $this->context->debug(sprintf("state %d (class %d): aux[%d]\n", $i, $this->context->class_of[$i], $this->context->class2nd[$this->context->class_of[$i]]));
@@ -533,7 +533,7 @@ class Compress
 
         stable_sort($trow, [TRow::class, 'compare']);
 
-        if ($this->context->debug) {
+        if ($this->context->verboseDebug) {
             $this->context->debug("Order:\n");
             for ($i = 0; $i < $nrows; $i++) {
                 $this->context->debug(sprintf("%d,", $trow[$i]->index));

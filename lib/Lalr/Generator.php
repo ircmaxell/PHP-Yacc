@@ -200,7 +200,7 @@ class Generator
             }
         } while ($changed);
 
-        if ($this->context->debug) {
+        if ($this->context->verboseDebug) {
             foreach ($this->states as $p) {
                 $this->context->debug("state unknown:\n");
                 for ($x = $p->items; $x != null; $x = $x->next) {
@@ -505,7 +505,7 @@ class Generator
             }
         } while ($changed);
 
-        if ($this->context->debug) {
+        if ($this->context->verboseDebug) {
             $this->context->debug("EMPTY nonterminals: ");
             foreach ($this->context->nonterminals as $symbol) {
                 if ($symbol->associativity & Production::EMPTY) {
@@ -545,7 +545,7 @@ class Generator
             }
         } while ($changed);
 
-        if ($this->context->debug) {
+        if ($this->context->verboseDebug) {
             $this->context->debug("First:\n");
             foreach ($this->context->nonterminals as $symbol) {
                 $this->context->debug("{$symbol->name}\t[ ");
@@ -722,7 +722,7 @@ class Generator
 
     protected function printStatistics()
     {
-        if (!$this->context->debug) {
+        if (!$this->context->verboseDebug) {
             return;
         }
 

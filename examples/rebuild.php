@@ -4,8 +4,9 @@ require __DIR__ . "/../vendor/autoload.php";
 
 use PhpYacc\Grammar\Context;
 
-const DEBUG = 0;
-const RUN_KMYACC = 0;
+const DEBUG = true;
+const VERBOSE_DEBUG = true;
+const RUN_KMYACC = false;
 
 $generator = new PhpYacc\Generator;
 
@@ -45,11 +46,13 @@ function buildFolder(string $dir) {
 
     unlink($tmpGrammar);
 
-    if (DEBUG) {
-        $generator->generate(new Context($grammar, fopen("$dir/y.phpyacc.output", 'w')), file_get_contents($grammar), file_get_contents($skeleton), "$dir/parser.phpyacc.php");
-    } else {
-        $generator->generate(new Context($grammar), file_get_contents($grammar), file_get_contents($skeleton), "$dir/parser.phpyacc.php");
-    }
+    $debugFile = DEBUG ? fopen("$dir/y.phpyacc.output", 'w') : null;
+    $generator->generate(
+        new Context($grammar, $debugFile, VERBOSE_DEBUG),
+        file_get_contents($grammar),
+        file_get_contents($skeleton),
+        "$dir/parser.phpyacc.php"
+    );
 
     shell_exec("cd $dir && diff -w parser.kmyacc.php parser.phpyacc.php > parser.diff");
 

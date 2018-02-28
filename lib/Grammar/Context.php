@@ -45,7 +45,7 @@ class Context
     public $aflag = false;
     public $tflag = false;
     public $pspref = '';
-    public $debug = false;
+    public $verboseDebug = false;
 
     public $filename = 'YY';
     public $pureFlag = false;
@@ -77,10 +77,12 @@ class Context
 
     public $debugFile;
 
-    public function __construct(string $filename = 'YY', $debugFile = null)
+    public function __construct(
+        string $filename = 'YY', $debugFile = null, bool $verboseDebug = false)
     {
         $this->filename = $filename;
         $this->debugFile = $debugFile;
+        $this->verboseDebug = $verboseDebug;
     }
 
     public function debug(string $data)
