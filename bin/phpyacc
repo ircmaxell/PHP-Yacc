@@ -6,7 +6,7 @@ use PhpYacc\Grammar\Context;
 
 foreach (array(__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php') as $file) {
     if (file_exists($file)) {
-        define('PHPUNIT_COMPOSER_INSTALL', $file);
+        define('COMPOSER_INSTALL', $file);
 
         break;
     }
@@ -14,7 +14,7 @@ foreach (array(__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.p
 
 unset($file);
 
-if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+if (!defined('COMPOSER_INSTALL')) {
     fwrite(
         STDERR,
         'You need to set up the project dependencies using Composer:' . PHP_EOL . PHP_EOL .
@@ -25,7 +25,7 @@ if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
     die(1);
 }
 
-require PHPUNIT_COMPOSER_INSTALL;
+require COMPOSER_INSTALL;
 
 $grammarFile = end($argv);
 
@@ -66,7 +66,7 @@ for ($i = 1; $i < $argc - 1; $i++) {
             break;
         case '-m':
             if ($i === $argc - 2) {
-                error("Class name required for option -p");
+                error("Skeleton file required for option -m");
             }
             $skeleton = file_get_contents($argv[++$i]);
             break;
@@ -89,8 +89,10 @@ Usage: phpyacc [options] grammar.y
 Options:
   -p <name>     The name of the class to generate
   -x            Enable debug mode
-  -t            Set the T flag for templates
-  -a            Set the A flag for templates
+  -v            Enable verbose mode
+  -t            Set the T flag for templates (inclusion of debug information)
+  -a            Set the A flag for templates (unused)
+  -m <skeleton> Path to the skeleton file to use
 
 
 EOH;
