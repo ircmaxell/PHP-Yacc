@@ -16,6 +16,7 @@
             "lib/functions.php"
         ]
     },
+    "bin": ["bin/phpyacc"],
     "require": {
         "php": ">=7.0"
     },
