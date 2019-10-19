@@ -54,9 +54,9 @@ for ($i = 1; $i < $argc - 1; $i++) {
             $context->pspref = $argv[++$i];
             break;
         case '-x':
-            $context->debugFile = fopen(getcwd() . "/y.output", 'w' );
+            $context->verboseDebug = true;
         case '-v':
-            $context->debug = true;
+            $context->debugFile = fopen(getcwd() . "/y.output", 'w' );
             break;
         case '-t':
             $context->tflag = true;
@@ -88,8 +88,8 @@ Usage: phpyacc [options] grammar.y
 
 Options:
   -p <name>     The name of the class to generate
-  -x            Enable debug mode
-  -v            Enable verbose mode
+  -x            Enable extended debug mode
+  -v            Generate y.output file
   -t            Set the T flag for templates (inclusion of debug information)
   -a            Set the A flag for templates (unused)
   -m <skeleton> Path to the skeleton file to use
