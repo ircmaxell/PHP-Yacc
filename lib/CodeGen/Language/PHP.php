@@ -28,6 +28,10 @@ class PHP implements Language
 
     public function commit()
     {
+        // Make sure there is exactly one trailing newline.
+        $this->fileBuffer = rtrim($this->fileBuffer, "\n") . "\n";
+        $this->headerBuffer = rtrim($this->headerBuffer, "\n") . "\n";
+
         fwrite($this->fp, $this->fileBuffer);
         fwrite($this->hp, $this->headerBuffer);
         $this->fp = $this->hp = null;
