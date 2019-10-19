@@ -204,9 +204,9 @@ class Template
                     $var = trim(substr($p, 9));
                     $this->gen_list_var($buffer, $var);
                 } elseif ($this->metamatch($p, 'ifnot')) {
-                    $skipmode = $skipmode || !$this->skipif($p);
+                    $skipmode = $skipmode || $this->evalCond($p);
                 } elseif ($this->metamatch($p, 'if')) {
-                    $skipmode = $skipmode || $this->skipif($p);
+                    $skipmode = $skipmode || !$this->evalCond($p);
                 } elseif ($this->metamatch($p, 'endif')) {
                     $skipmode = false;
                 } else {
@@ -225,7 +225,7 @@ class Template
         $this->language->commit();
     }
 
-    protected function skipif($spec): bool
+    protected function evalCond($spec): bool
     {
         list($dump, $test) = explode(' ', $spec, 2);
         $test = trim($test);

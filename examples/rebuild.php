@@ -45,8 +45,10 @@ function buildFolder(CliOptions $options, Generator $generator, string $dir) {
     }
 
     $debugFile = DEBUG ? fopen("$dir/y.phpyacc.output", 'w') : null;
+    $context = new Context($grammar, $debugFile, VERBOSE_DEBUG);
+    $context->tflag = true;
     $generator->generate(
-        new Context($grammar, $debugFile, VERBOSE_DEBUG),
+        $context,
         file_get_contents($grammar),
         file_get_contents($skeleton),
         "$dir/parser.phpyacc.php"
