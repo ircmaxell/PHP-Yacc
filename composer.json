@@ -1,7 +1,7 @@
 {
     "name": "ircmaxell/php-yacc",
     "description": "A PHP YACC Parser-Generator library",
-    "license": "Apache 2.0",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Anthony Ferrara",
