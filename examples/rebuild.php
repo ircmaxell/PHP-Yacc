@@ -44,8 +44,9 @@ function buildFolder(CliOptions $options, Generator $generator, string $dir) {
         rename("$dir/grammar.php", "$dir/parser.kmyacc.php");
     }
 
+    $errorFile = fopen("php://stderr", "w");
     $debugFile = DEBUG ? fopen("$dir/y.phpyacc.output", 'w') : null;
-    $context = new Context($grammar, $debugFile, VERBOSE_DEBUG);
+    $context = new Context($grammar, $errorFile, $debugFile, VERBOSE_DEBUG);
     $context->tflag = true;
     $generator->generate(
         $context,

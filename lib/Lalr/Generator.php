@@ -704,19 +704,18 @@ class Generator
     protected function printDiagnostics()
     {
         // TODO check expected_srconf
-        $expected_srconf = 0;
-        if ($this->nsrerr !== $expected_srconf || $this->nrrerr !== 0) {
-            $this->context->debug("{$this->context->filename}: there are ");
-            if ($this->nsrerr !== $expected_srconf) {
-                $this->context->debug(" $this->nsrerr shift/reduce");
+        if ($this->nsrerr !== $this->context->expected || $this->nrrerr !== 0) {
+            $this->context->error("{$this->context->filename}: there are ");
+            if ($this->nsrerr !== $this->context->expected) {
+                $this->context->error(" $this->nsrerr shift/reduce");
                 if ($this->nrrerr !== 0) {
-                    $this->context->debug(" and");
+                    $this->context->error(" and");
                 }
             }
             if ($this->nrrerr !== 0) {
-                $this->context->debug(" $this->nrrerr reduce/reduce");
+                $this->context->error(" $this->nrrerr reduce/reduce");
             }
-            $this->context->debug(" conflicts\n");
+            $this->context->error(" conflicts\n");
         }
     }
 

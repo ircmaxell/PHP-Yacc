@@ -28,7 +28,6 @@ if (!defined('COMPOSER_INSTALL')) {
 require COMPOSER_INSTALL;
 
 $grammarFile = end($argv);
-
 $resultFile = substr($grammarFile, 0, -1);
 
 if ($grammarFile === '-') {
@@ -41,7 +40,8 @@ if ($argc < 2 || !file_exists($grammarFile)) {
     exit(4);
 }
 
-$context = new Context($grammarFile);
+$errorFile = fopen('php://stderr', 'w');
+$context = new Context($grammarFile, $errorFile);
 
 $skeleton = '';
 

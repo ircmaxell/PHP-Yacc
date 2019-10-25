@@ -50,7 +50,7 @@ class Context
     public $filename = 'YY';
     public $pureFlag = false;
     public $startSymbol = null;
-    public $expected = null;
+    public $expected = 0;
     public $unioned = false;
     public $eofToken = null;
     public $errorToken = null;
@@ -76,13 +76,22 @@ class Context
     public $naux = 0;
 
     public $debugFile;
+    public $errorFile;
 
     public function __construct(
-        string $filename = 'YY', $debugFile = null, bool $verboseDebug = false)
+        string $filename = 'YY', $errorFile = null, $debugFile = null, bool $verboseDebug = false)
     {
         $this->filename = $filename;
+        $this->errorFile = $errorFile;
         $this->debugFile = $debugFile;
         $this->verboseDebug = $verboseDebug;
+    }
+
+    public function error(string $data)
+    {
+        if ($this->errorFile) {
+            fwrite($this->errorFile, $data);
+        }
     }
 
     public function debug(string $data)
