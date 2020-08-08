@@ -293,13 +293,15 @@ class Template
             $this->print_array($array, $size < 0 ? count($array) : $size, $indent);
         } elseif ($var === 'terminals') {
             $nl = 0;
-            foreach ($this->context->terminals as $term) {
-                if ($this->context->ctermindex[$term->code] >= 0) {
-                    $prefix = $nl++ ? ",\n" : "";
-                    $this->language->write($prefix . $indent . "\"");
-                    $this->language->writeQuoted($term->name);
-                    $this->language->write("\"");
-                }
+            $terminals = iterator_to_array($this->context->terminals);
+            usort($terminals, function($t1, $t2) {
+                return $this->context->ctermindex[$t1->code] <=> $this->context->ctermindex[$t2->code];
+            });
+            foreach ($terminals as $term) {
+                $prefix = $nl++ ? ",\n" : "";
+                $this->language->write($prefix . $indent . "\"");
+                $this->language->writeQuoted($term->name);
+                $this->language->write("\"");
             }
             $this->language->write("\n");
         } elseif ($var === 'nonterminals') {

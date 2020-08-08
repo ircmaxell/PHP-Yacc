@@ -416,6 +416,16 @@ class Compress
             }
         }
 
+        // Unlike kmyacc, we preserve unused terminal symbols. This makes things easier if a set
+        // tokens is shared between multiple parsers, not all of which might use all tokens.
+        // We assign these at the end, to keep numbering of other tokens the same.
+        for ($j = 0; $j < $this->context->nterminals; $j++) {
+            if ($this->context->ctermindex[$j] === -1) {
+                $this->context->ctermindex[$j] = $ncterms;
+                $this->context->otermindex[$ncterms++] = $j;
+            }
+        }
+
         $cterm_action = array_fill(0, $this->context->naux, array_fill(0, $ncterms, 0));
         for ($i = 0; $i < $this->context->nclasses; $i++) {
             for ($j = 0; $j < $ncterms; $j++) {
@@ -500,10 +510,8 @@ class Compress
 
         
         for ($i = 0; $i < $this->context->nterminals; $i++) {
-            if ($this->context->ctermindex[$i] >= 0) {
-                $symbol = $this->context->symbol($i);
-                $this->result->yytranslate[$symbol->value] = $this->context->ctermindex[$i];
-            }
+            $symbol = $this->context->symbol($i);
+            $this->result->yytranslate[$symbol->value] = $this->context->ctermindex[$i];
         }
 
         $this->result->yyaction = $this->encode_shift_reduce($this->result->yyaction, count($this->result->yyaction));
