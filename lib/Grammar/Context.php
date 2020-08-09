@@ -44,6 +44,7 @@ class Context
 
     public $aflag = false;
     public $tflag = false;
+    public $allowSemanticValueReferenceByName = false;
     public $pspref = '';
     public $verboseDebug = false;
 

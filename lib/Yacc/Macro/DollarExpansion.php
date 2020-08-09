@@ -25,6 +25,9 @@ class DollarExpansion extends MacroAbstract
             $t = $tokens->current();
             switch ($t->t) {
                 case Token::NAME:
+                    if (!$ctx->allowSemanticValueReferenceByName) {
+                        break;
+                    }
                     $type = null;
                     $v = -1;
                     for ($i = 0; $i <= $n; $i++) {
