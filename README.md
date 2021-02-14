@@ -46,7 +46,7 @@ Using the generated parser however should be quite fast (the generated parser is
 
 A bunch of things. Here's the wishlist:
 
- * Refactor to make conventions consistent (some parts currently use camel-case, some parts use snakeCase, etc).
+ * Refactor to make conventions consistent (some parts currently use camelCase, some parts use snake_case, etc).
  * Performance tuning
  * Unit test as much as possible
  * Document as much as possible (It's a complicated series of algorithms with no source documentation in either project).
