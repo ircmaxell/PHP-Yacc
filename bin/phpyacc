@@ -28,14 +28,16 @@ if (!defined('COMPOSER_INSTALL')) {
 require COMPOSER_INSTALL;
 
 $grammarFile = end($argv);
-$resultFile = substr($grammarFile, 0, -1);
+$isUsingStdin = ($grammarFile === '-');
 
-if ($grammarFile === '-') {
+if ($isUsingStdin) {
     $grammarFile = 'php://stdin';
     $resultFile = 'php://stdout';
+} else {
+    $resultFile = substr($grammarFile, 0, -1);
 }
 
-if ($argc < 2 || !file_exists($grammarFile)) {
+if ($argc < 2 || (!$isUsingStdin && !file_exists($grammarFile))) {
     help();
     exit(4);
 }
