@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
@@ -7,28 +8,28 @@ use PhpYacc\Exception\LexingException;
 
 class Token
 {
-    const NAME        = 0x0200;
-    const NUMBER      = 0x0201;
-    const COLON       = ':';
-    const SPACE       = ' ';
-    const NEWLINE     = '\n';
-    const MARK        = 0x0100;
-    const BEGININC    = 0x0101;
-    const ENDINC      = 0x0102;
-    const TOKEN       = 0x0103;
-    const LEFT        = 0x0104;
-    const RIGHT       = 0x0105;
-    const NONASSOC    = 0x0106;
-    const PRECTOK     = 0x0107;
-    const TYPE        = 0x0108;
-    const UNION       = 0x0109;
-    const START       = 0x010a;
-    const COMMENT     = 0x010b;
+    public const NAME        = 0x0200;
+    public const NUMBER      = 0x0201;
+    public const COLON       = ':';
+    public const SPACE       = ' ';
+    public const NEWLINE     = '\n';
+    public const MARK        = 0x0100;
+    public const BEGININC    = 0x0101;
+    public const ENDINC      = 0x0102;
+    public const TOKEN       = 0x0103;
+    public const LEFT        = 0x0104;
+    public const RIGHT       = 0x0105;
+    public const NONASSOC    = 0x0106;
+    public const PRECTOK     = 0x0107;
+    public const TYPE        = 0x0108;
+    public const UNION       = 0x0109;
+    public const START       = 0x010a;
+    public const COMMENT     = 0x010b;
 
-    const EXPECT      = 0x010c;
-    const PURE_PARSER = 0x010d;
+    public const EXPECT      = 0x010c;
+    public const PURE_PARSER = 0x010d;
 
-    const TOKEN_MAP = [
+    public const TOKEN_MAP = [
         self::NAME        => "NAME",
         self::NUMBER      => "NUMBER",
         self::COLON       => 'COLON',

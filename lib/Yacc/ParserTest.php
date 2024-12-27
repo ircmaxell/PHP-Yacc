@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
@@ -160,7 +161,7 @@ CODE
     #[DataProvider("provideParserDebugCases")]
     public function testParserWithDebug(string $grammar, array $directProps, array $info)
     {
-        $parser = new Parser(new Lexer, new MacroSet);
+        $parser = new Parser(new Lexer(), new MacroSet());
         $context =  new Context('YY');
         $context->macros = [
             1 => "m1(%n,%l,%t)",

@@ -9,13 +9,14 @@ use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
 use PhpYacc\Grammar\State;
 use PhpYacc\Yacc\Production;
+
 use function PhpYacc\stable_sort;
 
 require_once __DIR__ . '/functions.php';
 
 class Generator
 {
-    const NON_ASSOC = -32768;
+    public const NON_ASSOC = -32768;
 
     /** @var Context */
     protected $context;
