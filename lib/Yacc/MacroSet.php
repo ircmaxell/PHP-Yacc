@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
@@ -13,7 +14,7 @@ class MacroSet
 
     public function __construct(MacroAbstract ...$macros)
     {
-        $this->addMacro(new Macro\DollarExpansion);
+        $this->addMacro(new Macro\DollarExpansion());
         $this->addMacro(...$macros);
     }
 

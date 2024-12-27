@@ -19,14 +19,14 @@ class Generator
 
     public function __construct(Parser $parser = null, Lalr $lalr = null, Compress $compressor = null)
     {
-        $this->parser = $parser ?: new Parser(new Lexer(), new MacroSet);
-        $this->lalr = $lalr ?: new Lalr;
-        $this->compressor = $compressor ?: new Compress;
+        $this->parser = $parser ?: new Parser(new Lexer(), new MacroSet());
+        $this->lalr = $lalr ?: new Lalr();
+        $this->compressor = $compressor ?: new Compress();
     }
 
     public function generate(Context $context, string $grammar, string $template, string $resultFile)
     {
-        $template = new Template(new PHP, $template, $context);
+        $template = new Template(new PHP(), $template, $context);
 
         $this->parser->parse($grammar, $context);
 

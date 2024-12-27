@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
@@ -16,14 +17,14 @@ use PhpYacc\Yacc\Production;
  */
 class Symbol
 {
-    const UNDEF = 0;
-    const LEFT = 1;
-    const RIGHT = 2;
-    const NON = 3;
-    const MASK = 3;
+    public const UNDEF = 0;
+    public const LEFT = 1;
+    public const RIGHT = 2;
+    public const NON = 3;
+    public const MASK = 3;
 
-    const TERMINAL = 0x100;
-    const NONTERMINAL = 0x200;
+    public const TERMINAL = 0x100;
+    public const NONTERMINAL = 0x200;
 
     /** @var int */
     public $code;

@@ -12,10 +12,10 @@ use RuntimeException;
 
 class DollarExpansion extends MacroAbstract
 {
-    const SEMVAL_LHS_TYPED   = 1;
-    const SEMVAL_LHS_UNTYPED = 2;
-    const SEMVAL_RHS_TYPED   = 3;
-    const SEMVAL_RHS_UNTYPED = 4;
+    public const SEMVAL_LHS_TYPED   = 1;
+    public const SEMVAL_LHS_UNTYPED = 2;
+    public const SEMVAL_RHS_TYPED   = 3;
+    public const SEMVAL_RHS_UNTYPED = 4;
 
 
     public function apply(Context $ctx, array $symbols, Iterator $tokens, int $n, array $attribute): Generator
@@ -89,10 +89,10 @@ class DollarExpansion extends MacroAbstract
                             throw new RuntimeException("N is too big");
                         }
                     }
-semval:
-                    if ($type === null) {
-                        $type = $symbols[$v]->type;
-                    }
+                    semval:
+                                        if ($type === null) {
+                                            $type = $symbols[$v]->type;
+                                        }
                     if ($type === null /** && $ctx->unioned */ && false) {
                         throw new ParseException("Type not defined for " . $symbols[$v]->name);
                     }

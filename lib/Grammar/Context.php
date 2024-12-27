@@ -1,13 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Grammar;
 
-use function PhpYacc\character_value;
 use PhpYacc\Exception\LogicException;
 use PhpYacc\Yacc\Production;
 use PhpYacc\Yacc\Macro\DollarExpansion;
 use Generator;
+
+use function PhpYacc\character_value;
 
 /**
  * @property Symbol[] $symbols
@@ -80,8 +82,11 @@ class Context
     public $errorFile;
 
     public function __construct(
-        string $filename = 'YY', $errorFile = null, $debugFile = null, bool $verboseDebug = false)
-    {
+        string $filename = 'YY',
+        $errorFile = null,
+        $debugFile = null,
+        bool $verboseDebug = false
+    ) {
         $this->filename = $filename;
         $this->errorFile = $errorFile;
         $this->debugFile = $debugFile;
@@ -185,7 +190,7 @@ class Context
     public function internSymbol(string $s, bool $isTerm): Symbol
     {
         $p = $this->intern($s);
-        
+
         if (!$p->isNilSymbol()) {
             return $p;
         }

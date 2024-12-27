@@ -1,25 +1,27 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
-use function PhpYacc\is_sym_character;
-use function PhpYacc\is_white;
 use PhpYacc\Exception\LexingException;
 use PhpYacc\Exception\ParseException;
+
+use function PhpYacc\is_sym_character;
+use function PhpYacc\is_white;
 
 const EOF = "EOF";
 const MAXTOKEN = 50000;
 
 class Lexer
 {
-    const SPACE_TOKENS = [
+    public const SPACE_TOKENS = [
         Token::SPACE,
         Token::COMMENT,
         Token::NEWLINE,
     ];
 
-    const TAG_MAP = [
+    public const TAG_MAP = [
         "%%"            => Token::MARK,
         "%{"            => Token::BEGININC,
         "%}"            => Token::ENDINC,
@@ -35,7 +37,7 @@ class Lexer
         "%expect"       => Token::EXPECT,
         "%pure_parser"  => Token::PURE_PARSER,
     ];
-    
+
 
     protected $backToken = null;
     protected $token = null;
@@ -204,7 +206,7 @@ class Lexer
         return new Token($id, $value, $this->lineNumber, $this->filename);
     }
 
-    
+
 
     protected $buffer = '';
     protected $bufferOffset = 0;

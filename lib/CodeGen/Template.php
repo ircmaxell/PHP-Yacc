@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\CodeGen;
@@ -8,8 +9,9 @@ use PhpYacc\Exception\TemplateException;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Compress\Compress;
 use PhpYacc\Compress\CompressResult;
-use function PhpYacc\is_white;
 use PhpYacc\Yacc\Macro\DollarExpansion;
+
+use function PhpYacc\is_white;
 
 class Template
 {
@@ -294,7 +296,7 @@ class Template
         } elseif ($var === 'terminals') {
             $nl = 0;
             $terminals = iterator_to_array($this->context->terminals);
-            usort($terminals, function($t1, $t2) {
+            usort($terminals, function ($t1, $t2) {
                 return $this->context->ctermindex[$t1->code] <=> $this->context->ctermindex[$t2->code];
             });
             foreach ($terminals as $term) {

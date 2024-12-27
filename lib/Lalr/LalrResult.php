@@ -11,7 +11,7 @@ class LalrResult
     public $states;
     public $output;
     public $nnonleafstates;
-    
+
     public function __construct(array $grams, array $states, int $nnonleafstates, string $output)
     {
         $this->grams = $grams;

@@ -1,13 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
-use function PhpYacc\character_value;
 use PhpYacc\Exception\ParseException;
 use RuntimeException;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
+
+use function PhpYacc\character_value;
 
 class Parser
 {
@@ -275,7 +277,7 @@ class Parser
             if ($p->name[0] === "'") {
                 $p->value = character_value(substr($p->name, 1, -1));
             }
-                
+
             if ($type) {
                 $p->type = $type;
             }

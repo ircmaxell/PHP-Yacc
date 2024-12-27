@@ -1,19 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Compress;
 
 use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
+
 use function PhpYacc\stable_sort;
 
 require_once __DIR__ . "/functions.php";
 
 class Compress
 {
-    const YYUNEXPECTED = 32767;
-    const YYDEFAULT = -32766;
-    const VACANT = -32768;
+    public const YYUNEXPECTED = 32767;
+    public const YYDEFAULT = -32766;
+    public const VACANT = -32768;
 
     /**
      * @var Context $context
@@ -27,7 +29,7 @@ class Compress
 
     public function compress(Context $context)
     {
-        $this->result = new CompressResult;
+        $this->result = new CompressResult();
         $this->context = $context;
 
         $this->makeup_table2();
@@ -256,7 +258,7 @@ class Compress
             if ($prim->length < 2) {
                 continue;
             }
-            $p = new Auxiliary;
+            $p = new Auxiliary();
             $this->best_covering($p, $prim);
             if ($p->gain < 1) {
                 continue;
@@ -508,7 +510,7 @@ class Compress
         $this->result->yytranslate = array_fill(0, $this->result->yytranslatesize, $ncterms);
         $this->result->yyncterms = $ncterms;
 
-        
+
         for ($i = 0; $i < $this->context->nterminals; $i++) {
             $symbol = $this->context->symbol($i);
             $this->result->yytranslate[$symbol->value] = $this->context->ctermindex[$i];
@@ -632,7 +634,8 @@ class Compress
         return 0;
     }
 
-    private function nb(Symbol $symbol) {
+    private function nb(Symbol $symbol)
+    {
         if ($symbol->isterminal) {
             return $symbol->code;
         } else {

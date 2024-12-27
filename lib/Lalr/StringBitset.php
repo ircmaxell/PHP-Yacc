@@ -1,13 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Lalr;
 
 class StringBitset implements Bitset
 {
-    const NBITS = 8;
+    public const NBITS = 8;
 
-    const MASKS = [
+    public const MASKS = [
         "\x01",
         "\x02",
         "\x04",

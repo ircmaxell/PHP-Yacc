@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Lalr;
 
 class ArrayBitset implements Bitset
 {
-    const NBITS = \PHP_INT_SIZE * 8;
+    public const NBITS = \PHP_INT_SIZE * 8;
 
     private $numBits;
     private $array;

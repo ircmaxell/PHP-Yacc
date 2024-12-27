@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
@@ -7,7 +8,7 @@ use PhpYacc\Grammar\Symbol;
 
 class Production
 {
-    const EMPTY = 0x10;
+    public const EMPTY = 0x10;
 
     /** @var Production|null */
     public $link;

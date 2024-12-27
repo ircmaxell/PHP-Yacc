@@ -5,9 +5,10 @@ namespace PhpYacc\Yacc;
 use Iterator;
 use PhpYacc\Exception\LogicException;
 use PhpYacc\Exception\ParseException;
-use function PhpYacc\is_sym_character;
 use PhpYacc\Macro;
 use RuntimeException;
+
+use function PhpYacc\is_sym_character;
 
 abstract class MacroAbstract implements Macro
 {
