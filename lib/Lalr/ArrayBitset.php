@@ -24,17 +24,20 @@ class ArrayBitset implements Bitset
 
     public function testBit(int $i): bool
     {
-        return ($this->array[$i / self::NBITS] & (1 << ($i % self::NBITS))) !== 0;
+        $offset = intdiv($i, self::NBITS);
+        return ($this->array[$offset] & (1 << ($i % self::NBITS))) !== 0;
     }
 
     public function setBit(int $i)
     {
-        $this->array[$i / self::NBITS] |= (1 << ($i % self::NBITS));
+        $offset = intdiv($i, self::NBITS);
+        $this->array[$offset] |= (1 << ($i % self::NBITS));
     }
 
     public function clearBit(int $i)
     {
-        $this->array[$i / self::NBITS] &= ~(1 << ($i % self::NBITS));
+        $offset = intdiv($i, self::NBITS);
+        $this->array[$offset] &= ~(1 << ($i % self::NBITS));
     }
 
     public function or(Bitset $other): bool
