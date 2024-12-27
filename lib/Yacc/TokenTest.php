@@ -20,12 +20,10 @@ class TokenTest extends Testcase
         $this->assertEquals("[foo.php:42] 'f' (f)", "$token");
     }
 
-    /**
-     * @expectedException PhpYacc\Exception\LexingException
-     * @expectedExceptionMessage Unknown token found: -2
-     */
     public function testUnknownToken()
     {
+        $this->expectException(LexingException::class);
+        $this->expectExceptionMessage('Unknown token found: -2');
         new Token(-2, '', 42, 'foo.php');
     }
 }

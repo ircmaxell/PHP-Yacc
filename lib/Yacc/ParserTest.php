@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use PhpYacc\Grammar\Context;
 
@@ -156,9 +157,7 @@ CODE
         ];
     }
 
-    /**
-     * @dataProvider provideParserDebugCases
-     */
+    #[DataProvider("provideParserDebugCases")]
     public function testParserWithDebug(string $grammar, array $directProps, array $info)
     {
         $parser = new Parser(new Lexer, new MacroSet);

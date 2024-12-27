@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace PhpYacc\Yacc;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class LexerTest extends Testcase
 {
-    public static function provideTestAtoms()
+    public static function provideTestAtoms(): array
     {
         return [
             ["   \t", Token::SPACE],
@@ -19,10 +20,8 @@ class LexerTest extends Testcase
             ["'f'", "'"],
         ];
     }
-    
-    /**
-     * @dataProvider provideTestAtoms
-     */
+
+    #[DataProvider("provideTestAtoms")]
     public function testAtoms(string $source, $expected)
     {
         $lexer = $this->boot($source);
@@ -30,7 +29,6 @@ class LexerTest extends Testcase
         $this->assertEquals($expected, $token->t);
         $this->assertEquals($source, $token->v);
     }
-
 
     protected function boot(string $source): Lexer
     {
