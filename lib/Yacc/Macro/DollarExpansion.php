@@ -96,7 +96,7 @@ class DollarExpansion extends MacroAbstract
                     if ($type === null /** && $ctx->unioned */ && false) {
                         throw new ParseException("Type not defined for " . $symbols[$v]->name);
                     }
-                    foreach ($this->parseDollar($ctx, $t, $v, $n, $type ? $type->name : null) as $t) {
+                    foreach ($this->parseDollar($ctx, $t, $v, $n, $type?->name) as $t) {
                         yield $t;
                     }
 
@@ -106,7 +106,7 @@ class DollarExpansion extends MacroAbstract
         }
     }
 
-    protected function parseDollar(Context $ctx, Token $t, int $nth, int $len, string $type = null): array
+    protected function parseDollar(Context $ctx, Token $t, int $nth, int $len, ?string $type): array
     {
         if ($t->t === '$') {
             if ($type) {

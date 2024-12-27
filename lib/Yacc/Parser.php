@@ -30,9 +30,9 @@ class Parser
         $this->macros = $macros;
     }
 
-    public function parse(string $code, Context $context = null)
+    public function parse(string $code, Context $context)
     {
-        $this->context = $context ?: new Context();
+        $this->context = $context;
         $this->lexer->startLexing($code, $this->context->filename);
         $this->doDeclaration();
         $this->doGrammar();
@@ -127,7 +127,7 @@ class Parser
             }
 
             $lastTerm = $this->startPrime;
-            $action = null;
+            $action = '';
             $pos = 0;
             $i = 1;
             while (true) {
@@ -166,7 +166,7 @@ class Parser
                     if ($w->isterminal) {
                         $lastTerm = $w;
                     }
-                    $action = null;
+                    $action = '';
                 } else {
                     break;
                 }
