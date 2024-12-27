@@ -52,7 +52,7 @@ class ArrayBitset implements Bitset
         return $changed;
     }
 
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         $numElems = count($this->array);
         for ($n = 0; $n < $numElems; $n++) {

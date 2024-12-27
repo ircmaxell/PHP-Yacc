@@ -249,6 +249,7 @@ class Context
                 return $symbol;
             }
         }
+        throw new LogicException("Should never happen: unknown symbol $code");
     }
 
     public function addGram(Production $p)
