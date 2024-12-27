@@ -25,7 +25,7 @@ class Production
     /** @var int */
     public $num = -1;
 
-    public function __construct(string $action = null, int $position)
+    public function __construct(string $action, int $position)
     {
         $this->action = $action;
         $this->position = $position;

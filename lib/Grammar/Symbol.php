@@ -40,7 +40,7 @@ class Symbol
 
     protected $_terminal = self::UNDEF;
 
-    public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, Symbol $type = null)
+    public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, ?Symbol $type = null)
     {
         $this->code = $code;
         $this->_name = $name;
@@ -102,7 +102,7 @@ class Symbol
         $this->_value = $value;
     }
 
-    public function setType(Symbol $type = null)
+    public function setType(?Symbol $type): void
     {
         $this->_type = $type;
     }
