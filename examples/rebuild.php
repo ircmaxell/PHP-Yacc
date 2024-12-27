@@ -39,7 +39,7 @@ function buildFolder(CliOptions $options, Generator $generator, string $dir) {
     $skeleton = "parser.template.php";
 
     if ($options->runKmyacc) {
-        $output = trim(shell_exec("cd $dir && kmyacc -x -t -v -L php -m $skeleton -p Parser $grammar 2>&1"));
+        shell_exec("cd $dir && kmyacc -x -t -v -L php -m $skeleton -p Parser $grammar 2>&1");
         rename("$dir/y.output", "$dir/y.kmyacc.output");
         rename("$dir/grammar.php", "$dir/parser.kmyacc.php");
     }
@@ -65,7 +65,7 @@ class CliOptions {
     public $runKmyacc = false;
     public $args = [];
 
-    public function fromArgv(array $argv) {
+    public static function fromArgv(array $argv) {
         $options = new self;
         foreach (array_slice($argv, 1) as $arg) {
             if ($arg === '-k') {
