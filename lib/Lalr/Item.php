@@ -22,7 +22,7 @@ class Item implements ArrayAccess, IteratorAggregate
         $this->pos = $offset;
     }
 
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         for ($i = $this->pos; $i < \count($this->production->body); $i++) {
             yield $this->production->body[$i];
@@ -34,25 +34,25 @@ class Item implements ArrayAccess, IteratorAggregate
         return new Item($this->production, $this->pos + $n);
     }
 
-    public function offsetExists($index)
+    public function offsetExists($offset): bool
     {
-        return isset($this->production->body[$index + $this->pos]);
+        return isset($this->production->body[$offset + $this->pos]);
     }
 
-    public function offsetGet($index)
+    public function offsetGet($offset): mixed
     {
-        if (!$this->offsetExists($index)) {
-            throw new LogicException("Offset $index does not exist");
+        if (!$this->offsetExists($offset)) {
+            throw new LogicException("Offset $offset does not exist");
         }
-        return $this->production->body[$index + $this->pos];
+        return $this->production->body[$offset + $this->pos];
     }
 
-    public function offsetSet($index, $value)
+    public function offsetSet($offset, $value): void
     {
         throw new LogicException("Not supported");
     }
 
-    public function offsetUnset($index)
+    public function offsetUnset($offset): void
     {
         throw new LogicException("Not supported");
     }

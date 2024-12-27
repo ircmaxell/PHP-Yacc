@@ -65,7 +65,7 @@ class StringBitset implements Bitset
         return $changed;
     }
 
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         for ($i = 0; $i < $this->numBits; $i++) {
             if ($this->testBit($i)) {
