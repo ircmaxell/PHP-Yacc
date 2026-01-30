@@ -12,7 +12,7 @@ class State
 {
     /** @var State[] */
     public $shifts = [];
-    /** @var Reduce[] */
+    /** @var non-empty-array<Reduce> */
     public $reduce;
     /** @var Conflict|null */
     public $conflict;
