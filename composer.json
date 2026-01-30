@@ -26,7 +26,7 @@
         "phpunit/phpunit": "^10.5"
     },
     "scripts": {
-        "analyze": "phpstan analyze lib",
+        "analyze": "phpstan analyze",
         "build": [
             "@cs-fix",
             "@build-examples"
