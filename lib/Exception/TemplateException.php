@@ -9,6 +9,4 @@
 
 namespace PhpYacc\Exception;
 
-class TemplateException extends PhpYaccException
-{
-}
+class TemplateException extends PhpYaccException {}

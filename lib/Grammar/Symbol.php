@@ -58,7 +58,7 @@ class Symbol
 
     public function __get($name)
     {
-        return $this->{'_'.$name};
+        return $this->{'_' . $name};
     }
 
     public function __set($name, $value)

@@ -229,7 +229,7 @@ class Template
 
     protected function evalCond($spec): bool
     {
-        list($dump, $test) = explode(' ', $spec, 2);
+        [$dump, $test] = explode(' ', $spec, 2);
         $test = trim($test);
         switch ($test) {
             case '-a':

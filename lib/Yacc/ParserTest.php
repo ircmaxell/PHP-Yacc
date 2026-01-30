@@ -15,13 +15,12 @@ class ParserTest extends TestCase
         return [
             [
                 <<<CODE
-%%
-expr: 
-      '1'             { $$ = 1; }
-;
-%%
-CODE
-                , [
+                    %%
+                    expr: 
+                          '1'             { $$ = 1; }
+                    ;
+                    %%
+                    CODE, [
                     "pureFlag" => false,
                     "nsymbols" => 5,
                     "nterminals" => 2,
@@ -32,34 +31,33 @@ CODE
                         49 => "'1'",
                     ],
                     "nonterminals" => [
-                        "expr"
+                        "expr",
                     ],
                     "grams" => [
                         [
                             "action" => "",
                             "empty" => false,
-                            "body" => [3, 4]
+                            "body" => [3, 4],
                         ],
                         [
                             "action" => " m2(0,1) = 1; ",
                             "empty" => false,
                             "body" => [4, 2],
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ],
 
             [
                 <<<CODE
-%pure_parser
-%%
-expr: 
-    '1'             { $$ = 1; }
-  | '2'             { $$ = 2; }
-;
-%%
-CODE
-                , [
+                    %pure_parser
+                    %%
+                    expr: 
+                        '1'             { $$ = 1; }
+                      | '2'             { $$ = 2; }
+                    ;
+                    %%
+                    CODE, [
                     "pureFlag" => true,
                     "nsymbols" => 6,
                     "nterminals" => 3,
@@ -71,13 +69,13 @@ CODE
                         50 => "'2'",
                     ],
                     "nonterminals" => [
-                        "expr"
+                        "expr",
                     ],
                     "grams" => [
                         [
                             "action" => "",
                             "empty" => false,
-                            "body" => [4, 5]
+                            "body" => [4, 5],
                         ],
                         [
                             "action" => " m2(0,1) = 1; ",
@@ -88,27 +86,26 @@ CODE
                             "action" => " m2(0,1) = 2; ",
                             "empty" => false,
                             "body" => [5, 3],
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ],
 
             [
                 <<<CODE
-%left '+'
-%right '-'
-%nonassoc '(' ')'
-%token T_NUMBER
-%%
-expr: 
-    T_NUMBER       { $$ = $1; }
-  | expr '+' expr  { $$ = $1 + $3; }
-  | expr '-' expr  { $$ = $1 - $3; }
-  | '(' expr ')'   { { $$ = ($2); } }
-;
-%%
-CODE
-                , [
+                    %left '+'
+                    %right '-'
+                    %nonassoc '(' ')'
+                    %token T_NUMBER
+                    %%
+                    expr: 
+                        T_NUMBER       { $$ = $1; }
+                      | expr '+' expr  { $$ = $1 + $3; }
+                      | expr '-' expr  { $$ = $1 - $3; }
+                      | '(' expr ')'   { { $$ = ($2); } }
+                    ;
+                    %%
+                    CODE, [
                     "pureFlag" => false,
                     "nsymbols" => 9,
                     "nterminals" => 7,
@@ -123,13 +120,13 @@ CODE
                         257 => "T_NUMBER",
                     ],
                     "nonterminals" => [
-                        "expr"
+                        "expr",
                     ],
                     "grams" => [
                         [
                             "action" => "",
                             "empty" => false,
-                            "body" => [7, 8]
+                            "body" => [7, 8],
                         ],
                         [
                             "action" => " m2(0,1) = m4(1,1); ",
@@ -150,10 +147,10 @@ CODE
                             "action" => " { m2(0,3) = (m4(2,3)); } ",
                             "empty" => false,
                             "body" => [8, 4, 8, 5],
-                        ]
-                    ]
-                ]
-            ]
+                        ],
+                    ],
+                ],
+            ],
 
         ];
     }

@@ -7,11 +7,11 @@ jobs:
 
     strategy:
       matrix:
-        php: [ '8.1', '8.2', '8.3', '8.4' ]
+        php: [ '8.1', '8.2', '8.3', '8.4', '8.5' ]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Docs: https://github.com/shivammathur/setup-php
       - name: Setup PHP
@@ -31,6 +31,10 @@ jobs:
       - name: Run PHPUnit
         run: composer test
 
+      - name: Perform static analysis
+        run: composer analyze -- --error-format=github
+        if: ${{ matrix.php == '8.5' }}
+
       - name: Check Formatting
-        run: vendor/bin/php-cs-fixer fix -v --dry-run --stop-on-violation --using-cache=no ./lib
-        if: ${{ matrix.php == '8.3' }}
+        run: vendor/bin/php-cs-fixer check -v --show-progress=dots --stop-on-violation --using-cache=no ./lib
+        if: ${{ matrix.php == '8.5' }}
