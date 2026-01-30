@@ -11,7 +11,7 @@ abstract class Conflict
     protected $next;
     protected $symbol;
 
-    protected function __construct(Symbol $symbol, Conflict $next = null)
+    protected function __construct(Symbol $symbol, ?Conflict $next)
     {
         $this->next = $next;
         $this->symbol = $symbol;
@@ -37,7 +37,7 @@ abstract class Conflict
         return $this->next;
     }
 
-    public function setNext(Conflict $next = null)
+    public function setNext(?Conflict $next)
     {
         $this->next = $next;
     }

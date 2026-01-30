@@ -6,7 +6,7 @@ namespace PhpYacc\Lalr;
 
 use PhpYacc\Grammar\Context;
 
-function isSameSet(Lr1 $left = null, Lr1 $right = null): bool
+function isSameSet(Lr1 $left, Lr1 $right): bool
 {
     $p = $left;
     $t = $right;

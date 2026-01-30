@@ -17,7 +17,7 @@ class Generator
     protected $lalr;
     protected $compressor;
 
-    public function __construct(Parser $parser = null, Lalr $lalr = null, Compress $compressor = null)
+    public function __construct(?Parser $parser = null, ?Lalr $lalr = null, ?Compress $compressor = null)
     {
         $this->parser = $parser ?: new Parser(new Lexer(), new MacroSet());
         $this->lalr = $lalr ?: new Lalr();

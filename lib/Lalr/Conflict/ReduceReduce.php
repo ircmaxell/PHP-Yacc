@@ -14,7 +14,7 @@ class ReduceReduce extends Conflict
     protected $reduce1;
     protected $reduce2;
 
-    public function __construct(int $reduce1, int $reduce2, Symbol $symbol, Conflict $next = null)
+    public function __construct(int $reduce1, int $reduce2, Symbol $symbol, ?Conflict $next)
     {
         $this->reduce1 = $reduce1;
         $this->reduce2 = $reduce2;

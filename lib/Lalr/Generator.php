@@ -616,7 +616,7 @@ class Generator
         return $tail;
     }
 
-    protected function sortList(Lr1 $list = null, callable $cmp)
+    protected function sortList(?Lr1 $list, callable $cmp)
     {
         $array = [];
         for ($x = $list; $x !== null; $x = $x->next) {

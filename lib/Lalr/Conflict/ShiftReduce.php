@@ -13,7 +13,7 @@ class ShiftReduce extends Conflict
     protected $state;
     protected $reduce;
 
-    public function __construct(State $state, int $reduce, Symbol $symbol, Conflict $next = null)
+    public function __construct(State $state, int $reduce, Symbol $symbol, ?Conflict $next)
     {
         $this->state = $state;
         $this->reduce = $reduce;
