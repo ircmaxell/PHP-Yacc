@@ -84,6 +84,16 @@ class Parser
         $this->lexer->unget();
     }
 
+    protected function doUnion()
+    {
+        throw new ParseException("doUnion() has not been implemented");
+    }
+
+    protected function doCopy()
+    {
+        throw new ParseException("doCopy() has not been implemented");
+    }
+
     protected function doGrammar()
     {
         $attribute = [];
