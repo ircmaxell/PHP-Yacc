@@ -17,7 +17,7 @@ class Lr1
     /** @var Bitset|null $look */
     public $look;
 
-    public function __construct(Symbol $left = null, Bitset $look, Item $item)
+    public function __construct(?Symbol $left, Bitset $look, Item $item)
     {
         $this->left = $left;
         $this->look = $look;

@@ -247,7 +247,7 @@ class Template
         }
     }
 
-    protected function expand_mac(string $def, int $value, string $str = null)
+    protected function expand_mac(string $def, int $value, ?string $str = null)
     {
         $result = '';
         for ($i = 0; $i < strlen($def); $i++) {
@@ -423,7 +423,7 @@ class Template
         }
     }
 
-    protected function print_line(int $line = -1, string $filename = null)
+    protected function print_line(int $line = -1, ?string $filename = null)
     {
         if ($line === -1) {
             $line = $this->lineno;
