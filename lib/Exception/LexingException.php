@@ -9,6 +9,4 @@
 
 namespace PhpYacc\Exception;
 
-class LexingException extends PhpYaccException
-{
-}
+class LexingException extends PhpYaccException {}

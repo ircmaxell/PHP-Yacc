@@ -11,6 +11,4 @@ namespace PhpYacc\Exception;
 
 use Exception;
 
-class PhpYaccException extends Exception
-{
-}
+class PhpYaccException extends Exception {}

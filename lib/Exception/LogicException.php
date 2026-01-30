@@ -9,6 +9,4 @@
 
 namespace PhpYacc\Exception;
 
-class LogicException extends PhpYaccException
-{
-}
+class LogicException extends PhpYaccException {}
