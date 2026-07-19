@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace PhpYacc\Compress;
 
-use PhpYacc\Grammar\Symbol;
-use PhpYacc\Lalr\State;
-
 class CompressResult
 {
     public array $yytranslate = [];

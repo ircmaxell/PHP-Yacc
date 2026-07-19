@@ -11,7 +11,6 @@ use function PhpYacc\is_sym_character;
 use function PhpYacc\is_white;
 
 const EOF = "EOF";
-const MAXTOKEN = 50000;
 
 class Lexer
 {

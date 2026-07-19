@@ -2,8 +2,6 @@
 
 namespace PhpYacc\Lalr;
 
-use PhpYacc\Yacc\ParseResult;
-
 class LalrResult
 {
     public array $grams;

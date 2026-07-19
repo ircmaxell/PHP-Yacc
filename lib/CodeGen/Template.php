@@ -38,7 +38,6 @@ class Template
         $this->language->begin($resultFile, $headerFile);
 
         $this->compress = $result;
-        $result = '';
         $skipmode = false;
         $linechanged = false;
         $tailcode = false;
@@ -53,7 +52,6 @@ class Template
             "mac" => [],
         ];
         $buffer = '';
-        $this->print_line();
         foreach ($this->template as $line) {
             $line .= "\n";
             if ($tailcode) {
@@ -149,7 +147,6 @@ class Template
                 } elseif ($this->metamatch($p, 'endheader')) {
                     $this->copy_header = false;
                 } elseif ($this->metamatch($p, 'tailcode')) {
-                    $this->print_line();
                     $tailcode = true;
                     continue;
                 } elseif ($this->metamatch($p, 'verification-table')) {
@@ -208,7 +205,6 @@ class Template
                 $linechanged = true;
             } else {
                 if ($linechanged) {
-                    $this->print_line();
                     $linechanged = false;
                 }
                 $this->language->write($buffer, $this->copy_header);
@@ -254,7 +250,6 @@ class Template
                         break;
                     case 'b':
                         $gram = $this->context->gram($value);
-                        $this->print_line($gram->position);
                         $result .= $gram->action;
                         break;
                     default:
@@ -270,7 +265,6 @@ class Template
 
     protected function gen_list_var(string $indent, string $var): void
     {
-        $array = [];
         $size = -1;
         if (isset($this->compress->$var)) {
             $array = $this->compress->$var;
@@ -412,16 +406,5 @@ class Template
         } else {
             throw new TemplateException("\$semval: bad format $macro");
         }
-    }
-
-    protected function print_line(int $line = -1, ?string $filename = null): void
-    {
-        if ($line === -1) {
-            $line = $this->lineno;
-        }
-        if ($filename === null) {
-            $filename = $this->context->filename;
-        }
-        //$this->language->inline_comment("{$filename}:$line");
     }
 }
