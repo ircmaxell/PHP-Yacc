@@ -10,6 +10,7 @@ use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
 
 use function PhpYacc\character_value;
+use function PhpYacc\is_gsym;
 
 class Parser
 {
@@ -69,7 +70,7 @@ class Parser
             if (($t = $this->lexer->get())->v === ',') {
                 continue;
             }
-            if ($t->t !== Token::NAME && $t->t !== "'") {
+            if (!is_gsym($t)) {
                 break;
             }
             $p = $this->context->internSymbol($t->v, false);
@@ -157,7 +158,7 @@ class Parser
                 } elseif ($t->t === Token::NAME && $this->lexer->peek()->t === '@') {
                     $attribute[$i] = $t->v;
                     $this->lexer->get();
-                } elseif ($t->t === Token::NAME || $t->t === "'") {
+                } elseif (is_gsym($t)) {
                     if ($action) {
                         $g = $this->context->genNonTerminal();
                         $r = new Production($action, $pos);
@@ -278,7 +279,7 @@ class Parser
         $type = $this->getType();
         $t = $this->lexer->get();
 
-        while ($t->t === Token::NAME || $t->t === "'") {
+        while (is_gsym($t)) {
             $p = $this->context->internSymbol($t->v, true);
             if ($p->name[0] === "'") {
                 $p->value = character_value(substr($p->name, 1, -1));
