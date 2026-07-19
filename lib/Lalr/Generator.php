@@ -22,9 +22,9 @@ class Generator
     /** @var State[][] */
     protected array $statesThrough = [];
     protected array $visited = [];
-    /** @var Bitset[] */
+    /** @var ArrayBitset[] */
     protected array $first;
-    /** @var Bitset[] */
+    /** @var ArrayBitset[] */
     protected array $follow;
     /** @var State[] $states */
     protected array $states;
@@ -90,7 +90,6 @@ class Generator
             /** @var Lr1|null $tmpTail */
             $tmpList = $tmpTail = null;
 
-            /** @var Lr1 $x */
             for ($x = $p->items; $x !== null; $x = $x->next) {
                 if (!$x->isTailItem()) {
                     $wp = new Lr1(null, clone $this->blank, $x->item->slice(1));
@@ -108,7 +107,7 @@ class Generator
             for ($tp = $tmpList; $tp != null; $tp = $tp->next) {
                 /** @var Symbol $g */
                 $g = $tp->item[-1];
-                if ($g !== null && !$g->isterminal && !$this->visited[$g->code]) {
+                if (!$g->isterminal && !$this->visited[$g->code]) {
                     $this->visited[$g->code] = true;
                     /** @var Production $gram */
                     for ($gram = $g->value; $gram != null; $gram = $gram->link) {
@@ -427,7 +426,7 @@ class Generator
             }
         }
         for ($x = $st->items; $x !== null; $x = $x->next) {
-            /** @var Symbol $g */
+            /** @var Symbol|null $g */
             $g = $x->item[0] ?? null;
             if ($g !== null && !$g->isterminal && $this->isSeqNullable($x->item->slice(1))) {
                 $this->follow[$g->code]->or($x->look);
@@ -448,7 +447,7 @@ class Generator
         } while ($changed);
     }
 
-    protected function computeFirst(Bitset $p, Item $item): void
+    protected function computeFirst(ArrayBitset $p, Item $item): void
     {
         /** @var Symbol $g */
         foreach ($item as $g) {
@@ -577,7 +576,7 @@ class Generator
         }
         $this->clearVisited();
         for ($p = $items; $p !== null; $p = $p->next) {
-            /** @var Symbol $g */
+            /** @var Symbol|null $g */
             $g = $p->item[0] ?? null;
             if ($g !== null && !$g->isterminal) {
                 $tail = $this->findEmpty($tail, $g);
@@ -598,8 +597,8 @@ class Generator
         if (!$this->visited[$x->code] && ($x->associativity & Production::EMPTY)) {
             $this->visited[$x->code] = true;
 
-            /** @var Production $gram */
             for ($gram = $x->value; $gram !== null; $gram = $gram->link) {
+                /** @var Production $gram */
                 if ($gram->isEmpty()) {
                     $p = new Lr1(null, clone $this->blank, new Item($gram, 1));
                     $tail->next = $p;
@@ -623,7 +622,7 @@ class Generator
         usort($array, $cmp);
 
         $list = null;
-        /** @var Lr1 $tail */
+        /** @var Lr1|null $tail */
         $tail = null;
         foreach ($array as $x) {
             if ($list == null) {

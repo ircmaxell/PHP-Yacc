@@ -42,7 +42,7 @@ function character_value(string $string): int
     if (is_octal($c)) {
         $value = (int) $c;
         for ($i = 0; $n < $length && is_octal($string[$n]) && $i < 3; $i++) {
-            $value = $value * 8 + $string[$n++];
+            $value = $value * 8 + (int) $string[$n++];
         }
         return $value;
     }

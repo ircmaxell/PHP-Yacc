@@ -54,6 +54,7 @@ class Context
     public ?Symbol $startSymbol = null;
     public int $expected = 0;
     public bool $unioned = false;
+    public ?string $union_body = null;
     public ?Symbol $eofToken = null;
     public ?Symbol $errorToken = null;
     public ?Symbol $startPrime = null;

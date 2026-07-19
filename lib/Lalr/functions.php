@@ -21,7 +21,7 @@ function isSameSet(Lr1 $left, Lr1 $right): bool
     return $p === null || $p->isHeadItem();
 }
 
-function dumpSet(Context $ctx, Bitset $set): string
+function dumpSet(Context $ctx, ArrayBitset $set): string
 {
     $result = '';
     foreach ($set as $code) {

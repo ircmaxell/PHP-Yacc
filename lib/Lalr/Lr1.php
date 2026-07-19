@@ -11,9 +11,9 @@ class Lr1
     public ?Lr1 $next = null;
     public ?Symbol $left;
     public Item $item;
-    public ?Bitset $look;
+    public ?ArrayBitset $look;
 
-    public function __construct(?Symbol $left, Bitset $look, Item $item)
+    public function __construct(?Symbol $left, ArrayBitset $look, Item $item)
     {
         $this->left = $left;
         $this->look = $look;

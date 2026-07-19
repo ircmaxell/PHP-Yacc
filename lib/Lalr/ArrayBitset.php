@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpYacc\Lalr;
 
-class ArrayBitset implements Bitset
+class ArrayBitset implements \IteratorAggregate
 {
     public const NBITS = \PHP_INT_SIZE * 8;
 
@@ -40,7 +40,7 @@ class ArrayBitset implements Bitset
         $this->array[$offset] &= ~(1 << ($i % self::NBITS));
     }
 
-    public function or(Bitset $other): bool
+    public function or(self $other): bool
     {
         assert($this->numBits === $other->numBits);
 
