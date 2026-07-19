@@ -102,7 +102,7 @@ class Template
                                 $str = "YYERRTOK";
                             }
                             foreach ($tokenmode['mac'] as $mac) {
-                                $this->expand_mac($mac, $symbol->value, $str);
+                                $this->expand_mac($mac, $symbol->value(), $str);
                             }
                         }
                     }
@@ -169,7 +169,7 @@ class Template
                     for ($i = 0; $i < $this->context->nterminals; $i++) {
                         if ($this->context->ctermindex[$i] >= 0) {
                             $symbol = $this->context->symbol($i);
-                            $this->language->case_block($buffer, $symbol->value, $symbol->name);
+                            $this->language->case_block($buffer, $symbol->value(), $symbol->name);
                         }
                     }
                 } elseif ($this->metamatch($p, 'production-strings')) {
@@ -331,7 +331,7 @@ class Template
             case 'YYNLSTATES':
                 return sprintf('%d', $this->context->nnonleafstates);
             case 'YYINTERRTOK':
-                return sprintf('%d', $this->compress->yytranslate[$this->context->errorToken->value]);
+                return sprintf('%d', $this->compress->yytranslate[$this->context->errorToken->value()]);
             case 'YYUNEXPECTED':
                 return sprintf('%d', Compress::YYUNEXPECTED);
             case 'YYDEFAULT':

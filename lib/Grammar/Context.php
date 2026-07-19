@@ -172,14 +172,14 @@ class Context
         }
         if ($isTerm || $s[0] === "'") {
             if ($s[0] === "'") {
-                $p->value = character_value(substr($s, 1, -1));
+                $p->setValue(character_value(substr($s, 1, -1)));
             } else {
-                $p->value = -1;
+                $p->setValue(-1);
             }
-            $p->terminal = Symbol::TERMINAL;
+            $p->setTerminal(Symbol::TERMINAL);
         } else {
-            $p->value = null;
-            $p->terminal = Symbol::NONTERMINAL;
+            $p->setValue(null);
+            $p->setTerminal(Symbol::NONTERMINAL);
         }
 
         $p->associativity   = Symbol::UNDEF;

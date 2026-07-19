@@ -110,7 +110,7 @@ class Generator
                 if (!$g->isterminal && !$this->visited[$g->code]) {
                     $this->visited[$g->code] = true;
                     /** @var Production $gram */
-                    for ($gram = $g->value; $gram != null; $gram = $gram->link) {
+                    for ($gram = $g->value(); $gram != null; $gram = $gram->link) {
                         if (isset($gram->body[1])) {
                             $wp = new Lr1($g, clone $this->blank, new Item($gram, 2));
                             $tmpTail->next = $wp;
@@ -597,7 +597,7 @@ class Generator
         if (!$this->visited[$x->code] && ($x->associativity & Production::EMPTY)) {
             $this->visited[$x->code] = true;
 
-            for ($gram = $x->value; $gram !== null; $gram = $gram->link) {
+            for ($gram = $x->value(); $gram !== null; $gram = $gram->link) {
                 /** @var Production $gram */
                 if ($gram->isEmpty()) {
                     $p = new Lr1(null, clone $this->blank, new Item($gram, 1));

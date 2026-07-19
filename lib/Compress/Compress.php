@@ -492,7 +492,7 @@ class Compress
         $this->result->yytranslatesize = 0;
 
         foreach ($this->context->terminals() as $term) {
-            $value = $term->value;
+            $value = $term->value();
             if ($value + 1 > $this->result->yytranslatesize) {
                 $this->result->yytranslatesize = $value + 1;
             }
@@ -504,7 +504,7 @@ class Compress
 
         for ($i = 0; $i < $this->context->nterminals; $i++) {
             $symbol = $this->context->symbol($i);
-            $this->result->yytranslate[$symbol->value] = $this->context->ctermindex[$i];
+            $this->result->yytranslate[$symbol->value()] = $this->context->ctermindex[$i];
         }
 
         $this->result->yyaction = $this->encode_shift_reduce($this->result->yyaction, count($this->result->yyaction));

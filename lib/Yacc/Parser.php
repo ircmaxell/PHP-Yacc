@@ -165,8 +165,8 @@ class Parser
                         $r->body = [$g];
                         $gbuffer[$i++] = $g;
                         $attribute[$i] = null;
-                        $r->link = $r->body[0]->value;
-                        $g->value = $this->context->addGram($r);
+                        $r->link = $r->body[0]->value();
+                        $g->setValue($this->context->addGram($r));
                     }
                     $gbuffer[$i++] = $w = $this->context->internSymbol($t->v, false);
                     $attribute[$i] = null;
@@ -187,20 +187,20 @@ class Parser
             $r->body = array_slice($gbuffer, 0, $i);
             $r->precedence = $lastTerm->precedence;
             $r->associativity = $lastTerm->associativity & Symbol::MASK;
-            $r->link = $r->body[0]->value;
-            $gbuffer[0]->value = $this->context->addGram($r);
+            $r->link = $r->body[0]->value();
+            $gbuffer[0]->setValue($this->context->addGram($r));
 
             if ($t->t === ';') {
                 $t = $this->lexer->get();
             }
         }
         $this->context->gram(0)->body[] = $this->context->startSymbol;
-        $this->startPrime->value = null;
+        $this->startPrime->setValue(null);
         foreach ($this->context->nonTerminals() as $key => $symbol) {
             if ($symbol === $this->startPrime) {
                 continue;
             }
-            if (($j = $symbol->value) === null) {
+            if (($j = $symbol->value()) === null) {
                 throw new ParseException("Nonterminal {$symbol->name} used but not defined");
             }
             $k = null;
@@ -210,14 +210,14 @@ class Parser
                 $k = $j;
                 $j = $w;
             }
-            $symbol->value = $k;
+            $symbol->setValue($k);
         }
     }
 
     protected function doDeclaration(): void
     {
         $this->eofToken = $this->context->internSymbol("EOF", true);
-        $this->eofToken->value = 0;
+        $this->eofToken->setValue(0);
         $this->errorToken = $this->context->internSymbol("error", true);
         $this->startPrime = $this->context->internSymbol("\$start", false);
 
@@ -265,8 +265,8 @@ class Parser
             if ($terminal === $this->context->eofToken) {
                 continue;
             }
-            if ($terminal->value < 0) {
-                $terminal->value = $base++;
+            if ($terminal->value() < 0) {
+                $terminal->setValue($base++);
             }
         }
     }
@@ -282,7 +282,7 @@ class Parser
         while (is_gsym($t)) {
             $p = $this->context->internSymbol($t->v, true);
             if ($p->name[0] === "'") {
-                $p->value = character_value(substr($p->name, 1, -1));
+                $p->setValue(character_value(substr($p->name, 1, -1)));
             }
 
             if ($type) {
@@ -305,8 +305,8 @@ class Parser
             }
             $t = $this->lexer->get();
             if ($t->t === Token::NUMBER) {
-                if ($p->value === null) {
-                    $p->value = (int) $t->v;
+                if ($p->value() === null) {
+                    $p->setValue((int) $t->v);
                 } else {
                     throw new ParseException("Unexpected Token::NUMBER as {$p->name} already has a value");
                 }

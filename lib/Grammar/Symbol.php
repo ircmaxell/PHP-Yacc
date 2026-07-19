@@ -7,14 +7,6 @@ namespace PhpYacc\Grammar;
 use PhpYacc\Exception\LogicException;
 use PhpYacc\Yacc\Production;
 
-/**
- * @property Symbol|null $type
- * @property mixed $value
- * @property int $precedence
- * @property int $associativity
- * @property string $name
- * @property int $terminal
- */
 class Symbol
 {
     public const UNDEF = 0;
@@ -27,12 +19,12 @@ class Symbol
     public const NONTERMINAL = 0x200;
 
     public int $code;
-    protected ?Symbol $_type;
+    public ?Symbol $type;
+    public int $precedence;
+    public int $associativity;
+    public string $name;
 
     protected Production|int|null $_value;
-    protected int $_precedence;
-    protected int $_associativity;
-    protected string $_name;
 
     public bool $isterminal = false;
     public bool $isnonterminal = false;
@@ -42,12 +34,12 @@ class Symbol
     public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, ?Symbol $type = null)
     {
         $this->code = $code;
-        $this->_name = $name;
+        $this->name = $name;
         $this->_value = $value;
         $this->setTerminal($terminal);
-        $this->_precedence = $precedence;
-        $this->_associativity = $associativity;
-        $this->_type = $type;
+        $this->precedence = $precedence;
+        $this->associativity = $associativity;
+        $this->type = $type;
     }
 
     public function isNilSymbol(): bool
@@ -55,14 +47,9 @@ class Symbol
         return $this->_terminal === self::UNDEF;
     }
 
-    public function __get($name)
+    public function terminal(): int
     {
-        return $this->{'_' . $name};
-    }
-
-    public function __set($name, $value)
-    {
-        $this->{'set' . $name}($value);
+        return $this->_terminal;
     }
 
     public function setTerminal(int $terminal): void
@@ -81,14 +68,9 @@ class Symbol
         $this->setValue($this->_value); // force check to prevent issues
     }
 
-    public function setAssociativity(int $associativity): void
+    public function value(): Production|int|null
     {
-        $this->_associativity = $associativity;
-    }
-
-    public function setPrecedence(int $precedence): void
-    {
-        $this->_precedence = $precedence;
+        return $this->_value;
     }
 
     public function setValue(Production|int|null $value): void
@@ -101,13 +83,8 @@ class Symbol
         $this->_value = $value;
     }
 
-    public function setType(?Symbol $type): void
-    {
-        $this->_type = $type;
-    }
-
     public function setAssociativityFlag(int $flag): void
     {
-        $this->_associativity |= $flag;
+        $this->associativity |= $flag;
     }
 }

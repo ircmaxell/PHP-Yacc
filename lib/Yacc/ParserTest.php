@@ -176,7 +176,7 @@ class ParserTest extends TestCase
         foreach ($info['terminals'] as $value => $token) {
             $symbol = $context->symbols()[$i];
             $this->assertEquals($token, $symbol->name, "terminal: symbol[$i]->name");
-            $this->assertEquals($value, $symbol->value, "terminal: symbol[$i]->value");
+            $this->assertEquals($value, $symbol->value(), "terminal: symbol[$i]->value");
             $i++;
         }
         $this->assertEquals($context->startPrime, $context->symbols()[$i], "startPrime: symbol[$i]");
