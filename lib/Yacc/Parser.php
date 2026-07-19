@@ -196,7 +196,7 @@ class Parser
         }
         $this->context->gram(0)->body[] = $this->context->startSymbol;
         $this->startPrime->value = null;
-        foreach ($this->context->nonterminals as $key => $symbol) {
+        foreach ($this->context->nonTerminals() as $key => $symbol) {
             if ($symbol === $this->startPrime) {
                 continue;
             }
@@ -261,7 +261,7 @@ class Parser
             }
         }
         $base = 256;
-        foreach ($this->context->terminals as $terminal) {
+        foreach ($this->context->terminals() as $terminal) {
             if ($terminal === $this->context->eofToken) {
                 continue;
             }

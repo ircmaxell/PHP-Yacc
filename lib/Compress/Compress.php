@@ -85,14 +85,14 @@ class Compress
             $this->context->term_action[$i] = array_fill(0, $this->context->nterminals, self::VACANT);
             $this->context->nonterm_goto[$i] = array_fill(0, $this->context->nnonterminals, self::VACANT);
 
-            foreach ($this->context->states[$i]->shifts as $shift) {
+            foreach ($this->context->states()[$i]->shifts as $shift) {
                 if ($shift->through->isterminal) {
                     $this->context->term_action[$i][$shift->through->code] = $shift->number;
                 } else {
                     $this->context->nonterm_goto[$i][$this->nb($shift->through)] = $shift->number;
                 }
             }
-            foreach ($this->context->states[$i]->reduce as $reduce) {
+            foreach ($this->context->states()[$i]->reduce as $reduce) {
                 if ($reduce->symbol->isNilSymbol()) {
                     break;
                 }
@@ -101,7 +101,7 @@ class Compress
             $this->context->state_imagesorted[$i] = $i;
         }
 
-        foreach ($this->context->states as $key => $state) {
+        foreach ($this->context->states() as $key => $state) {
             foreach ($state->reduce as $r) {
                 if ($r->symbol->isNilSymbol()) {
                     break;
@@ -194,7 +194,7 @@ class Compress
             $this->context->debug(sprintf("%4d", $i));
         }
         $this->context->debug("\n");
-        foreach ($this->context->nonterminals as $symbol) {
+        foreach ($this->context->nonTerminals() as $symbol) {
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->context->nonterm_goto[$i][$this->nb($symbol)] > 0) {
                     break;
@@ -215,7 +215,7 @@ class Compress
             $this->context->debug(sprintf("%4d", $i));
         }
         $this->context->debug("\n");
-        foreach ($this->context->nonterminals as $symbol) {
+        foreach ($this->context->nonTerminals() as $symbol) {
             $nb = $this->nb($symbol);
             for ($i = 0; $i < $this->context->nnonleafstates; $i++) {
                 if ($this->context->nonterm_goto[$i][$nb] > 0) {
@@ -484,14 +484,14 @@ class Compress
 
         $this->result->yylhs = [];
         $this->result->yylen = [];
-        foreach ($this->context->grams as $gram) {
+        foreach ($this->context->grams() as $gram) {
             $this->result->yylhs[] = $this->nb($gram->body[0]);
             $this->result->yylen[] = count($gram->body) - 1;
         }
 
         $this->result->yytranslatesize = 0;
 
-        foreach ($this->context->terminals as $term) {
+        foreach ($this->context->terminals() as $term) {
             $value = $term->value;
             if ($value + 1 > $this->result->yytranslatesize) {
                 $this->result->yytranslatesize = $value + 1;

@@ -71,7 +71,7 @@ class Template
                     if ($reducemode['m'] < 0) {
                         $reducemode['m'] = $reducemode['n'];
                     }
-                    foreach ($this->context->grams as $gram) {
+                    foreach ($this->context->grams() as $gram) {
                         if ($gram->action) {
                             for ($j = 0; $j < $reducemode['m']; $j++) {
                                 $this->expand_mac($reducemode['mac'][$j], $gram->num, null);
@@ -173,7 +173,7 @@ class Template
                         }
                     }
                 } elseif ($this->metamatch($p, 'production-strings')) {
-                    foreach ($this->context->grams as $gram) {
+                    foreach ($this->context->grams() as $gram) {
                         $info = array_slice($gram->body, 0);
                         $this->language->write($buffer . "\"");
                         $this->language->writeQuoted($info[0]->name);
@@ -280,7 +280,7 @@ class Template
             $this->print_array($array, $size < 0 ? count($array) : $size, $indent);
         } elseif ($var === 'terminals') {
             $nl = 0;
-            $terminals = iterator_to_array($this->context->terminals);
+            $terminals = iterator_to_array($this->context->terminals());
             usort($terminals, function ($t1, $t2) {
                 return $this->context->ctermindex[$t1->code] <=> $this->context->ctermindex[$t2->code];
             });
@@ -293,7 +293,7 @@ class Template
             $this->language->write("\n");
         } elseif ($var === 'nonterminals') {
             $nl = 0;
-            foreach ($this->context->nonterminals as $nonterm) {
+            foreach ($this->context->nonTerminals() as $nonterm) {
                 $prefix = $nl++ ? ",\n" : "";
                 $this->language->write($prefix . $indent . "\"");
                 $this->language->writeQuoted($nonterm->name);

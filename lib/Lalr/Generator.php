@@ -55,7 +55,7 @@ class Generator
         $this->statesThrough = [];
         $this->first = [];
         $this->follow = [];
-        foreach ($this->context->symbols as $s) {
+        foreach ($this->context->symbols() as $s) {
             $this->first[$s->code] = clone $this->blank;
             $this->follow[$s->code] = clone $this->blank;
             $this->statesThrough[$s->code] = [];
@@ -69,7 +69,7 @@ class Generator
         $this->printDiagnostics();
         $this->printStatistics();
 
-        $this->context->states = $this->states;
+        $this->context->setStates($this->states);
         $this->context->nnonleafstates = $this->nnonleafstates;
     }
 
@@ -80,7 +80,7 @@ class Generator
             clone $this->blank,
             new Item($this->context->gram(0), 1)
         );
-        $this->findOrCreateState($this->context->nilsymbol, $tmpList);
+        $this->findOrCreateState($this->context->nilSymbol(), $tmpList);
 
         // foreach by ref so that new additions to $this->states are also picked up
         foreach ($this->states as &$p) {
@@ -280,7 +280,7 @@ class Generator
                 }
 
                 foreach ($alook as $e) {
-                    $sym = $this->context->symbols[$e];
+                    $sym = $this->context->symbols()[$e];
                     $tmpr[] = new Reduce($sym, $gram->num);
                 }
             }
@@ -322,7 +322,7 @@ class Generator
                 }
                 return $x->number - $y->number;
             });
-            $tmpr[] = new Reduce($this->context->nilsymbol, $tdefact);
+            $tmpr[] = new Reduce($this->context->nilSymbol(), $tdefact);
 
             // Squeeze shift actions (we deleted some keys)
             $p->shifts = array_values($p->shifts);
@@ -339,7 +339,7 @@ class Generator
         }
 
         $k = 0;
-        foreach ($this->context->grams as $gram) {
+        foreach ($this->context->grams() as $gram) {
             if (!$this->visited[$gram->num]) {
                 $k++;
                 $this->context->debug("Never reduced: \n"); // TODO
@@ -492,7 +492,7 @@ class Generator
     {
         do {
             $changed = false;
-            foreach ($this->context->grams as $gram) {
+            foreach ($this->context->grams() as $gram) {
                 $left = $gram->body[0];
                 $right = $gram->body[1] ?? null;
                 if (($right === null || ($right->associativity & Production::EMPTY)) && !($left->associativity & Production::EMPTY)) {
@@ -504,7 +504,7 @@ class Generator
 
         if ($this->context->verboseDebug) {
             $this->context->debug("EMPTY nonterminals: ");
-            foreach ($this->context->nonterminals as $symbol) {
+            foreach ($this->context->nonTerminals() as $symbol) {
                 if ($symbol->associativity & Production::EMPTY) {
                     $this->context->debug(" " . $symbol->name);
                 }
@@ -517,7 +517,7 @@ class Generator
     {
         do {
             $changed = false;
-            foreach ($this->context->grams as $gram) {
+            foreach ($this->context->grams() as $gram) {
                 $h = $gram->body[0];
                 for ($s = 1; $s < count($gram->body); $s++) {
                     $g = $gram->body[$s];
@@ -544,7 +544,7 @@ class Generator
 
         if ($this->context->verboseDebug) {
             $this->context->debug("First:\n");
-            foreach ($this->context->nonterminals as $symbol) {
+            foreach ($this->context->nonTerminals() as $symbol) {
                 $this->context->debug("{$symbol->name}\t[ ");
                 $this->context->debug(dumpSet($this->context, $this->first[$symbol->code]));
                 if ($this->nullable[$symbol->code]) {
@@ -722,8 +722,8 @@ class Generator
             return;
         }
 
-        $nterms = iterator_count($this->context->terminals);
-        $nnonts = iterator_count($this->context->nonterminals);
+        $nterms = iterator_count($this->context->terminals());
+        $nnonts = iterator_count($this->context->nonTerminals());
 
         $nprods = $this->context->ngrams;
         $totalActs = $this->nacts + $this->nacts2;

@@ -25,7 +25,7 @@ function dumpSet(Context $ctx, ArrayBitset $set): string
 {
     $result = '';
     foreach ($set as $code) {
-        $symbol = $ctx->symbols[$code];
+        $symbol = $ctx->symbols()[$code];
         $result .= "{$symbol->name} ";
     }
     return $result;

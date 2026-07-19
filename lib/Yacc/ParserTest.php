@@ -170,24 +170,24 @@ class ParserTest extends TestCase
         foreach ($directProps as $prop => $expected) {
             $this->assertEquals($expected, $context->$prop, "context->$prop");
         }
-        $this->assertEquals($context->eofToken, $context->symbols[0], "eofToken: symbol[0]");
-        $this->assertEquals($context->errorToken, $context->symbols[1], "errorToken: symbol[1]");
+        $this->assertEquals($context->eofToken, $context->symbols()[0], "eofToken: symbol[0]");
+        $this->assertEquals($context->errorToken, $context->symbols()[1], "errorToken: symbol[1]");
         $i = 2;
         foreach ($info['terminals'] as $value => $token) {
-            $symbol = $context->symbols[$i];
+            $symbol = $context->symbols()[$i];
             $this->assertEquals($token, $symbol->name, "terminal: symbol[$i]->name");
             $this->assertEquals($value, $symbol->value, "terminal: symbol[$i]->value");
             $i++;
         }
-        $this->assertEquals($context->startPrime, $context->symbols[$i], "startPrime: symbol[$i]");
+        $this->assertEquals($context->startPrime, $context->symbols()[$i], "startPrime: symbol[$i]");
         $i++;
         foreach ($info['nonterminals'] as $token) {
-            $symbol = $context->symbols[$i];
+            $symbol = $context->symbols()[$i];
             $this->assertEquals($token, $symbol->name, "nonterminal: symbol[$i]->name");
             $i++;
         }
         foreach ($info['grams'] as $key => $expect) {
-            $gram = $context->grams[$key];
+            $gram = $context->grams()[$key];
             $this->assertEquals($expect['action'], $gram->action, "gram[$key]->action");
             $this->assertEquals($expect['empty'], $gram->isEmpty(), "gram[$key]->isEmpty()");
             $this->assertEquals(count($expect['body']), count($gram->body), "count(gram[$key]->body)");

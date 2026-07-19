@@ -11,14 +11,6 @@ use Generator;
 
 use function PhpYacc\character_value;
 
-/**
- * @property Symbol[] $symbols
- * @property Symbol $nilsymbol
- * @property Symbol[] $terminals
- * @property Symbol[] $nonterminals
- * @property Production[] $grams
- * @property State[] $states
- */
 class Context
 {
     public array $macros = [
@@ -106,23 +98,6 @@ class Context
         if ($this->debugFile) {
             fwrite($this->debugFile, $data);
         }
-    }
-
-    public function __get($name)
-    {
-        switch ($name) {
-            case 'terminals': return $this->terminals();
-            case 'nonterminals': return $this->nonTerminals();
-        }
-        if (!isset($this->{'_' . $name})) {
-            throw new LogicException("Should never happen: unknown property $name");
-        }
-        return $this->{'_' . $name};
-    }
-
-    public function __set($name, $value)
-    {
-        $this->{'set' . $name}($value);
     }
 
     public function finish(): void
@@ -264,6 +239,22 @@ class Context
     {
         assert($i < $this->ngrams);
         return $this->_grams[$i];
+    }
+
+    /**
+     * @return Production[]
+     */
+    public function grams(): array
+    {
+        return $this->_grams;
+    }
+
+    /**
+     * @return State[]
+     */
+    public function states(): array
+    {
+        return $this->_states;
     }
 
     public function setStates(array $states): void
