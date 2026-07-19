@@ -7,8 +7,6 @@ namespace PhpYacc\Compress;
 use PhpYacc\Grammar\Context;
 use PhpYacc\Grammar\Symbol;
 
-use function PhpYacc\stable_sort;
-
 require_once __DIR__ . "/functions.php";
 
 class Compress
@@ -46,7 +44,7 @@ class Compress
             }
         }
 
-        stable_sort($primv, Preimage::class . "::compare");
+        usort($primv, Preimage::compare(...));
 
         $this->context->primof = array_fill(0, $this->context->nstates, 0);
         $this->context->prims = array_fill(0, $this->context->nstates, 0);
@@ -131,7 +129,7 @@ class Compress
         }
         # 847
 
-        stable_sort($this->context->state_imagesorted, [$this, 'cmp_states']);
+        usort($this->context->state_imagesorted, $this->cmp_states(...));
 
         $j = 0;
 
@@ -533,7 +531,7 @@ class Compress
             }
         }
 
-        stable_sort($trow, [TRow::class, 'compare']);
+        usort($trow, TRow::compare(...));
 
         if ($this->context->verboseDebug) {
             $this->context->debug("Order:\n");

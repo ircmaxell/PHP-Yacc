@@ -10,8 +10,6 @@ use PhpYacc\Grammar\Symbol;
 use PhpYacc\Grammar\State;
 use PhpYacc\Yacc\Production;
 
-use function PhpYacc\stable_sort;
-
 require_once __DIR__ . '/functions.php';
 
 class Generator
@@ -292,7 +290,7 @@ class Generator
             if (!$tdefact) {
                 $tdefact = -1;
 
-                stable_sort($tmpr, function (Reduce $x, Reduce $y) {
+                usort($tmpr, function (Reduce $x, Reduce $y) {
                     if ($x->number != $y->number) {
                         return $y->number - $x->number;
                     }
@@ -319,7 +317,7 @@ class Generator
                 return $reduce->number !== $tdefact;
             });
 
-            stable_sort($tmpr, function (Reduce $x, Reduce $y) {
+            usort($tmpr, function (Reduce $x, Reduce $y) {
                 if ($x->symbol !== $y->symbol) {
                     return $x->symbol->code - $y->symbol->code;
                 }
@@ -356,7 +354,7 @@ class Generator
         // Sort states in decreasing order of entries
         // do not move initial state
         $initState = array_shift($this->states);
-        stable_sort($this->states, function (State $p, State $q) {
+        usort($this->states, function (State $p, State $q) {
             $numReduces = count($p->reduce) - 1; // -1 for default action
             $pt = $numReduces;
             $pn = count($p->shifts) + $numReduces;
@@ -622,7 +620,7 @@ class Generator
             $array[] = $x;
         }
 
-        stable_sort($array, $cmp);
+        usort($array, $cmp);
 
         $list = null;
         /** @var Lr1 $tail */

@@ -6,28 +6,6 @@ namespace PhpYacc;
 
 use PhpYacc\Yacc\Token;
 
-function stable_sort(array &$array, callable $cmp)
-{
-    $indexedArray = [];
-    $i = 0;
-    foreach ($array as $item) {
-        $indexedArray[] = [$item, $i++];
-    }
-
-    usort($indexedArray, function (array $a, array $b) use ($cmp) {
-        $result = $cmp($a[0], $b[0]);
-        if ($result !== 0) {
-            return $result;
-        }
-        return $a[1] - $b[1];
-    });
-
-    $array = [];
-    foreach ($indexedArray as $item) {
-        $array[] = $item[0];
-    }
-}
-
 function is_white(string $c): bool
 {
     return $c === ' ' || $c === "\t" || $c === "\r" || $c === "\x0b" || $c === "\x0c";
