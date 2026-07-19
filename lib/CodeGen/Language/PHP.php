@@ -16,10 +16,10 @@ class PHP implements Language
     protected $fp;
     protected $hp;
 
-    protected $fileBuffer = '';
-    protected $headerBuffer = '';
+    protected string $fileBuffer = '';
+    protected string $headerBuffer = '';
 
-    public function begin($file, $headerFile)
+    public function begin($file, $headerFile): void
     {
         $this->fp = $file;
         $this->hp = $headerFile;
@@ -27,7 +27,7 @@ class PHP implements Language
         $this->headerBuffer = '';
     }
 
-    public function commit()
+    public function commit(): void
     {
         // Make sure there is exactly one trailing newline.
         $this->fileBuffer = rtrim($this->fileBuffer, "\n") . "\n";
@@ -40,22 +40,22 @@ class PHP implements Language
         $this->headerBuffer = '';
     }
 
-    public function inline_comment(string $text)
+    public function inline_comment(string $text): void
     {
         $this->fileBuffer .= '/* ' . $text . " */";
     }
 
-    public function comment(string $text)
+    public function comment(string $text): void
     {
         $this->fileBuffer .= '//' . $text . "\n";
     }
 
-    public function case_block(string $indent, int $num, string $value)
+    public function case_block(string $indent, int $num, string $value): void
     {
         $this->fileBuffer .= sprintf("%scase %d: return %s;\n", $indent, $num, var_export($value, true));
     }
 
-    public function write(string $text, bool $includeHeader = false)
+    public function write(string $text, bool $includeHeader = false): void
     {
         $this->fileBuffer .= $text;
         if ($includeHeader) {
@@ -63,7 +63,7 @@ class PHP implements Language
         }
     }
 
-    public function writeQuoted(string $text)
+    public function writeQuoted(string $text): void
     {
         $regex = '(\\$(?=[a-zA-Z_])|")';
         $text = preg_replace($regex, "\\\\$0", $text);

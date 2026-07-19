@@ -10,8 +10,8 @@ use PhpYacc\Lalr\Conflict;
 
 class ShiftReduce extends Conflict
 {
-    protected $state;
-    protected $reduce;
+    protected State $state;
+    protected int $reduce;
 
     public function __construct(State $state, int $reduce, Symbol $symbol, ?Conflict $next)
     {

@@ -8,14 +8,10 @@ use PhpYacc\Grammar\Symbol;
 
 class Lr1
 {
-    /** @var Lr1|null $next */
-    public $next;
-    /** @var Symbol|null $left */
-    public $left;
-    /** @var Item $item */
-    public $item;
-    /** @var Bitset|null $look */
-    public $look;
+    public ?Lr1 $next = null;
+    public ?Symbol $left;
+    public Item $item;
+    public ?Bitset $look;
 
     public function __construct(?Symbol $left, Bitset $look, Item $item)
     {

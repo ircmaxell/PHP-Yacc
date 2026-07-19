@@ -13,9 +13,9 @@ interface Bitset extends \IteratorAggregate
 {
     public function testBit(int $i): bool;
 
-    public function setBit(int $i);
+    public function setBit(int $i): void;
 
-    public function clearBit(int $i);
+    public function clearBit(int $i): void;
 
     public function or(Bitset $other): bool;
 }

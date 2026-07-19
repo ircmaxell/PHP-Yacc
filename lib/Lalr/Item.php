@@ -11,8 +11,8 @@ use PhpYacc\Yacc\Production;
 
 class Item implements ArrayAccess, IteratorAggregate
 {
-    protected $production;
-    protected $pos = 0;
+    protected Production $production;
+    protected int $pos = 0;
 
     public function __construct(Production $production, int $offset)
     {
@@ -57,12 +57,12 @@ class Item implements ArrayAccess, IteratorAggregate
         throw new LogicException("Not supported");
     }
 
-    public function isHeadItem()
+    public function isHeadItem(): bool
     {
         return $this->pos === 1;
     }
 
-    public function isTailItem()
+    public function isTailItem(): bool
     {
         return $this->pos === count($this->production->body);
     }

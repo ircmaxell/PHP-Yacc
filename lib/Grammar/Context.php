@@ -17,66 +17,66 @@ use function PhpYacc\character_value;
  * @property Symbol[] $terminals
  * @property Symbol[] $nonterminals
  * @property Production[] $grams
- * @property int $ngrams
- * @property int $nstates
  * @property State[] $states
- * @property int $nnonleafstates
  */
 class Context
 {
-    public $macros = [
+    public array $macros = [
         DollarExpansion::SEMVAL_LHS_TYPED => '',
         DollarExpansion::SEMVAL_LHS_UNTYPED => '',
         DollarExpansion::SEMVAL_RHS_TYPED => '',
         DollarExpansion::SEMVAL_RHS_UNTYPED => '',
     ];
 
-    public $nsymbols = 0;
-    public $nterminals = 0;
-    public $nnonterminals = 0;
+    public int $nsymbols = 0;
+    public int $nterminals = 0;
+    public int $nnonterminals = 0;
 
-    protected $symbolHash = [];
-    protected $_symbols = [];
-    protected $_nilsymbol = null;
-    protected $finished = false;
+    /** @var array<string, Symbol> */
+    protected array $symbolHash = [];
+    /** @var Symbol[] */
+    protected array $_symbols = [];
+    protected ?Symbol $_nilsymbol = null;
+    protected bool $finished = false;
 
-    protected $_states;
-    public $nstates = 0;
-    public $nnonleafstates = 0;
+    protected array $_states;
+    public int $nstates = 0;
+    public int $nnonleafstates = 0;
 
-    public $aflag = false;
-    public $tflag = false;
-    public $allowSemanticValueReferenceByName = false;
-    public $pspref = '';
-    public $verboseDebug = false;
+    public bool $aflag = false;
+    public bool $tflag = false;
+    public bool $allowSemanticValueReferenceByName = false;
+    public string $pspref = '';
+    public bool $verboseDebug = false;
 
-    public $filename = 'YY';
-    public $pureFlag = false;
-    public $startSymbol = null;
-    public $expected = 0;
-    public $unioned = false;
-    public $eofToken = null;
-    public $errorToken = null;
-    public $startPrime = null;
-    protected $_grams = [];
-    public $ngrams = 0;
+    public string $filename = 'YY';
+    public bool $pureFlag = false;
+    public ?Symbol $startSymbol = null;
+    public int $expected = 0;
+    public bool $unioned = false;
+    public ?Symbol $eofToken = null;
+    public ?Symbol $errorToken = null;
+    public ?Symbol $startPrime = null;
+    /** @var Production[] */
+    protected array $_grams = [];
+    public int $ngrams = 0;
 
-    public $default_act = [];
-    public $default_goto = [];
-    public $term_action = [];
-    public $class_action = [];
-    public $nonterm_goto = [];
-    public $class_of = [];
-    public $ctermindex = [];
-    public $otermindex = [];
-    public $frequency = [];
-    public $state_imagesorted = [];
-    public $nprims = 0;
-    public $prims = [];
-    public $primof = [];
-    public $class2nd = [];
-    public $nclasses = 0;
-    public $naux = 0;
+    public array $default_act = [];
+    public array $default_goto = [];
+    public array $term_action = [];
+    public array $class_action = [];
+    public array $nonterm_goto = [];
+    public array $class_of = [];
+    public array $ctermindex = [];
+    public array $otermindex = [];
+    public array $frequency = [];
+    public array $state_imagesorted = [];
+    public int $nprims = 0;
+    public array $prims = [];
+    public array $primof = [];
+    public array $class2nd = [];
+    public int $nclasses = 0;
+    public int $naux = 0;
 
     public $debugFile;
     public $errorFile;
@@ -93,14 +93,14 @@ class Context
         $this->verboseDebug = $verboseDebug;
     }
 
-    public function error(string $data)
+    public function error(string $data): void
     {
         if ($this->errorFile) {
             fwrite($this->errorFile, $data);
         }
     }
 
-    public function debug(string $data)
+    public function debug(string $data): void
     {
         if ($this->debugFile) {
             fwrite($this->debugFile, $data);
@@ -124,7 +124,7 @@ class Context
         $this->{'set' . $name}($value);
     }
 
-    public function finish()
+    public function finish(): void
     {
         if ($this->finished) {
             return;
@@ -252,7 +252,7 @@ class Context
         throw new LogicException("Should never happen: unknown symbol $code");
     }
 
-    public function addGram(Production $p)
+    public function addGram(Production $p): Production
     {
         $p->num = $this->ngrams++;
         $this->_grams[] = $p;
@@ -265,7 +265,7 @@ class Context
         return $this->_grams[$i];
     }
 
-    public function setStates(array $states)
+    public function setStates(array $states): void
     {
         foreach ($states as $state) {
             assert($state instanceof State);
@@ -274,7 +274,7 @@ class Context
         $this->nstates = count($states);
     }
 
-    public function setNNonLeafStates(int $n)
+    public function setNNonLeafStates(int $n): void
     {
         $this->nnonleafstates = $n;
     }

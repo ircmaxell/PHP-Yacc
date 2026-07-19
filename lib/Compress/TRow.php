@@ -6,10 +6,10 @@ namespace PhpYacc\Compress;
 
 class TRow
 {
-    public $index;
-    public $mini;
-    public $maxi;
-    public $nent;
+    public int $index;
+    public int $mini;
+    public int $maxi;
+    public int $nent;
 
     public function __construct(int $index)
     {

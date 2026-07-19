@@ -6,9 +6,9 @@ namespace PhpYacc\Compress;
 
 class Preimage
 {
-    public $index = 0;
-    public $classes = [];
-    public $length = 0;
+    public int $index = 0;
+    public array $classes = [];
+    public int $length = 0;
 
     public function __construct(int $index)
     {

@@ -10,20 +10,14 @@ class Production
 {
     public const EMPTY = 0x10;
 
-    /** @var Production|null */
-    public $link;
-    /** @var int */
-    public $associativity;
-    /** @var int */
-    public $precedence;
-    /** @var int */
-    public $position;
-    /** @var string */
-    public $action;
+    public ?Production $link;
+    public int $associativity = 0;
+    public int $precedence;
+    public int $position;
+    public string $action;
     /** @var Symbol[] */
-    public $body;
-    /** @var int */
-    public $num = -1;
+    public array $body;
+    public int $num = -1;
 
     public function __construct(string $action, int $position)
     {
@@ -32,7 +26,7 @@ class Production
         $this->body = [];
     }
 
-    public function setAssociativityFlag(int $flag)
+    public function setAssociativityFlag(int $flag): void
     {
         $this->associativity |= $flag;
     }

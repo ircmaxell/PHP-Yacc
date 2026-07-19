@@ -6,11 +6,11 @@ use PhpYacc\Yacc\ParseResult;
 
 class LalrResult
 {
-    public $grams;
-    public $nstates = 0;
-    public $states;
-    public $output;
-    public $nnonleafstates;
+    public array $grams;
+    public int $nstates = 0;
+    public array $states;
+    public string $output;
+    public int $nnonleafstates;
 
     public function __construct(array $grams, array $states, int $nnonleafstates, string $output)
     {

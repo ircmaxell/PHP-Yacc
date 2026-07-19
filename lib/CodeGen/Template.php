@@ -15,23 +15,14 @@ use function PhpYacc\is_white;
 
 class Template
 {
-    protected $metachar = '$';
-    protected $template = [];
-    protected $lineno = 0;
-    protected $copy_header = false;
+    protected string $metachar = '$';
+    protected array $template = [];
+    protected int $lineno = 0;
+    protected bool $copy_header = false;
 
-    /**
-     * @var Context
-     */
-    protected $context;
-    /**
-     * @var CompressResult
-     */
-    protected $compress;
-    /**
-     * @var Language
-     */
-    protected $language;
+    protected Context $context;
+    protected CompressResult $compress;
+    protected Language $language;
 
     public function __construct(Language $language, string $template, Context $context)
     {
@@ -40,7 +31,7 @@ class Template
         $this->parseTemplate($template);
     }
 
-    public function render(CompressResult $result, $resultFile, $headerFile = null)
+    public function render(CompressResult $result, $resultFile, $headerFile = null): void
     {
         $headerFile = $headerFile ?: fopen('php://memory', 'rw');
 
@@ -247,7 +238,7 @@ class Template
         }
     }
 
-    protected function expand_mac(string $def, int $value, ?string $str = null)
+    protected function expand_mac(string $def, int $value, ?string $str = null): void
     {
         $result = '';
         for ($i = 0; $i < strlen($def); $i++) {
@@ -277,7 +268,7 @@ class Template
         $this->language->write($result, $this->copy_header);
     }
 
-    protected function gen_list_var(string $indent, string $var)
+    protected function gen_list_var(string $indent, string $var): void
     {
         $array = [];
         $size = -1;
@@ -320,7 +311,7 @@ class Template
         }
     }
 
-    protected function print_array(array $array, int $limit, string $indent)
+    protected function print_array(array $array, int $limit, string $indent): void
     {
         $col = 0;
         for ($i = 0; $i < $limit; $i++) {
@@ -372,7 +363,7 @@ class Template
         }
     }
 
-    protected function parseTemplate(string $template)
+    protected function parseTemplate(string $template): void
     {
         $template = preg_replace("(\r\n|\r)", "\n", $template);
         $lines = explode("\n", $template);
@@ -408,7 +399,7 @@ class Template
         return isset($text[0]) && $text[0] === $this->metachar && substr($text, 1, strlen($keyword)) === $keyword;
     }
 
-    protected function def_semval_macro(string $macro)
+    protected function def_semval_macro(string $macro): void
     {
         if (strpos($macro, '($)') !== false) {
             $this->context->macros[DollarExpansion::SEMVAL_LHS_UNTYPED] = ltrim(substr($macro, 3));
@@ -423,7 +414,7 @@ class Template
         }
     }
 
-    protected function print_line(int $line = -1, ?string $filename = null)
+    protected function print_line(int $line = -1, ?string $filename = null): void
     {
         if ($line === -1) {
             $line = $this->lineno;

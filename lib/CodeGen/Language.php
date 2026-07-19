@@ -11,17 +11,17 @@ namespace PhpYacc\CodeGen;
 
 interface Language
 {
-    public function begin($file, $headerFile);
+    public function begin($file, $headerFile): void;
 
-    public function commit();
+    public function commit(): void;
 
-    public function write(string $text, bool $includeHeader = false);
+    public function write(string $text, bool $includeHeader = false): void;
 
-    public function writeQuoted(string $text);
+    public function writeQuoted(string $text): void;
 
-    public function comment(string $text);
+    public function comment(string $text): void;
 
-    public function inline_comment(string $text);
+    public function inline_comment(string $text): void;
 
-    public function case_block(string $indent, int $num, string $value);
+    public function case_block(string $indent, int $num, string $value): void;
 }

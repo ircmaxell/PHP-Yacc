@@ -8,10 +8,8 @@ use PhpYacc\Grammar\Symbol;
 
 class Reduce
 {
-    /** @var Symbol */
-    public $symbol;
-    /** @var int */
-    public $number;
+    public Symbol $symbol;
+    public int $number;
 
     public function __construct(Symbol $symbol, int $number)
     {

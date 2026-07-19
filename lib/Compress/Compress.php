@@ -17,17 +17,10 @@ class Compress
     public const YYDEFAULT = -32766;
     public const VACANT = -32768;
 
-    /**
-     * @var Context $context
-     */
-    protected $context;
-    /**
-     * @var CompressResult $result
-     */
-    protected $result;
+    protected Context $context;
+    protected CompressResult $result;
 
-
-    public function compress(Context $context)
+    public function compress(Context $context): CompressResult
     {
         $this->result = new CompressResult();
         $this->context = $context;
@@ -36,7 +29,7 @@ class Compress
         return $this->result;
     }
 
-    protected function compute_preimages()
+    protected function compute_preimages(): void
     {
         $primv = [];
 
@@ -78,7 +71,7 @@ class Compress
         return $t;
     }
 
-    protected function makeup_table2()
+    protected function makeup_table2(): void
     {
         $this->context->term_action = array_fill(0, $this->context->nnonleafstates, 0);
         $this->context->class_action = array_fill(0, $this->context->nnonleafstates * 2, 0);
@@ -174,7 +167,7 @@ class Compress
         $this->authodox_table();
     }
 
-    protected function print_table()
+    protected function print_table(): void
     {
         $this->context->debug("\nTerminal action:\n");
         $this->context->debug(sprintf("%8.8s", "T\\S"));
@@ -246,7 +239,7 @@ class Compress
         }
     }
 
-    protected function extract_common()
+    protected function extract_common(): void
     {
         $this->context->class2nd = array_fill(0, $this->context->nclasses, -1);
 
@@ -366,7 +359,7 @@ class Compress
         }
     }
 
-    protected function best_covering(Auxiliary $aux, Preimage $prim)
+    protected function best_covering(Auxiliary $aux, Preimage $prim): void
     {
         $this->resetFrequency();
         $gain = 0;
@@ -396,7 +389,7 @@ class Compress
         $aux->gain = $gain;
     }
 
-    protected function authodox_table()
+    protected function authodox_table(): void
     {
         // TODO
         $this->context->ctermindex = array_fill(0, $this->context->nterminals, -1);
@@ -521,7 +514,7 @@ class Compress
         $this->result->yygdefault = $this->encode_shift_reduce($this->result->yygdefault, $this->context->nnonterminals);
     }
 
-    protected function pack_table(array $transit, int $nrows, int $ncols, bool $checkrow, array &$outtable, array &$outcheck, array &$outbase)
+    protected function pack_table(array $transit, int $nrows, int $ncols, bool $checkrow, array &$outtable, array &$outcheck, array &$outbase): void
     {
         $trow = [];
         for ($i = 0; $i < $nrows; $i++) {
@@ -619,7 +612,7 @@ class Compress
         return $code < 0 ? self::YYUNEXPECTED : $code;
     }
 
-    public function resetFrequency()
+    public function resetFrequency(): void
     {
         $this->context->frequency = array_fill(0, $this->context->nstates, 0);
     }
@@ -634,7 +627,7 @@ class Compress
         return 0;
     }
 
-    private function nb(Symbol $symbol)
+    private function nb(Symbol $symbol): int
     {
         if ($symbol->isterminal) {
             return $symbol->code;

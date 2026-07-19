@@ -10,7 +10,7 @@ use Traversable;
 
 class MacroSet
 {
-    protected $macros = [];
+    protected array $macros = [];
 
     public function __construct(MacroAbstract ...$macros)
     {
@@ -18,7 +18,7 @@ class MacroSet
         $this->addMacro(...$macros);
     }
 
-    public function addMacro(MacroAbstract ...$macros)
+    public function addMacro(MacroAbstract ...$macros): void
     {
         foreach ($macros as $macro) {
             $this->macros[] = $macro;

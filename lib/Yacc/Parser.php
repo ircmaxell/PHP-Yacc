@@ -13,16 +13,12 @@ use function PhpYacc\character_value;
 
 class Parser
 {
-    /** @var Context */
-    protected $context;
-    protected $lexer;
-    protected $macros;
-
-    /** @var Symbol */
-    protected $eofToken;
-    /** @var Symbol */
-    protected $errorToken;
-    protected $startPrime;
+    protected Context $context;
+    protected Lexer $lexer;
+    protected MacroSet $macros;
+    protected Symbol $eofToken;
+    protected Symbol $errorToken;
+    protected Symbol $startPrime;
 
     public function __construct(Lexer $lexer, MacroSet $macros)
     {
@@ -30,7 +26,7 @@ class Parser
         $this->macros = $macros;
     }
 
-    public function parse(string $code, Context $context)
+    public function parse(string $code, Context $context): Context
     {
         $this->context = $context;
         $this->lexer->startLexing($code, $this->context->filename);
@@ -66,7 +62,7 @@ class Parser
         }, $expanded));
     }
 
-    protected function doType()
+    protected function doType(): void
     {
         $type = $this->getType();
         while (true) {
@@ -84,17 +80,17 @@ class Parser
         $this->lexer->unget();
     }
 
-    protected function doUnion()
+    protected function doUnion(): void
     {
         throw new ParseException("doUnion() has not been implemented");
     }
 
-    protected function doCopy()
+    protected function doCopy(): void
     {
         throw new ParseException("doCopy() has not been implemented");
     }
 
-    protected function doGrammar()
+    protected function doGrammar(): void
     {
         $attribute = [];
         $gbuffer = [null];
@@ -217,7 +213,7 @@ class Parser
         }
     }
 
-    protected function doDeclaration()
+    protected function doDeclaration(): void
     {
         $this->eofToken = $this->context->internSymbol("EOF", true);
         $this->eofToken->value = 0;
@@ -274,9 +270,9 @@ class Parser
         }
     }
 
-    protected $currentPrecedence = 0;
+    protected int $currentPrecedence = 0;
 
-    protected function doToken(Token $tag)
+    protected function doToken(Token $tag): void
     {
         $preIncr = 0;
         $type = $this->getType();
@@ -323,7 +319,7 @@ class Parser
         $this->currentPrecedence += $preIncr;
     }
 
-    protected function getType()
+    protected function getType(): ?Symbol
     {
         $t = $this->lexer->get();
         if ($t->t !== '<') {

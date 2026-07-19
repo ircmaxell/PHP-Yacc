@@ -18,29 +18,28 @@ class Generator
 {
     public const NON_ASSOC = -32768;
 
-    /** @var Context */
-    protected $context;
-    protected $nullable;
-    protected $blank;
+    protected Context $context;
+    protected array $nullable;
+    protected ArrayBitset $blank;
     /** @var State[][] */
-    protected $statesThrough = [];
-    protected $visited = [];
+    protected array $statesThrough = [];
+    protected array $visited = [];
     /** @var Bitset[] */
-    protected $first;
+    protected array $first;
     /** @var Bitset[] */
-    protected $follow;
+    protected array $follow;
     /** @var State[] $states */
-    protected $states;
+    protected array $states;
 
-    protected $nlooks;
-    protected $nstates;
-    protected $nacts;
-    protected $nacts2;
-    protected $nnonleafstates;
-    protected $nsrerr;
-    protected $nrrerr;
+    protected int $nlooks;
+    protected int $nstates;
+    protected int $nacts;
+    protected int $nacts2;
+    protected int $nnonleafstates;
+    protected int $nsrerr;
+    protected int $nrrerr;
 
-    public function compute(Context $context)
+    public function compute(Context $context): void
     {
         $this->context = $context;
         // Ensure nil symbol is part of nSymbols
@@ -76,7 +75,7 @@ class Generator
         $this->context->nnonleafstates = $this->nnonleafstates;
     }
 
-    protected function computeKernels()
+    protected function computeKernels(): void
     {
         $tmpList = new Lr1(
             null,
@@ -159,7 +158,7 @@ class Generator
         }
     }
 
-    protected function computeLookaheads()
+    protected function computeLookaheads(): void
     {
         $this->states[0]->items->look->setBit(0);
         do {
@@ -214,7 +213,7 @@ class Generator
         }
     }
 
-    protected function fillReduce()
+    protected function fillReduce(): void
     {
         $this->clearVisited();
         foreach ($this->states as $p) {
@@ -395,7 +394,7 @@ class Generator
         }
     }
 
-    protected function comparePrecedence(Production $gram, Symbol $x)
+    protected function comparePrecedence(Production $gram, Symbol $x): int
     {
         if ($gram->associativity === Symbol::UNDEF
             || ($x->associativity & Symbol::MASK) === Symbol::UNDEF
@@ -419,7 +418,7 @@ class Generator
         throw new LogicException('Gram has associativity other than LEFT/RIGHT/NON. This should never happen');
     }
 
-    protected function computeFollow(State $st)
+    protected function computeFollow(State $st): void
     {
         foreach ($st->shifts as $t) {
             if (!$t->through->isterminal) {
@@ -451,7 +450,7 @@ class Generator
         } while ($changed);
     }
 
-    protected function computeFirst(Bitset $p, Item $item)
+    protected function computeFirst(Bitset $p, Item $item): void
     {
         /** @var Symbol $g */
         foreach ($item as $g) {
@@ -466,7 +465,7 @@ class Generator
         }
     }
 
-    protected function isSeqNullable(Item $item)
+    protected function isSeqNullable(Item $item): bool
     {
         /** @var Symbol $g */
         foreach ($item as $g) {
@@ -477,7 +476,7 @@ class Generator
         return true;
     }
 
-    protected function findOrCreateState(Symbol $through, Lr1 $sublist)
+    protected function findOrCreateState(Symbol $through, Lr1 $sublist): State
     {
         foreach ($this->statesThrough[$through->code] as $state) {
             if (isSameSet($state->items, $sublist)) {
@@ -492,7 +491,7 @@ class Generator
         return $state;
     }
 
-    protected function computeEmpty()
+    protected function computeEmpty(): void
     {
         do {
             $changed = false;
@@ -517,7 +516,7 @@ class Generator
         }
     }
 
-    protected function firstNullablePrecomp()
+    protected function firstNullablePrecomp(): void
     {
         do {
             $changed = false;
@@ -589,7 +588,7 @@ class Generator
         return $items;
     }
 
-    protected function clearVisited()
+    protected function clearVisited(): void
     {
         $nSymbols = $this->context->nsymbols;
         $nGrams = $this->context->ngrams;
@@ -616,7 +615,7 @@ class Generator
         return $tail;
     }
 
-    protected function sortList(?Lr1 $list, callable $cmp)
+    protected function sortList(?Lr1 $list, callable $cmp): ?Lr1
     {
         $array = [];
         for ($x = $list; $x !== null; $x = $x->next) {
@@ -640,7 +639,7 @@ class Generator
         return $list;
     }
 
-    protected function printState(State $state)
+    protected function printState(State $state): void
     {
         $this->context->debug("state " . $state->number . "\n");
         for ($conf = $state->conflict; $conf !== null; $conf = $conf->next()) {
@@ -702,7 +701,7 @@ class Generator
         $this->context->debug("\n");
     }
 
-    protected function printDiagnostics()
+    protected function printDiagnostics(): void
     {
         // TODO check expected_srconf
         if ($this->nsrerr !== $this->context->expected || $this->nrrerr !== 0) {
@@ -720,7 +719,7 @@ class Generator
         }
     }
 
-    protected function printStatistics()
+    protected function printStatistics(): void
     {
         if (!$this->context->verboseDebug) {
             return;

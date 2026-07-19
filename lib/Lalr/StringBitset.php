@@ -19,8 +19,8 @@ class StringBitset implements Bitset
         "\x80",
     ];
 
-    private $numBits;
-    private $str;
+    private int $numBits;
+    private string $str;
 
     public function __construct(int $numBits)
     {
@@ -34,7 +34,7 @@ class StringBitset implements Bitset
         return ((ord($this->str[$offset]) >> ($i % self::NBITS)) & 1) !== 0;
     }
 
-    public function setBit(int $i)
+    public function setBit(int $i): void
     {
         $offset = intdiv($i, self::NBITS);
         $char = $this->str[$offset];
@@ -42,7 +42,7 @@ class StringBitset implements Bitset
         $this->str[$offset] = $char;
     }
 
-    public function clearBit(int $i)
+    public function clearBit(int $i): void
     {
         $offset = intdiv($i, self::NBITS);
         $char = $this->str[$offset];

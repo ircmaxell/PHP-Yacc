@@ -51,11 +51,12 @@ class Token
         self::PURE_PARSER => 'PURE_PARSER',
     ];
 
-    public $t;
-    public $v;
-    public $ln;
-    public $fn;
-    public function __construct($token, string $value, int $lineNumber, string $filename)
+    public int|string $t;
+    public string $v;
+    public int $ln;
+    public string $fn;
+
+    public function __construct(int|string $token, string $value, int $lineNumber, string $filename)
     {
         if (!isset(self::TOKEN_MAP[$token]) && !is_string($token)) {
             throw new LexingException("Unknown token found: $token");

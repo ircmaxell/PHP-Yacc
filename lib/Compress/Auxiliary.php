@@ -6,9 +6,9 @@ namespace PhpYacc\Compress;
 
 class Auxiliary
 {
-    public $next;
-    public $index;
-    public $gain;
-    public $preimage;
-    public $table = [];
+    public ?self $next;
+    public int $index;
+    public int $gain;
+    public Preimage $preimage;
+    public array $table = [];
 }

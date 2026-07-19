@@ -8,8 +8,8 @@ class ArrayBitset implements Bitset
 {
     public const NBITS = \PHP_INT_SIZE * 8;
 
-    private $numBits;
-    private $array;
+    private int $numBits;
+    private array $array;
 
     public function __construct(int $numBits)
     {
@@ -28,13 +28,13 @@ class ArrayBitset implements Bitset
         return ($this->array[$offset] & (1 << ($i % self::NBITS))) !== 0;
     }
 
-    public function setBit(int $i)
+    public function setBit(int $i): void
     {
         $offset = intdiv($i, self::NBITS);
         $this->array[$offset] |= (1 << ($i % self::NBITS));
     }
 
-    public function clearBit(int $i)
+    public function clearBit(int $i): void
     {
         $offset = intdiv($i, self::NBITS);
         $this->array[$offset] &= ~(1 << ($i % self::NBITS));

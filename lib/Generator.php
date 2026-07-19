@@ -13,9 +13,9 @@ use PhpYacc\CodeGen\Language\PHP;
 
 class Generator
 {
-    protected $parser;
-    protected $lalr;
-    protected $compressor;
+    protected Parser $parser;
+    protected Lalr $lalr;
+    protected Compress $compressor;
 
     public function __construct(?Parser $parser = null, ?Lalr $lalr = null, ?Compress $compressor = null)
     {
@@ -24,7 +24,7 @@ class Generator
         $this->compressor = $compressor ?: new Compress();
     }
 
-    public function generate(Context $context, string $grammar, string $template, string $resultFile)
+    public function generate(Context $context, string $grammar, string $template, string $resultFile): void
     {
         $template = new Template(new PHP(), $template, $context);
 

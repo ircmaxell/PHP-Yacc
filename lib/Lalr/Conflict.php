@@ -8,8 +8,8 @@ use PhpYacc\Grammar\Symbol;
 
 abstract class Conflict
 {
-    protected $next;
-    protected $symbol;
+    protected ?Conflict $next;
+    protected Symbol $symbol;
 
     protected function __construct(Symbol $symbol, ?Conflict $next)
     {
@@ -32,12 +32,12 @@ abstract class Conflict
         return $this->symbol;
     }
 
-    public function next()
+    public function next(): ?Conflict
     {
         return $this->next;
     }
 
-    public function setNext(?Conflict $next)
+    public function setNext(?Conflict $next): void
     {
         $this->next = $next;
     }

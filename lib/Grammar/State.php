@@ -11,17 +11,13 @@ use PhpYacc\Lalr\Reduce;
 class State
 {
     /** @var State[] */
-    public $shifts = [];
+    public array $shifts = [];
     /** @var non-empty-array<Reduce> */
-    public $reduce;
-    /** @var Conflict|null */
-    public $conflict;
-    /** @var Symbol */
-    public $through;
-    /** @var Lr1 */
-    public $items;
-    /** @var int */
-    public $number;
+    public array $reduce;
+    public ?Conflict $conflict = null;
+    public Symbol $through;
+    public Lr1 $items;
+    public int $number;
 
     public function __construct(Symbol $through, Lr1 $items)
     {

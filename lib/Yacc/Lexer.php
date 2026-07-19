@@ -39,12 +39,12 @@ class Lexer
     ];
 
 
-    protected $backToken = null;
-    protected $token = null;
-    protected $prevIsDollar = false;
+    protected ?Token $backToken = null;
+    protected ?Token $token = null;
+    protected bool $prevIsDollar = false;
 
-    protected $filename;
-    protected $lineNumber = 0;
+    protected string $filename;
+    protected int $lineNumber = 0;
 
     public function getLineNumber(): int
     {
@@ -67,7 +67,7 @@ class Lexer
         return $this->token;
     }
 
-    public function unget()
+    public function unget(): void
     {
         if ($this->backToken) {
             throw new LexingException("Too many ungetToken calls");
@@ -212,7 +212,7 @@ class Lexer
     protected $bufferOffset = 0;
     protected $backChar = null;
 
-    public function startLexing(string $code, string $filename)
+    public function startLexing(string $code, string $filename): void
     {
         $this->filename = $filename;
         $this->buffer = $code;
@@ -236,7 +236,7 @@ class Lexer
         return $this->buffer[$this->bufferOffset++];
     }
 
-    protected function ungetc(string $c)
+    protected function ungetc(string $c): void
     {
         if ($c === EOF) {
             return;

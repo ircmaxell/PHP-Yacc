@@ -9,29 +9,29 @@ use PhpYacc\Lalr\State;
 
 class CompressResult
 {
-    public $yytranslate = [];
+    public array $yytranslate = [];
 
-    public $yyaction = [];
+    public array $yyaction = [];
 
-    public $yybase = [];
-    public $yybasesize;
+    public array $yybase = [];
+    public int $yybasesize;
 
-    public $yycheck = [];
+    public array $yycheck = [];
 
-    public $yydefault = [];
+    public array $yydefault = [];
 
-    public $yygoto = [];
+    public array $yygoto = [];
 
-    public $yygbase = [];
+    public array $yygbase = [];
 
-    public $yygcheck = [];
+    public array $yygcheck = [];
 
-    public $yygdefault = [];
+    public array $yygdefault = [];
 
-    public $yylhs = [];
+    public array $yylhs = [];
 
-    public $yylen = [];
+    public array $yylen = [];
 
-    public $yyncterms = 0;
-    public $yytranslatesize = 0;
+    public int $yyncterms = 0;
+    public int $yytranslatesize = 0;
 }

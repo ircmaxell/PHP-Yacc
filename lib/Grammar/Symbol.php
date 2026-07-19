@@ -26,19 +26,18 @@ class Symbol
     public const TERMINAL = 0x100;
     public const NONTERMINAL = 0x200;
 
-    /** @var int */
-    public $code;
-    protected $_type;
+    public int $code;
+    protected ?Symbol $_type;
 
-    protected $_value;
-    protected $_precedence;
-    protected $_associativity;
-    protected $_name;
+    protected Production|int|null $_value;
+    protected int $_precedence;
+    protected int $_associativity;
+    protected string $_name;
 
-    public $isterminal = false;
-    public $isnonterminal = false;
+    public bool $isterminal = false;
+    public bool $isnonterminal = false;
 
-    protected $_terminal = self::UNDEF;
+    protected int $_terminal = self::UNDEF;
 
     public function __construct(int $code, string $name, $value = null, int $terminal = self::UNDEF, int $precedence = self::UNDEF, int $associativity = self::UNDEF, ?Symbol $type = null)
     {
@@ -66,7 +65,7 @@ class Symbol
         $this->{'set' . $name}($value);
     }
 
-    public function setTerminal(int $terminal)
+    public function setTerminal(int $terminal): void
     {
         $this->_terminal = $terminal;
         if ($terminal === self::TERMINAL) {
@@ -82,17 +81,17 @@ class Symbol
         $this->setValue($this->_value); // force check to prevent issues
     }
 
-    public function setAssociativity(int $associativity)
+    public function setAssociativity(int $associativity): void
     {
         $this->_associativity = $associativity;
     }
 
-    public function setPrecedence(int $precedence)
+    public function setPrecedence(int $precedence): void
     {
         $this->_precedence = $precedence;
     }
 
-    public function setValue($value)
+    public function setValue(Production|int|null $value): void
     {
         if ($this->isterminal && !is_int($value)) {
             throw new LogicException("Terminals value must be an integer, " . gettype($value) . " provided");
@@ -107,7 +106,7 @@ class Symbol
         $this->_type = $type;
     }
 
-    public function setAssociativityFlag(int $flag)
+    public function setAssociativityFlag(int $flag): void
     {
         $this->_associativity |= $flag;
     }

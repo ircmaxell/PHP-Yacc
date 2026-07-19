@@ -11,8 +11,8 @@ use PhpYacc\Lalr\{
 
 class ReduceReduce extends Conflict
 {
-    protected $reduce1;
-    protected $reduce2;
+    protected int $reduce1;
+    protected int $reduce2;
 
     public function __construct(int $reduce1, int $reduce2, Symbol $symbol, ?Conflict $next)
     {
